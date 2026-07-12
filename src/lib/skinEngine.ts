@@ -112,38 +112,38 @@ export function generateSkinArray(
   };
 
   // Head Base: x in [0, 31], y in [0, 15]
-  fillRect(0, 0, 31, 15, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
+  fillRect(0, 0, 31, 15, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top', 'skin');
 
   // Hair - Draw base helmet, then the chosen style's overlay rects
   for (const rect of HAIR_BASE) {
-    fillRect(rect.x1, rect.y1, rect.x2, rect.y2, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    fillRect(rect.x1, rect.y1, rect.x2, rect.y2, hairRgb.r, hairRgb.g, hairRgb.b, 255, false, 'none', 'top', 'hair');
   }
 
   const resolvedHairStyle = HAIR_STYLES[hairStyle] || HAIR_STYLES["messy-fringe"];
   for (const rect of resolvedHairStyle.rects) {
     const c = rect.shade ? applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, rect.shade, false) : hairRgb;
-    fillRect(rect.x1, rect.y1, rect.x2, rect.y2, c.r, c.g, c.b, 255, false);
+    fillRect(rect.x1, rect.y1, rect.x2, rect.y2, c.r, c.g, c.b, 255, false, 'none', 'top', 'hair');
   }
 
   // Hair Highlight Halo around y = 10 (adds shine and volume to the hair)
   const hairHighlight = applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, 18, false);
-  fillRect(9, 10, 14, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false);
-  fillRect(1, 10, 6, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false);
-  fillRect(17, 10, 22, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false);
-  fillRect(25, 10, 30, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false);
+  fillRect(9, 10, 14, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, 'none', 'top', 'hair');
+  fillRect(1, 10, 6, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, 'none', 'top', 'hair');
+  fillRect(17, 10, 22, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, 'none', 'top', 'hair');
+  fillRect(25, 10, 30, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, 'none', 'top', 'hair');
 
   // Eyes on Head Front: (8, 8) to (15, 15)
   const resolvedEyeStyle = EYE_STYLES[eyeStyle] || EYE_STYLES["cool-highlight"];
   resolvedEyeStyle.draw({
-    setPixel: (x, y, r, g, b, a = 255, applyShade = true) => setPixel(x, y, r, g, b, a, undefined, false, 'none', applyShade),
-    fillRect: (x1, y1, x2, y2, r, g, b, a = 255, isSkin = false) => fillRect(x1, y1, x2, y2, r, g, b, a, isSkin),
+    setPixel: (x, y, r, g, b, a = 255, applyShade = true) => setPixel(x, y, r, g, b, a, undefined, false, 'none', applyShade, 'top', 'eye'),
+    fillRect: (x1, y1, x2, y2, r, g, b, a = 255, isSkin = false) => fillRect(x1, y1, x2, y2, r, g, b, a, isSkin, 'none', 'top', isSkin ? 'skin' : 'eye'),
     eyeRgb,
     skinRgb,
   });
 
   // Nose/Mouth details (optional, subtle skin color differences or shadow)
-  setPixel(11, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, undefined, false);
-  setPixel(12, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, undefined, false);
+  setPixel(11, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, undefined, false, 'none', true, 'top', 'skin');
+  setPixel(12, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, undefined, false, 'none', true, 'top', 'skin');
 
   if (accessories && Array.isArray(accessories)) {
     const darkColor = { r: 35, g: 30, b: 30 }; // dark charcoal
