@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { generateSkinArray, skinToBase64 } from "@/lib/skinEngine";
+import { STENCIL_KEYS } from "@/lib/stencils";
 
 export const runtime = "edge";
 
-const VALID_STENCILS = ["hoodie", "blazer", "labcoat"] as const;
 const VALID_DEMOGRAPHICS = ["East Asian", "South Asian", "Caucasian", "Black"] as const;
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 
@@ -38,13 +38,14 @@ const toolsSchema = {
         type: "object",
         properties: {
           userId: { type: "string", description: "Clerk User ID to apply the skin to" },
-          stencilKey: { type: "string", enum: ["hoodie", "blazer", "labcoat"], description: "Uniform stencil key" },
+          stencilKey: { type: "string", enum: STENCIL_KEYS, description: "Uniform stencil key" },
           primaryColor: { type: "string", description: "Primary hex color code (e.g. #ff0000)" },
           secondaryColor: { type: "string", description: "Secondary hex color code" },
           trimColor: { type: "string", description: "Trim hex color code" },
           shirtColor: { type: "string", description: "Shirt hex color code" },
           tieColor: { type: "string", description: "Tie hex color code" },
           pantsColor: { type: "string", description: "Pants hex color code" },
+          shoesColor: { type: "string", description: "Shoes hex color code (optional)" },
           isAlex: { type: "boolean", description: "Use Alex (slim) model silhouette if true" }
         },
         required: ["userId", "stencilKey", "primaryColor", "secondaryColor", "trimColor", "shirtColor", "tieColor", "pantsColor"]
@@ -125,8 +126,8 @@ export async function POST(req: NextRequest) {
 
       if (name === "apply_apparel") {
         const stencilKey = args.stencilKey;
-        if (!VALID_STENCILS.includes(stencilKey)) {
-          return errorResponse(-32602, `Invalid stencilKey. Must be one of: ${VALID_STENCILS.join(", ")}`, 400, reqId);
+        if (!STENCIL_KEYS.includes(stencilKey)) {
+          return errorResponse(-32602, `Invalid stencilKey. Must be one of: ${STENCIL_KEYS.join(", ")}`, 400, reqId);
         }
 
         const colorFields = ["primaryColor", "secondaryColor", "trimColor", "shirtColor", "tieColor", "pantsColor"] as const;
@@ -135,9 +136,12 @@ export async function POST(req: NextRequest) {
             return errorResponse(-32602, `Invalid or missing ${field}: must be a hex color (e.g. #ff0000)`, 400, reqId);
           }
         }
+        if (args.shoesColor !== undefined && !isValidHex(args.shoesColor)) {
+          return errorResponse(-32602, `Invalid shoesColor: must be a hex color (e.g. #ff0000)`, 400, reqId);
+        }
 
         const isAlex = args.isAlex !== undefined ? !!args.isAlex : (currentModelType === "alex");
-        
+
         const skinArray = generateSkinArray(
           currentEthnicity,
           stencilKey,
@@ -147,7 +151,8 @@ export async function POST(req: NextRequest) {
             trim: args.trimColor,
             shirt: args.shirtColor,
             tie: args.tieColor,
-            pants: args.pantsColor
+            pants: args.pantsColor,
+            shoes: args.shoesColor
           },
           isAlex
         );
