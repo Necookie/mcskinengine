@@ -56,7 +56,7 @@ export default function WorkspacePage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [geminiKeyInput, setGeminiKeyInput] = useState("");
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
-  const [selectedModel, setSelectedModel] = useState("gemini-1.5-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-3.5-flash");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -129,7 +129,8 @@ export default function WorkspacePage() {
         setRole(data.apparel.stencilKey);
       }
 
-      const costStr = data.cost !== undefined ? `$${data.cost.toFixed(6)}` : "unknown";
+      const phpCost = data.cost !== undefined ? data.cost * 58.5 : 0;
+      const costStr = data.cost !== undefined ? `${phpCost.toFixed(4)} PHP` : "unknown";
       const usageStr = data.usage ? `${data.usage.promptTokenCount} in, ${data.usage.candidatesTokenCount} out` : "unknown";
       setSuccessMsg(`Skin generated! Cost: ${costStr} (${usageStr} tokens)`);
       fetchLogs();
@@ -558,12 +559,13 @@ export default function WorkspacePage() {
                         className="voxel-input font-mono text-[10px]"
                         style={{ padding: "6px", width: "100%", textTransform: "none" }}
                       >
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Rate: $0.075/1M in, $0.30/1M out)</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Rate: $1.25/1M in, $5.00/1M out)</option>
-                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Rate: $0.075/1M in, $0.30/1M out)</option>
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Rate: $0.075/1M in, $0.30/1M out)</option>
-                        <option value="gpt-4o-mini">OpenAI GPT-4o Mini (Rate: $0.150/1M in, $0.600/1M out)</option>
-                        <option value="gpt-4o">OpenAI GPT-4o (Rate: $2.50/1M in, $10.00/1M out)</option>
+                        <option value="gemini-3.5-flash">Gemini 3.5 Flash (~0.150 PHP per generation) [LATEST]</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (~0.006 PHP per generation)</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (~0.095 PHP per generation)</option>
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (~0.006 PHP per generation)</option>
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (~0.006 PHP per generation)</option>
+                        <option value="gpt-4o-mini">OpenAI GPT-4o Mini (~0.011 PHP per generation)</option>
+                        <option value="gpt-4o">OpenAI GPT-4o (~0.190 PHP per generation)</option>
                       </select>
                     </div>
                     <div className="form-group">
