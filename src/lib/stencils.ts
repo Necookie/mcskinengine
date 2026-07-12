@@ -1,16 +1,30 @@
+import { PatternType } from "./shading";
+
 export interface StencilRegion {
   name: string;
   x1: number;
   y1: number;
   x2: number; // inclusive
   y2: number; // inclusive
-  colorType: 'primary' | 'secondary' | 'trim' | 'shirt' | 'tie' | 'pants' | 'skin' | 'hair' | 'eyes';
+  colorType: 'primary' | 'secondary' | 'trim' | 'shirt' | 'tie' | 'pants' | 'skin' | 'hair' | 'eyes' | 'accent';
   overlay?: boolean;
 }
 
 export interface Stencil {
   name: string;
   regions: StencilRegion[];
+  /** What the torso base layer (under the overlay regions) is filled with. */
+  baseTorso: 'skin' | 'primary' | 'secondary' | 'shirt';
+  /** What the arm base layer (under the overlay regions) is filled with. */
+  baseSleeve: 'skin' | 'primary' | 'secondary' | 'shirt';
+  sleeveLength: 'long' | 'short' | 'none';
+  legStyle: 'pants' | 'shorts' | 'skirt' | 'bare';
+  /** Cloth pattern used when the caller doesn't request a specific detailTexture. */
+  defaultPattern: PatternType;
+  /** Style-axis metadata used for LLM prompt guidance/defaults, never a hard gate. */
+  vibe: 'masculine' | 'feminine' | 'neutral';
+  shoeStyle?: 'boots' | 'sneakers' | 'flats' | 'none';
+  baseTie?: boolean;
 }
 
 // Coordinate definitions for Minecraft skins
@@ -22,6 +36,13 @@ export interface Stencil {
 
 export const STUDENT_HOODIE_STENCIL: Stencil = {
   name: "Casual Student Hoodie",
+  baseTorso: 'primary',
+  baseSleeve: 'primary',
+  sleeveLength: 'long',
+  legStyle: 'pants',
+  defaultPattern: 'knit',
+  vibe: 'neutral',
+  shoeStyle: 'sneakers',
   regions: [
     // Hoodie Hood (Hat Overlay) - split to keep the face open
     { name: "Hood Top", x1: 40, y1: 0, x2: 47, y2: 7, colorType: "primary", overlay: true },
@@ -59,6 +80,14 @@ export const STUDENT_HOODIE_STENCIL: Stencil = {
 
 export const TWEED_BLAZER_STENCIL: Stencil = {
   name: "Professor Tweed Blazer",
+  baseTorso: 'shirt',
+  baseSleeve: 'shirt',
+  sleeveLength: 'long',
+  legStyle: 'pants',
+  defaultPattern: 'tweed',
+  vibe: 'masculine',
+  shoeStyle: 'boots',
+  baseTie: true,
   regions: [
     // Blazer Jacket on Torso Overlay (Tweed color)
     { name: "Blazer Torso", x1: 16, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
@@ -91,6 +120,13 @@ export const TWEED_BLAZER_STENCIL: Stencil = {
 
 export const LAB_COAT_STENCIL: Stencil = {
   name: "STEM Lab Coat",
+  baseTorso: 'shirt',
+  baseSleeve: 'shirt',
+  sleeveLength: 'long',
+  legStyle: 'pants',
+  defaultPattern: 'none',
+  vibe: 'neutral',
+  shoeStyle: 'flats',
   regions: [
     // Lab Coat Torso Overlay (White)
     { name: "Lab Coat Torso", x1: 16, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
@@ -122,6 +158,8 @@ export const STENCILS: Record<string, Stencil> = {
   blazer: TWEED_BLAZER_STENCIL,
   labcoat: LAB_COAT_STENCIL
 };
+
+export const STENCIL_KEYS = Object.keys(STENCILS);
 
 export interface DemographicConfig {
   skinColor: string;
