@@ -42,6 +42,11 @@ export const HAIR_STYLES: Record<string, HairStyle> = {
       { x1: 7, y1: 10, x2: 7, y2: 12 },
       { x1: 16, y1: 10, x2: 16, y2: 12 },
     ],
+    hatRects: [
+      { x1: 40, y1: 8, x2: 47, y2: 8 },
+      { x1: 41, y1: 9, x2: 42, y2: 9, shade: -10 },
+      { x1: 45, y1: 9, x2: 46, y2: 9 },
+    ],
   },
   undercut: {
     name: "Undercut",
@@ -62,6 +67,12 @@ export const HAIR_STYLES: Record<string, HairStyle> = {
       { x1: 15, y1: 10, x2: 15, y2: 12 },
       { x1: 20, y1: 16, x2: 21, y2: 19 },
       { x1: 26, y1: 16, x2: 27, y2: 19 },
+    ],
+    hatRects: [
+      { x1: 40, y1: 8, x2: 47, y2: 9 },
+      { x1: 48, y1: 8, x2: 49, y2: 12 },
+      { x1: 38, y1: 8, x2: 39, y2: 12 },
+      { x1: 56, y1: 8, x2: 63, y2: 11 },
     ],
   },
   "parted-curtains": {
@@ -94,6 +105,9 @@ export const HAIR_STYLES: Record<string, HairStyle> = {
       { x1: 24, y1: 8, x2: 31, y2: 15 },
       { x1: 26, y1: 16, x2: 27, y2: 19, shade: 10 },
     ],
+    hatRects: [
+      { x1: 56, y1: 8, x2: 61, y2: 12, shade: 6 },
+    ],
   },
   "twin-braids": {
     name: "Twin Braids",
@@ -107,6 +121,10 @@ export const HAIR_STYLES: Record<string, HairStyle> = {
       { x1: 20, y1: 16, x2: 20, y2: 19, shade: 5 },
       { x1: 27, y1: 16, x2: 27, y2: 19, shade: -5 },
     ],
+    hatRects: [
+      { x1: 48, y1: 10, x2: 48, y2: 15, shade: 5 },
+      { x1: 39, y1: 10, x2: 39, y2: 15, shade: -5 },
+    ],
   },
   "long-straight": {
     name: "Long Straight",
@@ -118,6 +136,11 @@ export const HAIR_STYLES: Record<string, HairStyle> = {
       { x1: 20, y1: 16, x2: 21, y2: 21 },
       { x1: 26, y1: 16, x2: 27, y2: 21 },
     ],
+    hatRects: [
+      { x1: 48, y1: 8, x2: 48, y2: 15 },
+      { x1: 39, y1: 8, x2: 39, y2: 15 },
+      { x1: 56, y1: 8, x2: 63, y2: 13, shade: -8 },
+    ],
   },
   bob: {
     name: "Bob",
@@ -126,6 +149,11 @@ export const HAIR_STYLES: Record<string, HairStyle> = {
       { x1: 8, y1: 8, x2: 15, y2: 9 },
       { x1: 0, y1: 10, x2: 7, y2: 13 },
       { x1: 16, y1: 10, x2: 23, y2: 13 },
+    ],
+    hatRects: [
+      { x1: 48, y1: 8, x2: 55, y2: 11 },
+      { x1: 32, y1: 8, x2: 39, y2: 11 },
+      { x1: 40, y1: 8, x2: 47, y2: 8 },
     ],
   },
   "buzz-cut": {
