@@ -10,6 +10,8 @@ export function getDb(): Client {
       throw new Error("TURSO_DATABASE_URL and TURSO_AUTH_TOKEN must be set");
     }
     _db = createClient({ url, authToken: token });
+    // Bypass buggy schema migration checks in @libsql/client
+    (_db as any).getIsSchemaDatabase = async () => false;
   }
   return _db;
 }
