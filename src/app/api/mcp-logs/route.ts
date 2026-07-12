@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 
 export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const result = await db.execute({
-      sql: "SELECT * FROM mcp_logs ORDER BY timestamp DESC LIMIT 20",
-      args: []
+      sql: "SELECT * FROM mcp_logs WHERE user_id = ? ORDER BY timestamp DESC LIMIT 20",
+      args: [userId]
     });
 
     const logs = result.rows.map((row) => ({

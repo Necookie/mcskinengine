@@ -4,6 +4,14 @@ import { generateSkinArray, skinToBase64 } from "@/lib/skinEngine";
 
 export const runtime = "edge";
 
+function verifyMcpAuth(req: NextRequest): boolean {
+  const mcpKey = process.env.MCP_API_KEY;
+  if (!mcpKey) return false;
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader) return false;
+  return authHeader === `Bearer ${mcpKey}`;
+}
+
 // Tool list schema for GET requests
 const toolsSchema = {
   tools: [
@@ -42,12 +50,22 @@ const toolsSchema = {
   ]
 };
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!verifyMcpAuth(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   return NextResponse.json(toolsSchema);
 }
 
 export async function POST(req: NextRequest) {
   try {
+    if (!verifyMcpAuth(req)) {
+      return NextResponse.json({
+        jsonrpc: "2.0",
+        error: { code: -32000, message: "Unauthorized: invalid or missing bearer token" }
+      }, { status: 401 });
+    }
+
     const body = await req.json();
     const { method, params, id: reqId } = body;
 
