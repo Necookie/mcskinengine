@@ -21,6 +21,7 @@ export default function WorkspacePage() {
     skinBase64,
     geminiPrompt,
     hasGeminiKey,
+    hasOpenaiKey,
     isGenerating,
     mcpLogs,
     role,
@@ -53,7 +54,9 @@ export default function WorkspacePage() {
 
   const [refImage, setRefImage] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [keyInput, setKeyInput] = useState("");
+  const [geminiKeyInput, setGeminiKeyInput] = useState("");
+  const [openaiKeyInput, setOpenaiKeyInput] = useState("");
+  const [selectedModel, setSelectedModel] = useState("gemini-1.5-flash");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -85,8 +88,10 @@ export default function WorkspacePage() {
   }, [isSignedIn]);
 
   const handleGenerateSkin = async () => {
-    if (!hasGeminiKey) {
-      setErrorMsg("Please configure your Gemini API Key in Settings first.");
+    const isOpenAI = selectedModel.startsWith("gpt");
+    const hasKey = isOpenAI ? hasOpenaiKey : hasGeminiKey;
+    if (!hasKey) {
+      setErrorMsg(`Please configure your ${isOpenAI ? "OpenAI" : "Gemini"} API Key in Settings first.`);
       setSettingsOpen(true);
       return;
     }
@@ -104,7 +109,9 @@ export default function WorkspacePage() {
           prompt: geminiPrompt,
           image: refImage,
           demographic: ethnicity,
-          isAlex: modelType === "alex"
+          isAlex: modelType === "alex",
+          provider: isOpenAI ? "openai" : "gemini",
+          model: selectedModel
         })
       });
 
@@ -122,7 +129,9 @@ export default function WorkspacePage() {
         setRole(data.apparel.stencilKey);
       }
 
-      setSuccessMsg("Skin generated and applied successfully!");
+      const costStr = data.cost !== undefined ? `$${data.cost.toFixed(6)}` : "unknown";
+      const usageStr = data.usage ? `${data.usage.promptTokenCount} in, ${data.usage.candidatesTokenCount} out` : "unknown";
+      setSuccessMsg(`Skin generated! Cost: ${costStr} (${usageStr} tokens)`);
       fetchLogs();
     } catch (err: any) {
       setErrorMsg(err.message || "An error occurred during generation");
@@ -134,8 +143,14 @@ export default function WorkspacePage() {
   const handleSaveSettings = async () => {
     setErrorMsg("");
     setSuccessMsg("");
-    await saveSettings(keyInput);
-    setSuccessMsg("Gemini API key saved securely!");
+    await saveSettings(
+      geminiKeyInput || undefined,
+      openaiKeyInput || undefined
+    );
+    setSuccessMsg("API keys saved securely!");
+    setGeminiKeyInput("");
+    setOpenaiKeyInput("");
+    setSettingsOpen(false);
     setTimeout(() => setSuccessMsg(""), 3000);
   };
 
@@ -322,13 +337,23 @@ export default function WorkspacePage() {
                   ✕
                 </button>
               </div>
-              <div className="form-group" style={{ marginBottom: "16px" }}>
+              <div className="form-group" style={{ marginBottom: "12px" }}>
                 <label className="form-group-label">Gemini Developer API Key</label>
                 <input
                   type="password"
-                  value={keyInput}
-                  onChange={(e) => setKeyInput(e.target.value)}
-                  placeholder="AIzaSy..."
+                  value={geminiKeyInput}
+                  onChange={(e) => setGeminiKeyInput(e.target.value)}
+                  placeholder={hasGeminiKey ? "•••••••• (Saved)" : "AIzaSy..."}
+                  className="voxel-input"
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: "16px" }}>
+                <label className="form-group-label">OpenAI API Key</label>
+                <input
+                  type="password"
+                  value={openaiKeyInput}
+                  onChange={(e) => setOpenaiKeyInput(e.target.value)}
+                  placeholder={hasOpenaiKey ? "•••••••• (Saved)" : "sk-proj-..."}
                   className="voxel-input"
                 />
               </div>
@@ -480,6 +505,22 @@ export default function WorkspacePage() {
                 <p className="ai-section-desc">
                   Describe uniform features or upload a reference image to procedure-generate details.
                 </p>
+                <div className="form-group">
+                  <label className="form-group-label">AI Model & Provider</label>
+                  <select
+                    value={selectedModel}
+                    onChange={(e) => setSelectedModel(e.target.value)}
+                    className="voxel-input font-mono text-[10px]"
+                    style={{ padding: "6px", width: "100%", textTransform: "none" }}
+                  >
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Rate: $0.075/1M in, $0.30/1M out)</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Rate: $1.25/1M in, $5.00/1M out)</option>
+                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Rate: $0.075/1M in, $0.30/1M out)</option>
+                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Rate: $0.075/1M in, $0.30/1M out)</option>
+                    <option value="gpt-4o-mini">OpenAI GPT-4o Mini (Rate: $0.150/1M in, $0.600/1M out)</option>
+                    <option value="gpt-4o">OpenAI GPT-4o (Rate: $2.50/1M in, $10.00/1M out)</option>
+                  </select>
+                </div>
                 <div className="form-group">
                   <label className="form-group-label">Aesthetic Prompt</label>
                   <textarea
