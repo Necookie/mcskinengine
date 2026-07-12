@@ -201,6 +201,41 @@ export function patternOffset(pattern: PatternType, x: number, y: number, seed: 
 }
 
 /**
+ * Material identifiers used by the contour/outline pass to know which
+ * shapes are touching, independent of their final shaded RGB values.
+ */
+export type MaterialId =
+  | 'none'
+  | 'skin'
+  | 'hair'
+  | 'eye'
+  | 'garment-primary'
+  | 'garment-secondary'
+  | 'garment-trim'
+  | 'garment-shirt'
+  | 'garment-tie'
+  | 'pants'
+  | 'shoes'
+  | 'accessory';
+
+export const MATERIAL_INDEX: Record<MaterialId, number> = {
+  none: 0,
+  skin: 1,
+  hair: 2,
+  eye: 3,
+  'garment-primary': 4,
+  'garment-secondary': 5,
+  'garment-trim': 6,
+  'garment-shirt': 7,
+  'garment-tie': 8,
+  pants: 9,
+  shoes: 10,
+  accessory: 11,
+};
+
+export const MATERIAL_BY_INDEX: MaterialId[] = Object.keys(MATERIAL_INDEX) as MaterialId[];
+
+/**
  * Per-pixel volume shader: stepped-band form shading with a configurable
  * light direction, plus seam/crease ambient occlusion and cloth texture.
  */
