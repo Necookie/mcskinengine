@@ -23,6 +23,8 @@ MCSkinEngine is a Minecraft skin editor/generator built with Next.js 16 (App Rou
 
 ## Skill Routing Rules
 
+**IMPORTANT:** Skills must be loaded automatically based on task context. When starting any task, identify which skills apply and load them immediately using the `skill` tool. Do not wait for explicit instruction — proactively load relevant skills to save time.
+
 ### ALWAYS — Design & UI Tasks
 For ANY design, UI, styling, layout, visual, or frontend polish task:
 1. **ALWAYS load the `impeccable` skill** (or `i-impeccable` for project-local variant)
@@ -61,6 +63,19 @@ When writing or running any tests (unit, integration, e2e):
 When needing up-to-date documentation for ANY dependency in this project (Next.js, React, Clerk, Cloudflare, Three.js, Zustand, libSQL, MCP SDK, HeroUI, Framer Motion, etc.):
 - **Load skill:** `context7-mcp`
 - Use context7 to fetch current docs instead of relying on potentially outdated knowledge
+
+### Git Commit Strategy — Micro-Commits
+**ALWAYS follow micro-commit workflow** when making changes:
+- **Load skill:** `conventional-commit` for commit message format
+- Make **small, atomic commits** — one logical change per commit
+- Commit **frequently** during development, not just at the end of a task
+- Each commit should be independently reviewable and revertable
+- Use conventional commit format: `type(scope): description`
+  - Types: `feat`, `fix`, `refactor`, `style`, `docs`, `test`, `chore`
+  - Example: `feat(editor): add pixel grid overlay toggle`
+- **Push to main after each meaningful commit** — don't batch commits locally
+- Break large features into multiple micro-commits (e.g., `feat: add type definitions`, `feat: implement component`, `feat: add tests`, `docs: update README`)
+- Never mix unrelated changes in a single commit
 
 ---
 
