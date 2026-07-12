@@ -8,7 +8,7 @@ import { Play, Pause, Download, Upload } from "lucide-react";
 // Dynamically import SkinViewer since it depends on browser canvas APIs (WebGL, ThreeJS)
 const ReactSkinview3d = dynamic(
   () => import("react-skinview3d"),
-  { ssr: false, loading: () => <div className="text-grid-tag text-[#8a8a93]">Loading Voxel Mesh...</div> }
+  { ssr: false, loading: () => <div className="text-grid-tag text-[#555558]">Loading Voxel Mesh...</div> }
 );
 
 export default function ModelPreview3D() {

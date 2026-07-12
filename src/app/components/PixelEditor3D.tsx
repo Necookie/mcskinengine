@@ -13,7 +13,7 @@ const PALETTE = [
 
 const ReactSkinview3d = dynamic(
   () => import("react-skinview3d"),
-  { ssr: false, loading: () => <div className="text-grid-tag text-[#8a8a93]">Loading Voxel Mat...</div> }
+  { ssr: false, loading: () => <div className="text-grid-tag text-[#555558]">Loading Voxel Mat...</div> }
 );
 
 export default function PixelEditor3D() {

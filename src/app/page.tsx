@@ -364,7 +364,7 @@ export default function WorkspacePage() {
               </button>
             </div>
           )}
-          <div style={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", paddingBottom: consoleExpanded ? "240px" : "56px" }}>
+          <div className={`editor-container-wrap ${consoleExpanded ? "console-open" : ""}`}>
             <PixelEditor3D />
           </div>
 
