@@ -139,11 +139,14 @@ export default function ModelPreview3D() {
                 viewerInstance.skinTexture.needsUpdate = true;
               }
 
+              // Set background to white
+              viewerInstance.background = 0xffffff;
+
               setViewer(viewerInstance);
             }}
           />
         ) : (
-          <div className="text-grid-tag text-white">Init 3D Scene...</div>
+          <div className="text-grid-tag" style={{ color: "var(--color-primary)" }}>Init 3D Scene...</div>
         )}
 
         {/* Overlay controls on top of 3D preview */}
