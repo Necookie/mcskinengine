@@ -304,3 +304,121 @@ export function applyVolumeShaderV2(
 
   return applyHueShift(r, g, b, total, isSkin);
 }
+
+/**
+ * Selective contour/outline pass: darkens pixels that sit "underneath" a
+ * higher-precedence material at a silhouette boundary (e.g. skin under a
+ * hairline, garment against bare skin at a cuff), so shapes read as
+ * deliberately illustrated instead of flat rectangles touching. Consults
+ * only the material map, never shaded RGB, so cloth texture/dithering is
+ * never mistaken for a boundary.
+ */
+
+// Highest precedence first: the material earlier in this list is treated as
+// "on top" at a boundary, and the other side gets darkened.
+const CONTOUR_PRECEDENCE: MaterialId[] = [
+  'accessory',
+  'hair',
+  'eye',
+  'garment-trim',
+  'garment-secondary',
+  'garment-tie',
+  'garment-primary',
+  'garment-shirt',
+  'shoes',
+  'pants',
+  'skin',
+];
+
+function contourRank(m: MaterialId): number {
+  const i = CONTOUR_PRECEDENCE.indexOf(m);
+  return i === -1 ? CONTOUR_PRECEDENCE.length : i;
+}
+
+export function applyContourPass(
+  rgba: Uint8Array,
+  materialMap: Uint8Array,
+  faceRects: ShadeBounds[]
+): void {
+  const materialAt = (x: number, y: number): MaterialId => MATERIAL_BY_INDEX[materialMap[y * 64 + x]] ?? 'none';
+
+  for (const rect of faceRects) {
+    for (let y = rect.y1; y <= rect.y2; y++) {
+      for (let x = rect.x1; x <= rect.x2; x++) {
+        const idx = (y * 64 + x) * 4;
+        if (rgba[idx + 3] === 0) continue;
+        const myMat = materialAt(x, y);
+        if (myMat === 'none' || myMat === 'eye') continue;
+        const myRank = contourRank(myMat);
+
+        // Only look above/left/right — the shader's own bottom-edge AO
+        // already darkens the underside of shapes, so skip "below" to
+        // avoid double-darkening the same seam.
+        const neighbors: [number, number][] = [
+          [x, y - 1],
+          [x - 1, y],
+          [x + 1, y],
+        ];
+
+        let shouldDarken = false;
+        for (const [nx, ny] of neighbors) {
+          if (nx < rect.x1 || nx > rect.x2 || ny < rect.y1 || ny > rect.y2) continue;
+          const nMat = materialAt(nx, ny);
+          if (nMat === 'none' || nMat === myMat || nMat === 'eye') continue;
+          if (contourRank(nMat) < myRank) shouldDarken = true;
+        }
+
+        if (shouldDarken) {
+          const isHairline = myMat === 'skin';
+          const strength = isHairline ? 22 : 18;
+          const shaded = applyHueShift(rgba[idx], rgba[idx + 1], rgba[idx + 2], -strength, myMat === 'skin');
+          rgba[idx] = shaded.r;
+          rgba[idx + 1] = shaded.g;
+          rgba[idx + 2] = shaded.b;
+        }
+      }
+    }
+  }
+}
+
+// The 64x64 skin base-layer UV faces, treated as independent islands so the
+// contour pass never compares pixels that aren't actually adjacent in 3D.
+export const BASE_FACE_RECTS: ShadeBounds[] = [
+  // Head
+  { x1: 8, y1: 8, x2: 15, y2: 15 },
+  { x1: 0, y1: 8, x2: 7, y2: 15 },
+  { x1: 16, y1: 8, x2: 23, y2: 15 },
+  { x1: 24, y1: 8, x2: 31, y2: 15 },
+  { x1: 8, y1: 0, x2: 15, y2: 7 },
+  { x1: 16, y1: 0, x2: 23, y2: 7 },
+  // Torso
+  { x1: 20, y1: 20, x2: 27, y2: 31 },
+  { x1: 32, y1: 20, x2: 39, y2: 31 },
+  { x1: 16, y1: 20, x2: 19, y2: 31 },
+  { x1: 28, y1: 20, x2: 31, y2: 31 },
+  { x1: 20, y1: 16, x2: 27, y2: 19 },
+  // Right arm (Steve bounds; Alex's extra column is transparent and skipped)
+  { x1: 44, y1: 20, x2: 47, y2: 31 },
+  { x1: 40, y1: 20, x2: 43, y2: 31 },
+  { x1: 48, y1: 20, x2: 51, y2: 31 },
+  { x1: 52, y1: 20, x2: 55, y2: 31 },
+  { x1: 44, y1: 16, x2: 47, y2: 19 },
+  // Left arm
+  { x1: 36, y1: 52, x2: 39, y2: 63 },
+  { x1: 32, y1: 52, x2: 35, y2: 63 },
+  { x1: 40, y1: 52, x2: 43, y2: 63 },
+  { x1: 44, y1: 52, x2: 47, y2: 63 },
+  { x1: 36, y1: 48, x2: 39, y2: 51 },
+  // Right leg
+  { x1: 4, y1: 20, x2: 7, y2: 31 },
+  { x1: 0, y1: 20, x2: 3, y2: 31 },
+  { x1: 8, y1: 20, x2: 11, y2: 31 },
+  { x1: 12, y1: 20, x2: 15, y2: 31 },
+  { x1: 4, y1: 16, x2: 7, y2: 19 },
+  // Left leg
+  { x1: 20, y1: 52, x2: 23, y2: 63 },
+  { x1: 16, y1: 52, x2: 19, y2: 63 },
+  { x1: 24, y1: 52, x2: 27, y2: 63 },
+  { x1: 28, y1: 52, x2: 31, y2: 63 },
+  { x1: 20, y1: 48, x2: 23, y2: 51 },
+];
