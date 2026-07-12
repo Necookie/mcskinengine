@@ -1,97 +1,29 @@
 import { DEMOGRAPHICS, STENCILS, Stencil, STUDENT_HOODIE_STENCIL } from "./stencils";
+import {
+  hexToRgb,
+  clamp,
+  applyHueShift,
+  applyVolumeShaderV2,
+  hash2,
+  PatternType,
+  ShadeBounds,
+  ShadeOptions,
+} from "./shading";
 
-// Helper to convert HEX color to RGB object
-export function hexToRgb(hex: string): { r: number; g: number; b: number } {
-  const cleanHex = hex.replace("#", "");
-  const num = parseInt(cleanHex, 16);
-  return {
-    r: (num >> 16) & 255,
-    g: (num >> 8) & 255,
-    b: num & 255,
-  };
-}
+export { hexToRgb, clamp, applyHueShift };
 
-// Helper to clamp a number between 0 and 255
-export function clamp(val: number): number {
-  return Math.max(0, Math.min(255, val));
-}
-
-export function applyHueShift(
-  r: number,
-  g: number,
-  b: number,
-  offset: number,
-  isSkin: boolean
-): { r: number; g: number; b: number } {
-  if (offset === 0) return { r, g, b };
-  
-  let targetR = r;
-  let targetG = g;
-  let targetB = b;
-
-  if (isSkin) {
-    if (offset > 0) {
-      targetR = clamp(r + offset * 1.2);
-      targetG = clamp(g + offset * 1.0);
-      targetB = clamp(b + offset * 0.6);
-    } else {
-      targetR = clamp(r + offset * 0.8);
-      targetG = clamp(g + offset * 1.2);
-      targetB = clamp(b + offset * 1.3);
-    }
-  } else {
-    if (offset > 0) {
-      targetR = clamp(r + offset * 1.1);
-      targetG = clamp(g + offset * 1.1);
-      targetB = clamp(b + offset * 0.9);
-    } else {
-      targetR = clamp(r + offset * 1.3);
-      targetG = clamp(g + offset * 1.1);
-      targetB = clamp(b + offset * 0.7);
-    }
-  }
-
-  return { r: targetR, g: targetG, b: targetB };
-}
-
+/** @deprecated use applyVolumeShaderV2 from ./shading */
 export function applyVolumeShader(
   x: number,
   y: number,
   r: number,
   g: number,
   b: number,
-  bounds?: { x1: number; y1: number; x2: number; y2: number },
+  bounds?: ShadeBounds,
   isSkin: boolean = false,
-  pattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none'
+  pattern: PatternType = 'none'
 ): { r: number; g: number; b: number } {
-  if (!bounds) {
-    const offset = Math.floor(Math.random() * 25) - 12;
-    return applyHueShift(r, g, b, offset, isSkin);
-  }
-
-  const { x1, y1, x2, y2 } = bounds;
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-
-  const pctX = dx > 0 ? (x - x1) / dx : 0.5;
-  const pctY = dy > 0 ? (y - y1) / dy : 0.5;
-
-  const verticalOffset = (1 - pctY) * 14 - 7;
-  const horizontalOffset = Math.sin(pctX * Math.PI) * 12 - 6;
-
-  let patternOffset = Math.floor(Math.random() * 8) - 4;
-
-  if (pattern === 'knit') {
-    patternOffset += (x + y) % 2 === 0 ? 3 : -3;
-  } else if (pattern === 'tweed') {
-    patternOffset += (x % 2 === 0 && y % 2 === 0) || (x % 2 === 1 && y % 2 === 1) ? 4 : -4;
-  } else if (pattern === 'pinstripe') {
-    patternOffset += x % 4 === 0 ? 5 : -2;
-  }
-
-  const totalOffset = Math.round(verticalOffset + horizontalOffset + patternOffset);
-
-  return applyHueShift(r, g, b, totalOffset, isSkin);
+  return applyVolumeShaderV2(x, y, r, g, b, bounds, { isSkin, pattern });
 }
 
 /**
