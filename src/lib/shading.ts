@@ -60,3 +60,88 @@ export function quantizeShade(offset: number, x: number, y: number, bandSize: nu
   const steppedBand = frac > bayerThreshold(x, y) ? flooredBand + 1 : flooredBand;
   return steppedBand * bandSize;
 }
+
+/**
+ * Cloth/material pattern offsets. Each pattern combines a structural element
+ * with value noise so nothing tiles perfectly flat, unlike a raw modulo checker.
+ */
+
+export type PatternType =
+  | 'knit'
+  | 'tweed'
+  | 'pinstripe'
+  | 'denim'
+  | 'flannel'
+  | 'plaid'
+  | 'corduroy'
+  | 'ribbed'
+  | 'leather'
+  | 'none';
+
+export const PATTERN_KEYS: PatternType[] = [
+  'knit',
+  'tweed',
+  'pinstripe',
+  'denim',
+  'flannel',
+  'plaid',
+  'corduroy',
+  'ribbed',
+  'leather',
+  'none',
+];
+
+export function patternOffset(pattern: PatternType, x: number, y: number, seed: number): number {
+  switch (pattern) {
+    case 'knit': {
+      const noise = valueNoise2(x, y, 4, seed);
+      const checker = (x + y) % 2 === 0 ? 3 : -3;
+      return checker * (0.5 + noise) + (noise - 0.5) * 6;
+    }
+    case 'tweed': {
+      const base = valueNoise2(x, y, 2, seed) * 14 - 7;
+      const fleck = hash2(x, y, seed + 1) > 0.92 ? 8 : 0;
+      return base + fleck;
+    }
+    case 'pinstripe': {
+      const stripe = x % 4 === 0 ? 6 : 0;
+      const jitter = hash2(0, y, seed) * 2;
+      const grain = (valueNoise2(x, y, 5, seed) - 0.5) * 4;
+      return stripe + jitter + grain;
+    }
+    case 'denim': {
+      const twill = (x + y) % 3 === 0 ? -4 : 2;
+      const wear = (valueNoise2(x, y, 3, seed) - 0.5) * 8;
+      return twill + wear;
+    }
+    case 'flannel': {
+      const a = x % 5 < 2 ? -5 : 0;
+      const b = y % 5 < 2 ? -5 : 0;
+      const noise = (valueNoise2(x, y, 4, seed) - 0.5) * 6;
+      return a + b + noise;
+    }
+    case 'plaid': {
+      const a = x % 6 < 2 ? -6 : 0;
+      const b = y % 6 < 2 ? -6 : 0;
+      const noise = (valueNoise2(x, y, 4, seed) - 0.5) * 6;
+      return a + b + noise;
+    }
+    case 'corduroy': {
+      const rib = x % 2 === 0 ? 4 : -4;
+      return rib * (0.7 + valueNoise2(x, y, 6, seed) * 0.6);
+    }
+    case 'ribbed': {
+      const rib = y % 2 === 0 ? 4 : -4;
+      return rib * (0.7 + valueNoise2(x, y, 6, seed) * 0.6);
+    }
+    case 'leather': {
+      const base = valueNoise2(x, y, 3, seed) * 10 - 5;
+      const sheen = hash2(x, y, seed + 2) > 0.95 ? 10 : 0;
+      return base + sheen;
+    }
+    case 'none':
+    default: {
+      return (valueNoise2(x, y, 4, seed) - 0.5) * 4;
+    }
+  }
+}
