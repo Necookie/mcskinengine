@@ -1,7 +1,13 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useSkinStore } from "@/lib/store";
+
+const PALETTE = [
+  "#1c1c1d", "#ffffff", "#ff2a85", "#b3d7df", "#ebd3be",
+  "#f1e4d3", "#d2ebd9", "#704732", "#f3d0bc", "#e02424",
+  "#eab308", "#22c55e", "#3b82f6", "#a855f7"
+] as const;
 
 export default function PixelEditor2D() {
   const {
@@ -14,7 +20,6 @@ export default function PixelEditor2D() {
     setSelectedColor,
     setBrushSize,
     saveSkin,
-    setSkinArray,
     activeTool,
     setActiveTool,
     showGuides,
@@ -25,24 +30,7 @@ export default function PixelEditor2D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hoverCoords, setHoverCoords] = useState<{ x: number; y: number } | null>(null);
-
-  // Palette Presets
-  const palette = [
-    "#1c1c1d", // Voxel Black
-    "#ffffff", // Studio White
-    "#ff2a85", // AI Accent
-    "#b3d7df", // Block Steve
-    "#ebd3be", // Block Alex
-    "#f1e4d3", // Block Tweed
-    "#d2ebd9", // Block Lab
-    "#704732", // Skin Dark
-    "#f3d0bc", // Skin Light
-    "#e02424", // Red
-    "#eab308", // Yellow
-    "#22c55e", // Green
-    "#3b82f6", // Blue
-    "#a855f7"  // Purple
-  ];
+  const lastUndoPos = useRef<{ x: number; y: number } | null>(null);
 
   // Draw skin array to canvas
   useEffect(() => {
@@ -69,7 +57,7 @@ export default function PixelEditor2D() {
     }
   }, [skinBase64]);
 
-  const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const getCanvasCoords = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
 
@@ -81,14 +69,15 @@ export default function PixelEditor2D() {
       return { x, y };
     }
     return null;
-  };
+  }, []);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (e.button !== 0) return; // Only left click
+    if (e.button !== 0) return;
     setIsDrawing(true);
-    pushUndo(skinArray);
     const coords = getCanvasCoords(e);
     if (coords) {
+      pushUndo(skinArray);
+      lastUndoPos.current = coords;
       applyPaint(coords.x, coords.y);
     }
   };
@@ -107,18 +96,18 @@ export default function PixelEditor2D() {
 
   const handleMouseUpOrLeave = () => {
     setIsDrawing(false);
+    lastUndoPos.current = null;
   };
 
-  const applyPaint = (x: number, y: number) => {
+  const applyPaint = useCallback((x: number, y: number) => {
     if (activeTool === "brush") {
       setPixel(x, y, selectedColor, 255);
     } else {
-      setPixel(x, y, "#000000", 0); // Transparent eraser
+      setPixel(x, y, "#000000", 0);
     }
-  };
+  }, [activeTool, selectedColor, setPixel]);
 
-  // Determine Minecraft skin mapping region label
-  const getRegionLabel = (x: number, y: number) => {
+  const getRegionLabel = useCallback((x: number, y: number) => {
     const isAlex = modelType === "alex";
     if (x >= 0 && x < 32 && y >= 0 && y < 16) {
       return `HEAD BASE (${x < 8 || x >= 24 || y < 8 ? "SIDES/TOP" : "FRONT"})`;
@@ -138,7 +127,7 @@ export default function PixelEditor2D() {
     if (x >= 48 && x < 64 && y >= 48 && y < 64) return "LEFT SLEEVE OVERLAY";
 
     return "BLANK TEXTURE FIELD";
-  };
+  }, [modelType]);
 
   return (
     <div className="canvas-workspace-wrapper">
@@ -229,7 +218,7 @@ export default function PixelEditor2D() {
 
         {/* Color Palette Presets */}
         <div className="color-presets-grid">
-          {palette.map((color) => (
+          {PALETTE.map((color) => (
             <button
               key={color}
               onClick={() => {
