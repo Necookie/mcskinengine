@@ -4,40 +4,38 @@ import React from "react";
 import { useSkinStore } from "@/lib/store";
 import { GraduationCap, Briefcase, FlaskConical, User, UserCheck } from "lucide-react";
 
+const ROLES = [
+  { key: "hoodie", label: "Student (Hoodie)", icon: GraduationCap },
+  { key: "blazer", label: "Professor (Blazer)", icon: Briefcase },
+  { key: "labcoat", label: "STEM Lab Coat", icon: FlaskConical }
+] as const;
+
+const ETHNICITIES = ["East Asian", "South Asian", "Caucasian", "Black"] as const;
+
 export default function TraitSelector() {
-  const {
-    skinArray,
-    role,
-    ethnicity,
-    modelType,
-    setRole,
-    setEthnicity,
-    setModelType,
-    saveSkin,
-    pushUndo
-  } = useSkinStore();
+  const skinArray = useSkinStore((s) => s.skinArray);
+  const role = useSkinStore((s) => s.role);
+  const ethnicity = useSkinStore((s) => s.ethnicity);
+  const modelType = useSkinStore((s) => s.modelType);
+  const setRole = useSkinStore((s) => s.setRole);
+  const setEthnicity = useSkinStore((s) => s.setEthnicity);
+  const setModelType = useSkinStore((s) => s.setModelType);
+  const saveSkin = useSkinStore((s) => s.saveSkin);
+  const pushUndo = useSkinStore((s) => s.pushUndo);
 
-  const roles = [
-    { key: "hoodie", label: "Student (Hoodie)", icon: GraduationCap, colorClass: "block-steve" },
-    { key: "blazer", label: "Professor (Blazer)", icon: Briefcase, colorClass: "block-tweed" },
-    { key: "labcoat", label: "STEM Lab Coat", icon: FlaskConical, colorClass: "block-lab" }
-  ];
-
-  const ethnicities = ["East Asian", "South Asian", "Caucasian", "Black"];
-
-  const handleRoleChange = async (newRole: string) => {
+  const handleRoleChange = (newRole: string) => {
     pushUndo(skinArray);
     setRole(newRole);
     setTimeout(() => saveSkin(), 500);
   };
 
-  const handleEthnicityChange = async (newEth: string) => {
+  const handleEthnicityChange = (newEth: string) => {
     pushUndo(skinArray);
     setEthnicity(newEth);
     setTimeout(() => saveSkin(), 500);
   };
 
-  const handleModelTypeChange = async (type: "steve" | "alex") => {
+  const handleModelTypeChange = (type: "steve" | "alex") => {
     pushUndo(skinArray);
     setModelType(type);
     setTimeout(() => saveSkin(), 500);
@@ -76,7 +74,7 @@ export default function TraitSelector() {
           <span className="trait-card-subtitle">Stencil Base</span>
         </div>
         <div className="segmented-control">
-          {roles.map((r) => {
+          {ROLES.map((r) => {
             const Icon = r.icon;
             const isActive = role === r.key;
             return (
@@ -101,7 +99,7 @@ export default function TraitSelector() {
           <span className="trait-card-subtitle">Skin Profile</span>
         </div>
         <div className="ethnicity-buttons-grid">
-          {ethnicities.map((eth) => {
+          {ETHNICITIES.map((eth) => {
             const isActive = ethnicity === eth;
             return (
               <button

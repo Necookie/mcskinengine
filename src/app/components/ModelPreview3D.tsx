@@ -12,7 +12,12 @@ const ReactSkinview3d = dynamic(
 );
 
 export default function ModelPreview3D() {
-  const { skinArray, modelType, setSkinArray, saveSkin, pushUndo, role } = useSkinStore();
+  const skinArray = useSkinStore((s) => s.skinArray);
+  const modelType = useSkinStore((s) => s.modelType);
+  const role = useSkinStore((s) => s.role);
+  const setSkinArray = useSkinStore((s) => s.setSkinArray);
+  const saveSkin = useSkinStore((s) => s.saveSkin);
+  const pushUndo = useSkinStore((s) => s.pushUndo);
   const [skinUrl, setSkinUrl] = useState<string>("");
   const [autoRotate, setAutoRotate] = useState(true);
   const [animationName, setAnimationName] = useState<"walk" | "run" | "idle" | "static">("walk");
