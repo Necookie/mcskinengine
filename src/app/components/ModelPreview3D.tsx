@@ -142,6 +142,11 @@ export default function ModelPreview3D() {
               // Set background to white
               viewerInstance.background = 0xffffff;
 
+              // Enable drag to rotate / orbit controls
+              import("skinview3d").then((sv) => {
+                sv.createOrbitControls(viewerInstance);
+              });
+
               setViewer(viewerInstance);
             }}
           />
