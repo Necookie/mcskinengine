@@ -11,6 +11,14 @@ export interface HairStyle {
   name: string;
   rects: HairRect[];
   vibe: 'masculine' | 'feminine' | 'neutral';
+  /**
+   * Optional strands drawn on the head's second/hat UV layer (32,0-63,15).
+   * Rendered slightly offset from the base head in-game, giving hair a
+   * subtle 3D "poof" over the forehead/sides instead of reading as flat.
+   * Skipped automatically when the outfit stencil already claims the hat
+   * layer (e.g. a hoodie hood).
+   */
+  hatRects?: HairRect[];
 }
 
 // Base "helmet" fill shared by every style: back, left, right, and top of the head.
