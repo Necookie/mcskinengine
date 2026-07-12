@@ -11,6 +11,7 @@ import {
   ShadeOptions,
 } from "./shading";
 import { HAIR_BASE, HAIR_STYLES } from "./hairStyles";
+import { EYE_STYLES } from "./eyeStyles";
 
 export { hexToRgb, clamp, applyHueShift };
 
@@ -120,38 +121,13 @@ export function generateSkinArray(
   fillRect(25, 10, 30, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false);
 
   // Eyes on Head Front: (8, 8) to (15, 15)
-  if (eyeStyle === "shadow-2x2") {
-    fillRect(10, 12, 11, 13, clamp(eyeRgb.r - 30), clamp(eyeRgb.g - 30), clamp(eyeRgb.b - 30), 255);
-    fillRect(13, 12, 14, 13, clamp(eyeRgb.r - 30), clamp(eyeRgb.g - 30), clamp(eyeRgb.b - 30), 255);
-    setPixel(9, 12, 255, 255, 255, 255, undefined, false);
-    setPixel(12, 12, 255, 255, 255, 255, undefined, false);
-  } else if (eyeStyle === "anime-glowing") {
-    const brightColor = applyHueShift(eyeRgb.r, eyeRgb.g, eyeRgb.b, 40, false);
-    fillRect(10, 12, 11, 12, brightColor.r, brightColor.g, brightColor.b, 255, false);
-    fillRect(13, 12, 14, 12, brightColor.r, brightColor.g, brightColor.b, 255, false);
-    setPixel(9, 12, 255, 255, 255, 255, undefined, false);
-    setPixel(12, 12, 255, 255, 255, 255, undefined, false);
-  } else if (eyeStyle === "classic-simple") {
-    setPixel(10, 12, 255, 255, 255, 255, undefined, false);
-    setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, undefined, false);
-    setPixel(13, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, undefined, false);
-    setPixel(14, 12, 255, 255, 255, 255, undefined, false);
-  } else {
-    // cool-highlight default:
-    setPixel(9, 12, 255, 255, 255, 255, undefined, false);
-    setPixel(10, 12, 255, 255, 255, 255, undefined, false);
-    setPixel(13, 12, 255, 255, 255, 255, undefined, false);
-    setPixel(14, 12, 255, 255, 255, 255, undefined, false);
-    
-    setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, undefined, false);
-    setPixel(11, 13, clamp(eyeRgb.r - 20), clamp(eyeRgb.g - 20), clamp(eyeRgb.b - 20), 255, undefined, false);
-    setPixel(12, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, undefined, false);
-    setPixel(12, 13, clamp(eyeRgb.r - 20), clamp(eyeRgb.g - 20), clamp(eyeRgb.b - 20), 255, undefined, false);
-    
-    setPixel(10, 12, 255, 255, 255, 220, undefined, false);
-    setPixel(13, 12, 255, 255, 255, 220, undefined, false);
-    fillRect(9, 11, 14, 11, clamp(skinRgb.r - 35), clamp(skinRgb.g - 45), clamp(skinRgb.b - 45), 255, true);
-  }
+  const resolvedEyeStyle = EYE_STYLES[eyeStyle] || EYE_STYLES["cool-highlight"];
+  resolvedEyeStyle.draw({
+    setPixel: (x, y, r, g, b, a = 255, applyShade = true) => setPixel(x, y, r, g, b, a, undefined, false, 'none', applyShade),
+    fillRect: (x1, y1, x2, y2, r, g, b, a = 255, isSkin = false) => fillRect(x1, y1, x2, y2, r, g, b, a, isSkin),
+    eyeRgb,
+    skinRgb,
+  });
 
   // Nose/Mouth details (optional, subtle skin color differences or shadow)
   setPixel(11, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, undefined, false);

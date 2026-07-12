@@ -18,18 +18,18 @@ export const EYE_STYLES: Record<string, EyeStyle> = {
     name: "Cool Highlight",
     vibe: 'neutral',
     draw: ({ setPixel, fillRect, eyeRgb, skinRgb }) => {
-      setPixel(9, 12, 255, 255, 255, 255, false);
-      setPixel(10, 12, 255, 255, 255, 255, false);
-      setPixel(13, 12, 255, 255, 255, 255, false);
-      setPixel(14, 12, 255, 255, 255, 255, false);
+      setPixel(9, 12, 255, 255, 255, 255);
+      setPixel(10, 12, 255, 255, 255, 255);
+      setPixel(13, 12, 255, 255, 255, 255);
+      setPixel(14, 12, 255, 255, 255, 255);
 
-      setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
-      setPixel(11, 13, clamp(eyeRgb.r - 20), clamp(eyeRgb.g - 20), clamp(eyeRgb.b - 20), 255, false);
-      setPixel(12, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
-      setPixel(12, 13, clamp(eyeRgb.r - 20), clamp(eyeRgb.g - 20), clamp(eyeRgb.b - 20), 255, false);
+      setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255);
+      setPixel(11, 13, clamp(eyeRgb.r - 20), clamp(eyeRgb.g - 20), clamp(eyeRgb.b - 20), 255);
+      setPixel(12, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255);
+      setPixel(12, 13, clamp(eyeRgb.r - 20), clamp(eyeRgb.g - 20), clamp(eyeRgb.b - 20), 255);
 
-      setPixel(10, 12, 255, 255, 255, 220, false);
-      setPixel(13, 12, 255, 255, 255, 220, false);
+      setPixel(10, 12, 255, 255, 255, 220);
+      setPixel(13, 12, 255, 255, 255, 220);
       fillRect(9, 11, 14, 11, clamp(skinRgb.r - 35), clamp(skinRgb.g - 45), clamp(skinRgb.b - 45), 255, true);
     },
   },
@@ -39,8 +39,8 @@ export const EYE_STYLES: Record<string, EyeStyle> = {
     draw: ({ setPixel, fillRect, eyeRgb }) => {
       fillRect(10, 12, 11, 13, clamp(eyeRgb.r - 30), clamp(eyeRgb.g - 30), clamp(eyeRgb.b - 30), 255);
       fillRect(13, 12, 14, 13, clamp(eyeRgb.r - 30), clamp(eyeRgb.g - 30), clamp(eyeRgb.b - 30), 255);
-      setPixel(9, 12, 255, 255, 255, 255, false);
-      setPixel(12, 12, 255, 255, 255, 255, false);
+      setPixel(9, 12, 255, 255, 255, 255);
+      setPixel(12, 12, 255, 255, 255, 255);
     },
   },
   "anime-glowing": {
@@ -50,18 +50,18 @@ export const EYE_STYLES: Record<string, EyeStyle> = {
       const bright = applyHueShift(eyeRgb.r, eyeRgb.g, eyeRgb.b, 40, false);
       fillRect(10, 12, 11, 12, bright.r, bright.g, bright.b, 255, false);
       fillRect(13, 12, 14, 12, bright.r, bright.g, bright.b, 255, false);
-      setPixel(9, 12, 255, 255, 255, 255, false);
-      setPixel(12, 12, 255, 255, 255, 255, false);
+      setPixel(9, 12, 255, 255, 255, 255);
+      setPixel(12, 12, 255, 255, 255, 255);
     },
   },
   "classic-simple": {
     name: "Classic Simple",
     vibe: 'neutral',
     draw: ({ setPixel, eyeRgb }) => {
-      setPixel(10, 12, 255, 255, 255, 255, false);
-      setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
-      setPixel(13, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
-      setPixel(14, 12, 255, 255, 255, 255, false);
+      setPixel(10, 12, 255, 255, 255, 255);
+      setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255);
+      setPixel(13, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255);
+      setPixel(14, 12, 255, 255, 255, 255);
     },
   },
   "long-lashes": {
