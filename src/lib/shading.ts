@@ -288,8 +288,21 @@ export function applyVolumeShaderV2(
 
   const vertical = (1 - pctY) * 12 - 6;
   const horizontal = Math.sin(sinePhase * Math.PI) * 14 - 7;
-  const bandSize = isSkin ? 5 : 7;
-  const form = quantizeShade(vertical + horizontal, x, y, bandSize);
+
+  let form: number;
+  let pattern_: number;
+  if (isSkin) {
+    // Clean 3-tone ramp (base / core-shadow / highlight) so faces and bare
+    // limbs read as deliberate flat shapes instead of noisy dithered mush.
+    const raw = quantizeShade(vertical + horizontal, x, y, 5, false);
+    form = Math.max(-5, Math.min(5, raw));
+    pattern_ = 0;
+  } else {
+    // Cloth keeps its dithered texture, but widened bands + a softened
+    // pattern contribution let the 3-band form shading dominate the read.
+    form = quantizeShade(vertical + horizontal, x, y, 8);
+    pattern_ = patternOffset(pattern, x, y, seed) * 0.75;
+  }
 
   const aoEdges = opts.aoEdges ?? !isSkin;
   let ao = 0;
@@ -300,7 +313,6 @@ export function applyVolumeShaderV2(
     if (!isSkin && y === y1) ao -= 4;
   }
 
-  const pattern_ = patternOffset(pattern, x, y, seed);
   const total = Math.round(form + ao + pattern_);
 
   return applyHueShift(r, g, b, total, isSkin);
