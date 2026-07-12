@@ -239,6 +239,9 @@ export function generateSkinArray(
     return hexToRgb(apparelColors.shirt);
   };
 
+  const layerMaterial = (source: 'skin' | 'primary' | 'secondary' | 'shirt'): MaterialId =>
+    source === 'skin' ? 'skin' : (`garment-${source}` as MaterialId);
+
   const resolvedPattern = (fallback: PatternType): PatternType =>
     PATTERN_KEYS.includes(detailTexture as PatternType) && detailTexture !== "none"
       ? (detailTexture as PatternType)
@@ -247,25 +250,26 @@ export function generateSkinArray(
   // Torso Base Layer:
   const torsoRgb = layerColor(stencil.baseTorso);
   const isTorsoSkin = stencil.baseTorso === 'skin';
+  const torsoMaterial = layerMaterial(stencil.baseTorso);
   const torsoPattern = resolvedPattern(stencil.defaultPattern);
 
   // Draw base torso (e.g. shirt underneath outer jacket overlay)
-  fillRect(16, 16, 39, 31, torsoRgb.r, torsoRgb.g, torsoRgb.b, 255, isTorsoSkin, torsoPattern);
+  fillRect(16, 16, 39, 31, torsoRgb.r, torsoRgb.g, torsoRgb.b, 255, isTorsoSkin, torsoPattern, 'top', torsoMaterial);
 
   if (!isTorsoSkin) {
     // V-neck cutout at front neck top: x in [22, 25], y in [20, 21]
-    fillRect(22, 20, 25, 21, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
+    fillRect(22, 20, 25, 21, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top', 'skin');
 
     // Draw base neck shadow
-    setPixel(22, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false);
-    setPixel(23, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false);
-    setPixel(24, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false);
-    setPixel(25, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false);
+    setPixel(22, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false, 'none', true, 'top', 'skin');
+    setPixel(23, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false, 'none', true, 'top', 'skin');
+    setPixel(24, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false, 'none', true, 'top', 'skin');
+    setPixel(25, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false, 'none', true, 'top', 'skin');
 
     // Draw base tie (underneath jacket)
     if (stencil.baseTie) {
       const tieColor = hexToRgb(apparelColors.tie);
-      fillRect(23, 21, 24, 27, tieColor.r, tieColor.g, tieColor.b, 255, false);
+      fillRect(23, 21, 24, 27, tieColor.r, tieColor.g, tieColor.b, 255, false, 'none', 'top', 'garment-tie');
     }
   }
 
@@ -273,59 +277,60 @@ export function generateSkinArray(
   const pantsColor = hexToRgb(apparelColors.pants);
   const legHem = stencil.legStyle === 'shorts' ? 4 : stencil.legStyle === 'skirt' ? 3 : stencil.legStyle === 'bare' ? -1 : 16;
   if (legHem >= 0) {
-    fillRect(0, 16, 15, 16 + legHem - 1, pantsColor.r, pantsColor.g, pantsColor.b, 255, false, 'none', 'top-right');
-    fillRect(16, 48, 31, 48 + legHem - 1, pantsColor.r, pantsColor.g, pantsColor.b, 255, false, 'none', 'top-left');
+    fillRect(0, 16, 15, 16 + legHem - 1, pantsColor.r, pantsColor.g, pantsColor.b, 255, false, 'none', 'top-right', 'pants');
+    fillRect(16, 48, 31, 48 + legHem - 1, pantsColor.r, pantsColor.g, pantsColor.b, 255, false, 'none', 'top-left', 'pants');
   }
 
   // Arms Base Layer:
   const sleeveRgb = layerColor(stencil.baseSleeve);
   const isArmSkin = stencil.baseSleeve === 'skin';
+  const armMaterial = layerMaterial(stencil.baseSleeve);
   const armPattern = resolvedPattern(stencil.defaultPattern);
   const shortSleeveRows = 6;
 
   // Right Arm Base
   if (isAlex) {
     if (stencil.sleeveLength === 'short') {
-      fillRect(40, 16, 54, 16 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right');
-      fillRect(40, 16 + shortSleeveRows, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+      fillRect(40, 16, 54, 16 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right', armMaterial);
+      fillRect(40, 16 + shortSleeveRows, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right', 'skin');
     } else if (stencil.sleeveLength === 'none') {
-      fillRect(40, 16, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+      fillRect(40, 16, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right', 'skin');
     } else {
-      fillRect(40, 16, 54, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right');
-      fillRect(40, 28, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+      fillRect(40, 16, 54, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right', armMaterial);
+      fillRect(40, 28, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right', 'skin');
     }
   } else {
     if (stencil.sleeveLength === 'short') {
-      fillRect(40, 16, 55, 16 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right');
-      fillRect(40, 16 + shortSleeveRows, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+      fillRect(40, 16, 55, 16 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right', armMaterial);
+      fillRect(40, 16 + shortSleeveRows, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right', 'skin');
     } else if (stencil.sleeveLength === 'none') {
-      fillRect(40, 16, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+      fillRect(40, 16, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right', 'skin');
     } else {
-      fillRect(40, 16, 55, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right');
-      fillRect(40, 28, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+      fillRect(40, 16, 55, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right', armMaterial);
+      fillRect(40, 28, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right', 'skin');
     }
   }
 
   // Left Arm Base
   if (isAlex) {
     if (stencil.sleeveLength === 'short') {
-      fillRect(32, 46, 46, 46 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left');
-      fillRect(32, 46 + shortSleeveRows, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+      fillRect(32, 46, 46, 46 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left', armMaterial);
+      fillRect(32, 46 + shortSleeveRows, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left', 'skin');
     } else if (stencil.sleeveLength === 'none') {
-      fillRect(32, 46, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+      fillRect(32, 46, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left', 'skin');
     } else {
-      fillRect(32, 46, 46, 57, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left');
-      fillRect(32, 58, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+      fillRect(32, 46, 46, 57, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left', armMaterial);
+      fillRect(32, 58, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left', 'skin');
     }
   } else {
     if (stencil.sleeveLength === 'short') {
-      fillRect(32, 48, 47, 48 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left');
-      fillRect(32, 48 + shortSleeveRows, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+      fillRect(32, 48, 47, 48 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left', armMaterial);
+      fillRect(32, 48 + shortSleeveRows, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left', 'skin');
     } else if (stencil.sleeveLength === 'none') {
-      fillRect(32, 48, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+      fillRect(32, 48, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left', 'skin');
     } else {
-      fillRect(32, 48, 47, 59, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left');
-      fillRect(32, 60, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+      fillRect(32, 48, 47, 59, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left', armMaterial);
+      fillRect(32, 60, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left', 'skin');
     }
   }
 
@@ -363,18 +368,29 @@ export function generateSkinArray(
       ? 'top-left'
       : 'top';
 
+    const regionMaterial: MaterialId =
+      region.colorType === 'pants'
+        ? 'pants'
+        : region.colorType === 'skin'
+        ? 'skin'
+        : region.colorType === 'hair'
+        ? 'hair'
+        : region.colorType === 'eyes'
+        ? 'eye'
+        : (`garment-${region.colorType === 'accent' ? 'secondary' : region.colorType}` as MaterialId);
+
     if (isAlex && region.name.includes("Sleeve")) {
       if (region.name.includes("Right Sleeve")) {
         const adjustedX2 = Math.min(region.x2, 54);
-        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern, regionLightDir);
+        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern, regionLightDir, regionMaterial);
       } else if (region.name.includes("Left Sleeve")) {
         const adjustedX2 = Math.min(region.x2, 62);
-        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern, regionLightDir);
+        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern, regionLightDir, regionMaterial);
       } else {
-        fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern, regionLightDir);
+        fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern, regionLightDir, regionMaterial);
       }
     } else {
-      fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b, 255, region.colorType === "skin", pattern, regionLightDir);
+      fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b, 255, region.colorType === "skin", pattern, regionLightDir, regionMaterial);
     }
   }
 
@@ -382,16 +398,16 @@ export function generateSkinArray(
   const shoeStyle = stencil.shoeStyle || 'boots';
   const shoeRgb = hexToRgb(apparelColors.shoes || "#302015");
   if (shoeStyle === 'boots') {
-    fillRect(0, 29, 15, 31, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
-    fillRect(16, 61, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
+    fillRect(0, 29, 15, 31, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, 'none', 'top', 'shoes');
+    fillRect(16, 61, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, 'none', 'top', 'shoes');
   } else if (shoeStyle === 'sneakers') {
-    fillRect(0, 30, 15, 30, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
-    fillRect(0, 31, 15, 31, 235, 235, 235, 255, false);
-    fillRect(16, 62, 31, 62, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
-    fillRect(16, 63, 31, 63, 235, 235, 235, 255, false);
+    fillRect(0, 30, 15, 30, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, 'none', 'top', 'shoes');
+    fillRect(0, 31, 15, 31, 235, 235, 235, 255, false, 'none', 'top', 'shoes');
+    fillRect(16, 62, 31, 62, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, 'none', 'top', 'shoes');
+    fillRect(16, 63, 31, 63, 235, 235, 235, 255, false, 'none', 'top', 'shoes');
   } else if (shoeStyle === 'flats') {
-    fillRect(0, 31, 15, 31, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
-    fillRect(16, 63, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
+    fillRect(0, 31, 15, 31, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, 'none', 'top', 'shoes');
+    fillRect(16, 63, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, 'none', 'top', 'shoes');
   }
 
   return array;
