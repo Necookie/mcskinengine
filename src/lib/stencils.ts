@@ -64,13 +64,13 @@ export const TWEED_BLAZER_STENCIL: Stencil = {
     { name: "Tie Knot", x1: 23, y1: 33, x2: 24, y2: 33, colorType: "tie", overlay: true },
     { name: "Tie Tail", x1: 23, y1: 34, x2: 23, y2: 38, colorType: "tie", overlay: true },
     
-    // Elbow patches on sleeves (Trim color)
-    { name: "Right Elbow Patch", x1: 41, y1: 38, x2: 42, y2: 40, colorType: "trim", overlay: true },
-    { name: "Left Elbow Patch", x1: 49, y1: 54, x2: 50, y2: 56, colorType: "trim", overlay: true },
-    
-    // Blazer Sleeves (Primary tweed color)
+    // Blazer Sleeves (Primary tweed color) - MUST come before elbow patches
     { name: "Right Sleeve Blazer", x1: 40, y1: 32, x2: 55, y2: 47, colorType: "primary", overlay: true },
     { name: "Left Sleeve Blazer", x1: 48, y1: 48, x2: 63, y2: 63, colorType: "primary", overlay: true },
+
+    // Elbow patches on sleeves (Trim color) - drawn AFTER sleeves so they're visible
+    { name: "Right Elbow Patch", x1: 41, y1: 38, x2: 42, y2: 40, colorType: "trim", overlay: true },
+    { name: "Left Elbow Patch", x1: 49, y1: 54, x2: 50, y2: 56, colorType: "trim", overlay: true },
 
     // Blazer Buttons (Gold/Secondary)
     { name: "Button Top", x1: 22, y1: 38, x2: 22, y2: 38, colorType: "secondary", overlay: true },
