@@ -1,3 +1,57 @@
+// Helper to convert HEX color to RGB object
+export function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const cleanHex = hex.replace("#", "");
+  const num = parseInt(cleanHex, 16);
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255,
+  };
+}
+
+// Helper to clamp a number between 0 and 255
+export function clamp(val: number): number {
+  return Math.max(0, Math.min(255, val));
+}
+
+export function applyHueShift(
+  r: number,
+  g: number,
+  b: number,
+  offset: number,
+  isSkin: boolean
+): { r: number; g: number; b: number } {
+  if (offset === 0) return { r, g, b };
+
+  let targetR = r;
+  let targetG = g;
+  let targetB = b;
+
+  if (isSkin) {
+    if (offset > 0) {
+      targetR = clamp(r + offset * 1.2);
+      targetG = clamp(g + offset * 1.0);
+      targetB = clamp(b + offset * 0.6);
+    } else {
+      targetR = clamp(r + offset * 0.8);
+      targetG = clamp(g + offset * 1.2);
+      targetB = clamp(b + offset * 1.3);
+    }
+  } else {
+    if (offset > 0) {
+      targetR = clamp(r + offset * 1.1);
+      targetG = clamp(g + offset * 1.1);
+      targetB = clamp(b + offset * 0.9);
+    } else {
+      targetR = clamp(r + offset * 1.3);
+      targetG = clamp(g + offset * 1.1);
+      targetB = clamp(b + offset * 0.7);
+    }
+  }
+
+  return { r: targetR, g: targetG, b: targetB };
+}
+
 /**
  * Deterministic hash and value-noise primitives used to break up repetitive
  * procedural shading/texture patterns without relying on Math.random().
@@ -144,4 +198,74 @@ export function patternOffset(pattern: PatternType, x: number, y: number, seed: 
       return (valueNoise2(x, y, 4, seed) - 0.5) * 4;
     }
   }
+}
+
+/**
+ * Per-pixel volume shader: stepped-band form shading with a configurable
+ * light direction, plus seam/crease ambient occlusion and cloth texture.
+ */
+
+export interface ShadeBounds {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+export interface ShadeOptions {
+  isSkin?: boolean;
+  pattern?: PatternType;
+  seed?: number;
+  lightDir?: 'top-left' | 'top' | 'top-right';
+  aoEdges?: boolean;
+}
+
+export function applyVolumeShaderV2(
+  x: number,
+  y: number,
+  r: number,
+  g: number,
+  b: number,
+  bounds: ShadeBounds | undefined,
+  opts: ShadeOptions = {}
+): { r: number; g: number; b: number } {
+  const seed = opts.seed ?? 0;
+  const isSkin = opts.isSkin ?? false;
+  const pattern = opts.pattern ?? 'none';
+
+  if (!bounds) {
+    const offset = patternOffset(pattern, x, y, seed) * 2;
+    return applyHueShift(r, g, b, Math.round(offset), isSkin);
+  }
+
+  const { x1, y1, x2, y2 } = bounds;
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+
+  const pctX = dx > 0 ? (x - x1) / dx : 0.5;
+  const pctY = dy > 0 ? (y - y1) / dy : 0.5;
+
+  const lightDir = opts.lightDir ?? 'top';
+  let sinePhase = pctX;
+  if (lightDir === 'top-left') sinePhase = pctX * 0.85;
+  else if (lightDir === 'top-right') sinePhase = 0.15 + pctX * 0.85;
+
+  const vertical = (1 - pctY) * 12 - 6;
+  const horizontal = Math.sin(sinePhase * Math.PI) * 14 - 7;
+  const bandSize = isSkin ? 5 : 7;
+  const form = quantizeShade(vertical + horizontal, x, y, bandSize);
+
+  const aoEdges = opts.aoEdges ?? !isSkin;
+  let ao = 0;
+  if (aoEdges) {
+    if (y === y2) ao -= isSkin ? 4 : 8;
+    else if (y === y2 - 1 && !isSkin) ao -= 4;
+    if (!isSkin && (x === x1 || x === x2)) ao -= 5;
+    if (!isSkin && y === y1) ao -= 4;
+  }
+
+  const pattern_ = patternOffset(pattern, x, y, seed);
+  const total = Math.round(form + ao + pattern_);
+
+  return applyHueShift(r, g, b, total, isSkin);
 }
