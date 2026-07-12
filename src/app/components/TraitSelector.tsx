@@ -49,19 +49,23 @@ export default function TraitSelector() {
           <span className="trait-card-title">Silhouette</span>
           <span className="trait-card-subtitle">Steve vs Alex</span>
         </div>
-        <div className="segmented-control">
+        <div className="segmented-control" role="radiogroup" aria-label="Model type">
           <button
             onClick={() => handleModelTypeChange("steve")}
             className={`segmented-item ${modelType === "steve" ? "active" : ""}`}
+            role="radio"
+            aria-checked={modelType === "steve"}
           >
-            <User size={13} />
+            <User size={13} aria-hidden="true" />
             <span>Steve (4px)</span>
           </button>
           <button
             onClick={() => handleModelTypeChange("alex")}
             className={`segmented-item ${modelType === "alex" ? "active" : ""}`}
+            role="radio"
+            aria-checked={modelType === "alex"}
           >
-            <UserCheck size={13} />
+            <UserCheck size={13} aria-hidden="true" />
             <span>Alex (3px)</span>
           </button>
         </div>
@@ -73,7 +77,7 @@ export default function TraitSelector() {
           <span className="trait-card-title">Institutional Role</span>
           <span className="trait-card-subtitle">Stencil Base</span>
         </div>
-        <div className="segmented-control">
+        <div className="segmented-control" role="radiogroup" aria-label="Institutional role">
           {ROLES.map((r) => {
             const Icon = r.icon;
             const isActive = role === r.key;
@@ -83,8 +87,10 @@ export default function TraitSelector() {
                 onClick={() => handleRoleChange(r.key)}
                 className={`segmented-item ${isActive ? "active" : ""}`}
                 title={r.label}
+                role="radio"
+                aria-checked={isActive}
               >
-                <Icon size={13} />
+                <Icon size={13} aria-hidden="true" />
                 <span>{r.key}</span>
               </button>
             );
@@ -98,7 +104,7 @@ export default function TraitSelector() {
           <span className="trait-card-title">Ethnicity Base</span>
           <span className="trait-card-subtitle">Skin Profile</span>
         </div>
-        <div className="ethnicity-buttons-grid">
+        <div className="ethnicity-buttons-grid" role="radiogroup" aria-label="Ethnicity">
           {ETHNICITIES.map((eth) => {
             const isActive = ethnicity === eth;
             return (
@@ -106,6 +112,8 @@ export default function TraitSelector() {
                 key={eth}
                 onClick={() => handleEthnicityChange(eth)}
                 className={`ethnicity-btn ${isActive ? "active" : ""}`}
+                role="radio"
+                aria-checked={isActive}
               >
                 {eth}
               </button>

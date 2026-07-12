@@ -179,6 +179,8 @@ export default function PixelEditor2D() {
               width={64}
               height={64}
               className="w-full h-full pixelated cursor-crosshair block touch-none"
+              aria-label="Minecraft skin pixel editor canvas"
+              role="img"
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUpOrLeave}
@@ -197,6 +199,7 @@ export default function PixelEditor2D() {
                 strokeWidth="0.2"
                 fill="none"
                 opacity="0.75"
+                aria-hidden="true"
               >
                 {/* Head / Hat */}
                 <rect x="0" y="0" width="32" height="16" stroke="#f59e0b" />
@@ -236,7 +239,7 @@ export default function PixelEditor2D() {
             )}
           </div>
 
-          <div className="brush-size-selector">
+          <div className="brush-size-selector" role="radiogroup" aria-label="Brush size">
             <span className="brush-size-label">Size:</span>
             <div className="brush-size-btn-group">
               {[1, 2, 3].map((size) => (
@@ -244,6 +247,9 @@ export default function PixelEditor2D() {
                   key={size}
                   onClick={() => setBrushSize(size)}
                   className={`brush-size-btn ${brushSize === size ? "active" : ""}`}
+                  role="radio"
+                  aria-checked={brushSize === size}
+                  aria-label={`Brush size ${size}x`}
                 >
                   {size}x
                 </button>
@@ -253,7 +259,7 @@ export default function PixelEditor2D() {
         </div>
 
         {/* Color Palette Presets */}
-        <div className="color-presets-grid">
+        <div className="color-presets-grid" role="listbox" aria-label="Color palette">
           {PALETTE.map((color) => (
             <button
               key={color}
@@ -265,9 +271,11 @@ export default function PixelEditor2D() {
                 selectedColor === color && activeTool === "brush" ? "active" : ""
               }`}
               style={{ backgroundColor: color }}
+              role="option"
+              aria-selected={selectedColor === color && activeTool === "brush"}
+              aria-label={`Color ${color}`}
             />
           ))}
-          {/* Custom color picker */}
           <div className="custom-color-picker-wrap">
             <input
               type="color"
@@ -277,8 +285,9 @@ export default function PixelEditor2D() {
                 setActiveTool("brush");
               }}
               className="custom-color-picker-input"
+              aria-label="Custom color picker"
             />
-            <span className="custom-color-picker-plus">+</span>
+            <span className="custom-color-picker-plus" aria-hidden="true">+</span>
           </div>
         </div>
       </div>
