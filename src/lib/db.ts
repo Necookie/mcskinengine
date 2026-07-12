@@ -1,15 +1,25 @@
-import { createClient } from "@libsql/client";
+import { createClient, type Client } from "@libsql/client";
 
-const TURSO_URL = process.env.TURSO_DATABASE_URL!;
-const TURSO_TOKEN = process.env.TURSO_AUTH_TOKEN!;
+let _db: Client | null = null;
 
-export const db = createClient({
-  url: TURSO_URL,
-  authToken: TURSO_TOKEN,
+function getDb(): Client {
+  if (!_db) {
+    const url = process.env.TURSO_DATABASE_URL;
+    const token = process.env.TURSO_AUTH_TOKEN;
+    if (!url || !token) {
+      throw new Error("TURSO_DATABASE_URL and TURSO_AUTH_TOKEN must be set");
+    }
+    _db = createClient({ url, authToken: token });
+    (_db as any).getIsSchemaDatabase = async () => false;
+  }
+  return _db;
+}
+
+export const db = new Proxy({} as Client, {
+  get(_, prop) {
+    return (getDb() as any)[prop];
+  }
 });
-
-// Override getIsSchemaDatabase to bypass buggy schema migration checks on Turso
-(db as any).getIsSchemaDatabase = async () => false;
 
 export async function initializeDatabase() {
   try {
