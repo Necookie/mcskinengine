@@ -216,6 +216,8 @@ User description: ${prompt}`;
       }
     }
 
+    const drawGlasses = prompt.toLowerCase().includes("glass");
+
     const skinArray = generateSkinArray(
       demographic || "East Asian",
       apparel.stencilKey,
@@ -227,7 +229,8 @@ User description: ${prompt}`;
         tie: apparel.tie,
         pants: apparel.pants,
       },
-      !!isAlex
+      !!isAlex,
+      drawGlasses
     );
 
     const base64Skin = skinToBase64(skinArray);

@@ -40,7 +40,8 @@ export function generateSkinArray(
     tie: string;
     pants: string;
   },
-  isAlex: boolean
+  isAlex: boolean,
+  drawGlasses: boolean = false
 ): Uint8Array {
   // Initialize with transparent pixels
   const array = new Uint8Array(64 * 64 * 4);
@@ -109,6 +110,31 @@ export function generateSkinArray(
   // Nose/Mouth details (optional, subtle skin color differences or shadow)
   setPixel(11, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, false);
   setPixel(12, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, false);
+
+  if (drawGlasses) {
+    const glassColor = { r: 40, g: 30, b: 30 }; // dark brown frames
+    
+    // Bridge between eyes: (12, 12)
+    setPixel(12, 12, glassColor.r, glassColor.g, glassColor.b, 255, false);
+
+    // Left frame box: border of (9, 11) to (12, 13)
+    fillRect(9, 11, 12, 11, glassColor.r, glassColor.g, glassColor.b, 255, false);
+    fillRect(9, 13, 12, 13, glassColor.r, glassColor.g, glassColor.b, 255, false);
+    setPixel(9, 12, glassColor.r, glassColor.g, glassColor.b, 255, false);
+    setPixel(12, 12, glassColor.r, glassColor.g, glassColor.b, 255, false); // merge bridge
+
+    // Right frame box: border of (13, 11) to (16, 13)
+    fillRect(13, 11, 16, 11, glassColor.r, glassColor.g, glassColor.b, 255, false);
+    fillRect(13, 13, 16, 13, glassColor.r, glassColor.g, glassColor.b, 255, false);
+    setPixel(13, 12, glassColor.r, glassColor.g, glassColor.b, 255, false);
+    setPixel(16, 12, glassColor.r, glassColor.g, glassColor.b, 255, false);
+
+    // Temples (sides of head):
+    // Right side temple: (7, 12) to (3, 12)
+    fillRect(3, 12, 7, 12, glassColor.r, glassColor.g, glassColor.b, 255, false);
+    // Left side temple: (16, 12) to (20, 12)
+    fillRect(16, 12, 20, 12, glassColor.r, glassColor.g, glassColor.b, 255, false);
+  }
 
   // Torso Base: (16, 16) to (40, 32)
   fillRect(16, 16, 39, 31, skinRgb.r, skinRgb.g, skinRgb.b);

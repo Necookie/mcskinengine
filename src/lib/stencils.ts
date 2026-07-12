@@ -23,8 +23,15 @@ export interface Stencil {
 export const STUDENT_HOODIE_STENCIL: Stencil = {
   name: "Casual Student Hoodie",
   regions: [
-    // Hood (Hat Overlay)
-    { name: "Hood Hat", x1: 32, y1: 0, x2: 63, y2: 15, colorType: "primary", overlay: true },
+    // Hoodie Hood (Hat Overlay) - split to keep the face open
+    { name: "Hood Top", x1: 40, y1: 0, x2: 47, y2: 7, colorType: "primary", overlay: true },
+    { name: "Hood Bottom", x1: 48, y1: 0, x2: 55, y2: 7, colorType: "primary", overlay: true },
+    { name: "Hood Right Side", x1: 32, y1: 8, x2: 39, y2: 15, colorType: "primary", overlay: true },
+    { name: "Hood Left Side", x1: 48, y1: 8, x2: 55, y2: 15, colorType: "primary", overlay: true },
+    { name: "Hood Back", x1: 56, y1: 8, x2: 63, y2: 15, colorType: "primary", overlay: true },
+    { name: "Hood Front Rim Top", x1: 40, y1: 8, x2: 47, y2: 8, colorType: "primary", overlay: true },
+    { name: "Hood Front Rim Left", x1: 40, y1: 9, x2: 40, y2: 15, colorType: "primary", overlay: true },
+    { name: "Hood Front Rim Right", x1: 47, y1: 9, x2: 47, y2: 15, colorType: "primary", overlay: true },
     
     // Hoodie Torso Overlay
     { name: "Hoodie Torso", x1: 16, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
@@ -43,7 +50,7 @@ export const STUDENT_HOODIE_STENCIL: Stencil = {
     // Sleeve cuffs (Secondary)
     { name: "Right Cuff", x1: 40, y1: 46, x2: 55, y2: 47, colorType: "secondary", overlay: true },
     { name: "Left Cuff", x1: 48, y1: 62, x2: 63, y2: 63, colorType: "secondary", overlay: true },
-
+ 
     // Pants (Pants overlays)
     { name: "Right Pants", x1: 0, y1: 32, x2: 15, y2: 47, colorType: "pants", overlay: true },
     { name: "Left Pants", x1: 0, y1: 48, x2: 15, y2: 63, colorType: "pants", overlay: true }
