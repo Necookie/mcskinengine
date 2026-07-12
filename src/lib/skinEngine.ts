@@ -150,54 +150,54 @@ export function generateSkinArray(
     
     if (accessories.includes("glasses")) {
       // Bridge between eyes: (12, 12)
-      setPixel(12, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false);
+      setPixel(12, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false, 'none', true, 'top', 'accessory');
 
       // Left frame box: border of (9, 11) to (12, 13)
-      fillRect(9, 11, 12, 11, darkColor.r, darkColor.g, darkColor.b, 255);
-      fillRect(9, 13, 12, 13, darkColor.r, darkColor.g, darkColor.b, 255);
-      setPixel(9, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false);
-      setPixel(12, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false);
+      fillRect(9, 11, 12, 11, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
+      fillRect(9, 13, 12, 13, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
+      setPixel(9, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false, 'none', true, 'top', 'accessory');
+      setPixel(12, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false, 'none', true, 'top', 'accessory');
 
       // Right frame box: border of (13, 11) to (16, 13)
-      fillRect(13, 11, 16, 11, darkColor.r, darkColor.g, darkColor.b, 255);
-      fillRect(13, 13, 16, 13, darkColor.r, darkColor.g, darkColor.b, 255);
-      setPixel(13, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false);
-      setPixel(16, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false);
+      fillRect(13, 11, 16, 11, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
+      fillRect(13, 13, 16, 13, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
+      setPixel(13, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false, 'none', true, 'top', 'accessory');
+      setPixel(16, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false, 'none', true, 'top', 'accessory');
 
       // Temples:
-      fillRect(3, 12, 7, 12, darkColor.r, darkColor.g, darkColor.b, 255);
-      fillRect(16, 12, 20, 12, darkColor.r, darkColor.g, darkColor.b, 255);
+      fillRect(3, 12, 7, 12, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
+      fillRect(16, 12, 20, 12, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
     }
 
     if (accessories.includes("headphones")) {
       const hpColor = hexToRgb(apparelColors.secondary || "#ff0000");
       // Band over head top (Front top rim: 8,0 to 15,0)
-      fillRect(8, 0, 15, 0, hpColor.r, hpColor.g, hpColor.b, 255);
+      fillRect(8, 0, 15, 0, hpColor.r, hpColor.g, hpColor.b, 255, false, 'none', 'top', 'accessory');
       // Sides down (4, 9 to 4, 11 on right, 19, 9 to 19, 11 on left)
-      fillRect(4, 9, 4, 11, hpColor.r, hpColor.g, hpColor.b, 255);
-      fillRect(19, 9, 19, 11, hpColor.r, hpColor.g, hpColor.b, 255);
+      fillRect(4, 9, 4, 11, hpColor.r, hpColor.g, hpColor.b, 255, false, 'none', 'top', 'accessory');
+      fillRect(19, 9, 19, 11, hpColor.r, hpColor.g, hpColor.b, 255, false, 'none', 'top', 'accessory');
       // Ear cups
-      fillRect(3, 10, 5, 12, hpColor.r, hpColor.g, hpColor.b, 255);
-      fillRect(18, 10, 20, 12, hpColor.r, hpColor.g, hpColor.b, 255);
+      fillRect(3, 10, 5, 12, hpColor.r, hpColor.g, hpColor.b, 255, false, 'none', 'top', 'accessory');
+      fillRect(18, 10, 20, 12, hpColor.r, hpColor.g, hpColor.b, 255, false, 'none', 'top', 'accessory');
     }
 
     if (accessories.includes("mask")) {
       const maskColor = hexToRgb(apparelColors.shirt || "#ffffff");
-      fillRect(10, 13, 13, 14, maskColor.r, maskColor.g, maskColor.b, 255);
+      fillRect(10, 13, 13, 14, maskColor.r, maskColor.g, maskColor.b, 255, false, 'none', 'top', 'accessory');
       // Mask straps
-      setPixel(9, 13, maskColor.r, maskColor.g, maskColor.b, 255, undefined, false);
-      setPixel(14, 13, maskColor.r, maskColor.g, maskColor.b, 255, undefined, false);
+      setPixel(9, 13, maskColor.r, maskColor.g, maskColor.b, 255, undefined, false, 'none', true, 'top', 'accessory');
+      setPixel(14, 13, maskColor.r, maskColor.g, maskColor.b, 255, undefined, false, 'none', true, 'top', 'accessory');
     }
 
     if (accessories.includes("beard")) {
-      fillRect(9, 15, 14, 15, darkColor.r, darkColor.g, darkColor.b, 255);
-      fillRect(8, 13, 8, 14, darkColor.r, darkColor.g, darkColor.b, 255);
-      fillRect(15, 13, 15, 14, darkColor.r, darkColor.g, darkColor.b, 255);
+      fillRect(9, 15, 14, 15, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
+      fillRect(8, 13, 8, 14, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
+      fillRect(15, 13, 15, 14, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
     }
 
     if (accessories.includes("eyebrows")) {
-      fillRect(9, 11, 11, 11, darkColor.r, darkColor.g, darkColor.b, 255);
-      fillRect(12, 11, 14, 11, darkColor.r, darkColor.g, darkColor.b, 255);
+      fillRect(9, 11, 11, 11, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
+      fillRect(12, 11, 14, 11, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
     }
 
     if (accessories.includes("freckles")) {
@@ -205,27 +205,27 @@ export function generateSkinArray(
       const spots: Array<[number, number]> = [[9, 13], [10, 14], [13, 14], [14, 13], [9, 14], [14, 14]];
       for (const [x, y] of spots) {
         if (hash2(x, y, resolvedSeed) > 0.4) {
-          setPixel(x, y, freckleRgb.r, freckleRgb.g, freckleRgb.b, 255, undefined, false);
+          setPixel(x, y, freckleRgb.r, freckleRgb.g, freckleRgb.b, 255, undefined, false, 'none', true, 'top', 'accessory');
         }
       }
     }
 
     if (accessories.includes("blush")) {
       const blushRgb = applyHueShift(skinRgb.r, skinRgb.g, skinRgb.b, 22, true);
-      setPixel(8, 13, blushRgb.r, blushRgb.g, blushRgb.b, 200, undefined, false);
-      setPixel(15, 13, blushRgb.r, blushRgb.g, blushRgb.b, 200, undefined, false);
+      setPixel(8, 13, blushRgb.r, blushRgb.g, blushRgb.b, 200, undefined, false, 'none', true, 'top', 'accessory');
+      setPixel(15, 13, blushRgb.r, blushRgb.g, blushRgb.b, 200, undefined, false, 'none', true, 'top', 'accessory');
     }
 
     if (accessories.includes("lipstick")) {
       const lipRgb = hexToRgb("#b03a4a");
-      setPixel(11, 14, lipRgb.r, lipRgb.g, lipRgb.b, 255, undefined, false);
-      setPixel(12, 14, lipRgb.r, lipRgb.g, lipRgb.b, 255, undefined, false);
+      setPixel(11, 14, lipRgb.r, lipRgb.g, lipRgb.b, 255, undefined, false, 'none', true, 'top', 'accessory');
+      setPixel(12, 14, lipRgb.r, lipRgb.g, lipRgb.b, 255, undefined, false, 'none', true, 'top', 'accessory');
     }
 
     if (accessories.includes("earrings")) {
       const earringRgb = hexToRgb(apparelColors.trim || "#d4af37");
-      setPixel(7, 13, earringRgb.r, earringRgb.g, earringRgb.b, 255, undefined, false);
-      setPixel(16, 13, earringRgb.r, earringRgb.g, earringRgb.b, 255, undefined, false);
+      setPixel(7, 13, earringRgb.r, earringRgb.g, earringRgb.b, 255, undefined, false, 'none', true, 'top', 'accessory');
+      setPixel(16, 13, earringRgb.r, earringRgb.g, earringRgb.b, 255, undefined, false, 'none', true, 'top', 'accessory');
     }
   }
 
