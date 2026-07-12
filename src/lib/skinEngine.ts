@@ -40,6 +40,7 @@ export function generateSkinArray(
     shirt: string;
     tie: string;
     pants: string;
+    shoes?: string;
   },
   isAlex: boolean,
   accessories: string[] = [],
@@ -399,10 +400,21 @@ export function generateSkinArray(
     }
   }
 
-  // Draw boots/shoes on leg bases (as decorative default elements)
-  const shoeRgb = hexToRgb("#302015");
-  fillRect(0, 30, 15, 31, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
-  fillRect(16, 62, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
+  // Draw stencil-appropriate shoes on the leg bases
+  const shoeStyle = stencil.shoeStyle || 'boots';
+  const shoeRgb = hexToRgb(apparelColors.shoes || "#302015");
+  if (shoeStyle === 'boots') {
+    fillRect(0, 29, 15, 31, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
+    fillRect(16, 61, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
+  } else if (shoeStyle === 'sneakers') {
+    fillRect(0, 30, 15, 30, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
+    fillRect(0, 31, 15, 31, 235, 235, 235, 255, false);
+    fillRect(16, 62, 31, 62, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
+    fillRect(16, 63, 31, 63, 235, 235, 235, 255, false);
+  } else if (shoeStyle === 'flats') {
+    fillRect(0, 31, 15, 31, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
+    fillRect(16, 63, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
+  }
 
   return array;
 }
