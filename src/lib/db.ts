@@ -31,6 +31,12 @@ export async function initializeDatabase() {
       );
     `);
     
+    try {
+      await db.execute("ALTER TABLE user_settings ADD COLUMN openai_key TEXT;");
+    } catch {
+      // Column already exists
+    }
+    
     await db.execute(`
       CREATE TABLE IF NOT EXISTS avatar_registry (
         user_id TEXT PRIMARY KEY,

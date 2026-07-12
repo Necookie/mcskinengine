@@ -21,6 +21,7 @@ interface SkinState {
   
   geminiPrompt: string;
   hasGeminiKey: boolean;
+  hasOpenaiKey: boolean;
   isGenerating: boolean;
   mcpLogs: LogEntry[];
 
@@ -54,7 +55,7 @@ interface SkinState {
   saveSkin: () => Promise<void>;
   fetchLogs: () => Promise<void>;
   fetchSettings: () => Promise<void>;
-  saveSettings: (key: string) => Promise<void>;
+  saveSettings: (geminiKey?: string, openaiKey?: string) => Promise<void>;
 }
 
 // Initial default blank/transparent skin (white base for mannequin visibility)
@@ -80,6 +81,7 @@ export const useSkinStore = create<SkinState>((set, get) => ({
   
   geminiPrompt: "",
   hasGeminiKey: false,
+  hasOpenaiKey: false,
   isGenerating: false,
   mcpLogs: [],
 
@@ -233,22 +235,28 @@ export const useSkinStore = create<SkinState>((set, get) => ({
       const res = await fetch("/api/settings");
       if (res.ok) {
         const data = await res.json();
-        set({ hasGeminiKey: data.hasKey || false });
+        set({ 
+          hasGeminiKey: data.hasGeminiKey || false,
+          hasOpenaiKey: data.hasOpenaiKey || false
+        });
       }
     } catch (err) {
       console.error("Error fetching settings:", err);
     }
   },
 
-  saveSettings: async (key) => {
+  saveSettings: async (geminiKey, openaiKey) => {
     try {
       const res = await fetch("/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ geminiKey: key }),
+        body: JSON.stringify({ geminiKey, openaiKey }),
       });
       if (res.ok) {
-        set({ hasGeminiKey: !!key });
+        const updates: Partial<SkinState> = {};
+        if (geminiKey !== undefined) updates.hasGeminiKey = !!geminiKey;
+        if (openaiKey !== undefined) updates.hasOpenaiKey = !!openaiKey;
+        set(updates);
       }
     } catch (err) {
       console.error("Error saving settings:", err);
