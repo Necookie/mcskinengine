@@ -12,7 +12,6 @@ const PALETTE = [
 export default function PixelEditor2D() {
   const {
     skinArray,
-    skinBase64,
     selectedColor,
     brushSize,
     modelType,
@@ -49,13 +48,11 @@ export default function PixelEditor2D() {
 
   // 1-second save debounce
   useEffect(() => {
-    if (skinBase64) {
-      const timer = setTimeout(() => {
-        saveSkin();
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [skinBase64]);
+    const timer = setTimeout(() => {
+      saveSkin();
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [skinArray, saveSkin]);
 
   const getCanvasCoords = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

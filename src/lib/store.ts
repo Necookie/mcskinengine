@@ -130,7 +130,6 @@ export const useSkinStore = create<SkinState>((set, get) => ({
     const state = get();
     const newArray = new Uint8Array(state.skinArray);
     
-    // Parse hex
     const hex = colorHex.replace("#", "");
     const r = parseInt(hex.substring(0, 2), 16) || 0;
     const g = parseInt(hex.substring(2, 4), 16) || 0;
@@ -153,8 +152,7 @@ export const useSkinStore = create<SkinState>((set, get) => ({
       }
     }
 
-    const b64 = skinToBase64(newArray);
-    set({ skinArray: newArray, skinBase64: b64 });
+    set({ skinArray: newArray });
   },
 
   setRole: (role) => set({ role }),
@@ -187,8 +185,9 @@ export const useSkinStore = create<SkinState>((set, get) => ({
   },
 
   saveSkin: async () => {
-    const { skinBase64, role, ethnicity, modelType } = get();
-    if (!skinBase64) return;
+    const { skinArray, role, ethnicity, modelType } = get();
+    if (skinArray.length === 0) return;
+    const skinBase64 = skinToBase64(skinArray);
     try {
       const res = await fetch("/api/save-skin", {
         method: "POST",
