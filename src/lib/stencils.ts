@@ -153,10 +153,130 @@ export const LAB_COAT_STENCIL: Stencil = {
   ]
 };
 
+export const CREWNECK_SWEATER_STENCIL: Stencil = {
+  name: "Crewneck Sweater",
+  baseTorso: 'primary',
+  baseSleeve: 'primary',
+  sleeveLength: 'long',
+  legStyle: 'pants',
+  defaultPattern: 'ribbed',
+  vibe: 'neutral',
+  shoeStyle: 'sneakers',
+  regions: [
+    { name: "Sweater Torso", x1: 16, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
+    // Crew collar band
+    { name: "Collar Band", x1: 21, y1: 32, x2: 26, y2: 32, colorType: "trim", overlay: true },
+    { name: "Sweater Right Sleeve", x1: 40, y1: 32, x2: 55, y2: 47, colorType: "primary", overlay: true },
+    { name: "Sweater Left Sleeve", x1: 48, y1: 48, x2: 63, y2: 63, colorType: "primary", overlay: true },
+    // Ribbed hem and cuffs (secondary)
+    { name: "Hem", x1: 16, y1: 46, x2: 39, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Right Cuff", x1: 40, y1: 46, x2: 55, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Left Cuff", x1: 48, y1: 62, x2: 63, y2: 63, colorType: "secondary", overlay: true },
+    { name: "Right Pants", x1: 0, y1: 32, x2: 15, y2: 47, colorType: "pants", overlay: true },
+    { name: "Left Pants", x1: 0, y1: 48, x2: 15, y2: 63, colorType: "pants", overlay: true }
+  ]
+};
+
+export const TRACKSUIT_STENCIL: Stencil = {
+  name: "Athletic Tracksuit",
+  baseTorso: 'primary',
+  baseSleeve: 'primary',
+  sleeveLength: 'long',
+  legStyle: 'pants',
+  defaultPattern: 'none',
+  vibe: 'neutral',
+  shoeStyle: 'sneakers',
+  regions: [
+    { name: "Tracksuit Torso", x1: 16, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
+    { name: "Side Stripe Left", x1: 16, y1: 32, x2: 17, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Side Stripe Right", x1: 38, y1: 32, x2: 39, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Zipper Line", x1: 27, y1: 32, x2: 28, y2: 47, colorType: "trim", overlay: true },
+    { name: "Tracksuit Right Sleeve", x1: 40, y1: 32, x2: 55, y2: 47, colorType: "primary", overlay: true },
+    { name: "Tracksuit Left Sleeve", x1: 48, y1: 48, x2: 63, y2: 63, colorType: "primary", overlay: true },
+    { name: "Right Sleeve Stripe", x1: 40, y1: 32, x2: 55, y2: 33, colorType: "secondary", overlay: true },
+    { name: "Left Sleeve Stripe", x1: 48, y1: 48, x2: 63, y2: 49, colorType: "secondary", overlay: true },
+    { name: "Track Pants Right", x1: 0, y1: 32, x2: 15, y2: 47, colorType: "primary", overlay: true },
+    { name: "Track Pants Left", x1: 0, y1: 48, x2: 15, y2: 63, colorType: "primary", overlay: true },
+    { name: "Track Pants Right Stripe", x1: 0, y1: 32, x2: 1, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Track Pants Left Stripe", x1: 0, y1: 48, x2: 1, y2: 63, colorType: "secondary", overlay: true }
+  ]
+};
+
+export const BOMBER_STREETWEAR_STENCIL: Stencil = {
+  name: "Streetwear Bomber & Tee",
+  baseTorso: 'shirt',
+  baseSleeve: 'primary',
+  sleeveLength: 'long',
+  legStyle: 'pants',
+  defaultPattern: 'leather',
+  vibe: 'masculine',
+  shoeStyle: 'sneakers',
+  regions: [
+    // Open jacket: sides only, center front left transparent to show the tee base
+    { name: "Bomber Torso Left", x1: 16, y1: 32, x2: 20, y2: 47, colorType: "primary", overlay: true },
+    { name: "Bomber Torso Right", x1: 34, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
+    { name: "Bomber Collar", x1: 21, y1: 32, x2: 33, y2: 32, colorType: "secondary", overlay: true },
+    { name: "Bomber Right Sleeve", x1: 40, y1: 32, x2: 55, y2: 47, colorType: "primary", overlay: true },
+    { name: "Bomber Left Sleeve", x1: 48, y1: 48, x2: 63, y2: 63, colorType: "primary", overlay: true },
+    { name: "Right Ribbed Cuff", x1: 40, y1: 46, x2: 55, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Left Ribbed Cuff", x1: 48, y1: 62, x2: 63, y2: 63, colorType: "secondary", overlay: true },
+    { name: "Right Pants", x1: 0, y1: 32, x2: 15, y2: 47, colorType: "pants", overlay: true },
+    { name: "Left Pants", x1: 0, y1: 48, x2: 15, y2: 63, colorType: "pants", overlay: true }
+  ]
+};
+
+export const SUMMER_DRESS_STENCIL: Stencil = {
+  name: "Summer Dress",
+  baseTorso: 'primary',
+  baseSleeve: 'skin',
+  sleeveLength: 'none',
+  legStyle: 'skirt',
+  defaultPattern: 'none',
+  vibe: 'feminine',
+  shoeStyle: 'flats',
+  regions: [
+    { name: "Dress Torso", x1: 16, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
+    { name: "Shoulder Strap Left", x1: 21, y1: 32, x2: 22, y2: 32, colorType: "primary", overlay: true },
+    { name: "Shoulder Strap Right", x1: 25, y1: 32, x2: 26, y2: 32, colorType: "primary", overlay: true },
+    { name: "Waist Sash", x1: 16, y1: 40, x2: 39, y2: 40, colorType: "secondary", overlay: true },
+    { name: "Skirt Right", x1: 0, y1: 32, x2: 15, y2: 38, colorType: "primary", overlay: true },
+    { name: "Skirt Left", x1: 0, y1: 48, x2: 15, y2: 54, colorType: "primary", overlay: true },
+    { name: "Skirt Hem Right", x1: 0, y1: 37, x2: 15, y2: 38, colorType: "trim", overlay: true },
+    { name: "Skirt Hem Left", x1: 0, y1: 53, x2: 15, y2: 54, colorType: "trim", overlay: true }
+  ]
+};
+
+export const SKIRT_TOP_STENCIL: Stencil = {
+  name: "Skirt & Fitted Top",
+  baseTorso: 'skin',
+  baseSleeve: 'skin',
+  sleeveLength: 'short',
+  legStyle: 'skirt',
+  defaultPattern: 'ribbed',
+  vibe: 'feminine',
+  shoeStyle: 'flats',
+  regions: [
+    // Fitted crop top: leaves a scoop neckline and crop hem open to skin
+    { name: "Top Torso", x1: 16, y1: 32, x2: 39, y2: 42, colorType: "primary", overlay: true },
+    { name: "Top Neckline", x1: 22, y1: 32, x2: 25, y2: 33, colorType: "skin", overlay: true },
+    { name: "Top Right Sleeve", x1: 40, y1: 32, x2: 55, y2: 37, colorType: "primary", overlay: true },
+    { name: "Top Left Sleeve", x1: 48, y1: 48, x2: 63, y2: 53, colorType: "primary", overlay: true },
+    { name: "Skirt Right", x1: 0, y1: 32, x2: 15, y2: 37, colorType: "secondary", overlay: true },
+    { name: "Skirt Left", x1: 0, y1: 48, x2: 15, y2: 53, colorType: "secondary", overlay: true },
+    { name: "Skirt Hem Right", x1: 0, y1: 36, x2: 15, y2: 37, colorType: "trim", overlay: true },
+    { name: "Skirt Hem Left", x1: 0, y1: 52, x2: 15, y2: 53, colorType: "trim", overlay: true }
+  ]
+};
+
 export const STENCILS: Record<string, Stencil> = {
   hoodie: STUDENT_HOODIE_STENCIL,
   blazer: TWEED_BLAZER_STENCIL,
-  labcoat: LAB_COAT_STENCIL
+  labcoat: LAB_COAT_STENCIL,
+  crewneck: CREWNECK_SWEATER_STENCIL,
+  tracksuit: TRACKSUIT_STENCIL,
+  bomber: BOMBER_STREETWEAR_STENCIL,
+  "summer-dress": SUMMER_DRESS_STENCIL,
+  "skirt-top": SKIRT_TOP_STENCIL
 };
 
 export const STENCIL_KEYS = Object.keys(STENCILS);
