@@ -18,26 +18,22 @@ export default function ModelPreview3D() {
   const setSkinArray = useSkinStore((s) => s.setSkinArray);
   const saveSkin = useSkinStore((s) => s.saveSkin);
   const pushUndo = useSkinStore((s) => s.pushUndo);
-  const [skinUrl, setSkinUrl] = useState<string>("");
   const [autoRotate, setAutoRotate] = useState(true);
   const [animationName, setAnimationName] = useState<"walk" | "run" | "idle" | "static">("walk");
   const [viewer, setViewer] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Convert 1D RGBA skin array to a dynamic browser canvas Data URL
+  // Synchronize skinArray changes (Undo/Redo/Drawing strokes) to the 3D viewer texture live
   useEffect(() => {
-    if (!skinArray) return;
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = 64;
-    tempCanvas.height = 64;
-    const tempCtx = tempCanvas.getContext("2d");
-    if (tempCtx) {
-      const imgData = tempCtx.createImageData(64, 64);
+    if (!viewer || !skinArray) return;
+    const ctx = viewer.skinCanvas.getContext("2d");
+    if (ctx) {
+      const imgData = ctx.createImageData(64, 64);
       imgData.data.set(skinArray);
-      tempCtx.putImageData(imgData, 0, 0);
-      setSkinUrl(tempCanvas.toDataURL());
+      ctx.putImageData(imgData, 0, 0);
+      viewer.skinTexture.needsUpdate = true;
     }
-  }, [skinArray]);
+  }, [viewer, skinArray]);
 
   // Handle animation changes on the viewer instance
   useEffect(() => {
@@ -60,10 +56,19 @@ export default function ModelPreview3D() {
 
   // Synchronize model type (Steve vs Alex) dynamically on the viewer instance
   useEffect(() => {
-    if (viewer && skinUrl) {
-      viewer.loadSkin(skinUrl, { model: modelType === "alex" ? "slim" : "classic" });
+    if (viewer && skinArray) {
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = 64;
+      tempCanvas.height = 64;
+      const ctx = tempCanvas.getContext("2d");
+      if (ctx) {
+        const imgData = ctx.createImageData(64, 64);
+        imgData.data.set(skinArray);
+        ctx.putImageData(imgData, 0, 0);
+        viewer.loadSkin(tempCanvas.toDataURL(), { model: modelType === "alex" ? "slim" : "classic" });
+      }
     }
-  }, [viewer, modelType, skinUrl]);
+  }, [viewer, modelType]);
 
   // Synchronize autoRotate dynamically on the viewer instance
   useEffect(() => {
@@ -126,9 +131,9 @@ export default function ModelPreview3D() {
     <div className="preview-container">
       {/* 3D Canvas Box */}
       <div className="preview-3d-box">
-        {skinUrl ? (
+        {skinArray ? (
           <ReactSkinview3d
-            skinUrl={skinUrl}
+            skinUrl=""
             height={260}
             width={200}
             onReady={(viewerInstance: any) => {

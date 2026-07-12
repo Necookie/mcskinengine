@@ -502,47 +502,94 @@ export default function WorkspacePage() {
 
             {sections.ai && (
               <div className="card-body" style={{ backgroundColor: "#ffffff" }}>
-                <p className="ai-section-desc">
-                  Describe uniform features or upload a reference image to procedure-generate details.
-                </p>
-                <div className="form-group">
-                  <label className="form-group-label">AI Model & Provider</label>
-                  <select
-                    value={selectedModel}
-                    onChange={(e) => setSelectedModel(e.target.value)}
-                    className="voxel-input font-mono text-[10px]"
-                    style={{ padding: "6px", width: "100%", textTransform: "none" }}
-                  >
-                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Rate: $0.075/1M in, $0.30/1M out)</option>
-                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Rate: $1.25/1M in, $5.00/1M out)</option>
-                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Rate: $0.075/1M in, $0.30/1M out)</option>
-                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Rate: $0.075/1M in, $0.30/1M out)</option>
-                    <option value="gpt-4o-mini">OpenAI GPT-4o Mini (Rate: $0.150/1M in, $0.600/1M out)</option>
-                    <option value="gpt-4o">OpenAI GPT-4o (Rate: $2.50/1M in, $10.00/1M out)</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-group-label">Aesthetic Prompt</label>
-                  <textarea
-                    value={geminiPrompt}
-                    onChange={(e) => setGeminiPrompt(e.target.value)}
-                    placeholder="e.g. A blue school hoodie with neon pink stripes on sleeves, black jeans, white sneakers"
-                    rows={3}
-                    className="voxel-textarea"
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-group-label">Reference Image (Optional)</label>
-                  <ImageDropzone onImageLoaded={(base64) => setRefImage(base64)} />
-                </div>
-                <button
-                  onClick={handleGenerateSkin}
-                  disabled={isGenerating || !geminiPrompt}
-                  className="voxel-btn btn-accent"
-                  style={{ width: "100%", justifyContent: "center" }}
-                >
-                  {isGenerating ? "GENERATING SKIN..." : "GENERATE SKIN"}
-                </button>
+                {!hasGeminiKey && !hasOpenaiKey ? (
+                  /* Setup Onboarding view */
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--color-accent-ai)" }}>
+                      <Sparkles size={16} />
+                      <span className="font-mono text-xs font-bold uppercase tracking-wider">AI Studio Setup Guide</span>
+                    </div>
+                    
+                    <p style={{ fontSize: "10px", lineHeight: "1.5", color: "#555558", fontFamily: "var(--font-sans)" }}>
+                      To generate Minecraft skins using Gemini, you need a free API Key. Paste your key below to initialize the AI creator module.
+                    </p>
+
+                    <a
+                      href="https://aistudio.google.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="voxel-btn text-[10px]"
+                      style={{ padding: "6px 0", fontSize: "10px", borderRadius: 0, borderWidth: "2px", justifyContent: "center", width: "100%", textDecoration: "none", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)" }}
+                    >
+                      Get Gemini API Key (Free) ↗
+                    </a>
+
+                    <div className="form-group" style={{ marginTop: "4px" }}>
+                      <label className="form-group-label">PASTE API KEY HERE</label>
+                      <input
+                        type="password"
+                        value={geminiKeyInput}
+                        onChange={(e) => setGeminiKeyInput(e.target.value)}
+                        placeholder="AIzaSy..."
+                        className="voxel-input"
+                      />
+                    </div>
+
+                    <button
+                      onClick={handleSaveSettings}
+                      disabled={!geminiKeyInput}
+                      className="voxel-btn btn-accent"
+                      style={{ width: "100%", justifyContent: "center", marginTop: "4px" }}
+                    >
+                      SAVE AND ACTIVATE AI
+                    </button>
+                  </div>
+                ) : (
+                  /* Normal Generator Interface View */
+                  <>
+                    <p className="ai-section-desc">
+                      Describe uniform features or upload a reference image to procedure-generate details.
+                    </p>
+                    <div className="form-group">
+                      <label className="form-group-label">AI Model & Provider</label>
+                      <select
+                        value={selectedModel}
+                        onChange={(e) => setSelectedModel(e.target.value)}
+                        className="voxel-input font-mono text-[10px]"
+                        style={{ padding: "6px", width: "100%", textTransform: "none" }}
+                      >
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Rate: $0.075/1M in, $0.30/1M out)</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Rate: $1.25/1M in, $5.00/1M out)</option>
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Rate: $0.075/1M in, $0.30/1M out)</option>
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Rate: $0.075/1M in, $0.30/1M out)</option>
+                        <option value="gpt-4o-mini">OpenAI GPT-4o Mini (Rate: $0.150/1M in, $0.600/1M out)</option>
+                        <option value="gpt-4o">OpenAI GPT-4o (Rate: $2.50/1M in, $10.00/1M out)</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-group-label">Aesthetic Prompt</label>
+                      <textarea
+                        value={geminiPrompt}
+                        onChange={(e) => setGeminiPrompt(e.target.value)}
+                        placeholder="e.g. A blue school hoodie with neon pink stripes on sleeves, black jeans, white sneakers"
+                        rows={3}
+                        className="voxel-textarea"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-group-label">Reference Image (Optional)</label>
+                      <ImageDropzone onImageLoaded={(base64) => setRefImage(base64)} />
+                    </div>
+                    <button
+                      onClick={handleGenerateSkin}
+                      disabled={isGenerating || !geminiPrompt}
+                      className="voxel-btn btn-accent"
+                      style={{ width: "100%", justifyContent: "center" }}
+                    >
+                      {isGenerating ? "GENERATING SKIN..." : "GENERATE SKIN"}
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
