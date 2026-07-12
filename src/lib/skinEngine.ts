@@ -11,6 +11,8 @@ import {
   ShadeOptions,
   MaterialId,
   MATERIAL_INDEX,
+  applyContourPass,
+  BASE_FACE_RECTS,
 } from "./shading";
 import { HAIR_BASE, HAIR_STYLES } from "./hairStyles";
 import { EYE_STYLES } from "./eyeStyles";
@@ -409,6 +411,8 @@ export function generateSkinArray(
     fillRect(0, 31, 15, 31, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, 'none', 'top', 'shoes');
     fillRect(16, 63, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, 'none', 'top', 'shoes');
   }
+
+  applyContourPass(array, materialMap, BASE_FACE_RECTS);
 
   return array;
 }
