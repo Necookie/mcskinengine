@@ -36,6 +36,7 @@ export default function PixelEditor3D() {
   const [viewer, setViewer] = useState<any>(null);
   const [hoverCoords, setHoverCoords] = useState<{ x: number; y: number } | null>(null);
   const isDrawingRef = useRef(false);
+  const controlsRef = useRef<any>(null);
 
   // Synchronize skinArray changes (e.g. from Undo/Redo/AI Generation) to the 3D viewer texture
   useEffect(() => {
@@ -164,8 +165,17 @@ export default function PixelEditor3D() {
       if (e.button !== 0) return; // Only left click paints
       const coords = getTextureCoords(e.clientX, e.clientY);
       if (coords) {
+        // If we hit the mesh, disable orbit controls so we paint instead of rotating
+        if (controlsRef.current) {
+          controlsRef.current.enabled = false;
+        }
         isDrawingRef.current = true;
         applyPaint(coords, true);
+      } else {
+        // If we clicked on empty space, make sure orbit controls are enabled
+        if (controlsRef.current) {
+          controlsRef.current.enabled = true;
+        }
       }
     };
 
@@ -183,6 +193,10 @@ export default function PixelEditor3D() {
 
     const onMouseUpOrLeave = () => {
       isDrawingRef.current = false;
+      // Re-enable controls for future rotates
+      if (controlsRef.current) {
+        controlsRef.current.enabled = true;
+      }
     };
 
     const onTouchStart = (e: TouchEvent) => {
@@ -190,8 +204,15 @@ export default function PixelEditor3D() {
       if (touch) {
         const coords = getTextureCoords(touch.clientX, touch.clientY);
         if (coords) {
+          if (controlsRef.current) {
+            controlsRef.current.enabled = false;
+          }
           isDrawingRef.current = true;
           applyPaint(coords, true);
+        } else {
+          if (controlsRef.current) {
+            controlsRef.current.enabled = true;
+          }
         }
       }
     };
@@ -213,12 +234,20 @@ export default function PixelEditor3D() {
 
     const onTouchEnd = () => {
       isDrawingRef.current = false;
+      if (controlsRef.current) {
+        controlsRef.current.enabled = true;
+      }
+    };
+
+    const onContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
     };
 
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUpOrLeave);
     canvas.addEventListener("mouseleave", onMouseUpOrLeave);
+    canvas.addEventListener("contextmenu", onContextMenu);
 
     canvas.addEventListener("touchstart", onTouchStart, { passive: true });
     canvas.addEventListener("touchmove", onTouchMove, { passive: true });
@@ -229,6 +258,7 @@ export default function PixelEditor3D() {
       canvas.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUpOrLeave);
       canvas.removeEventListener("mouseleave", onMouseUpOrLeave);
+      canvas.removeEventListener("contextmenu", onContextMenu);
 
       canvas.removeEventListener("touchstart", onTouchStart);
       canvas.removeEventListener("touchmove", onTouchMove);
@@ -282,15 +312,16 @@ export default function PixelEditor3D() {
                 // Set background of 3D editor scene to white
                 viewerInstance.background = 0xffffff;
 
-                // Setup OrbitControls (Right Click to Rotate, Left Click is free for Paint)
+                // Setup OrbitControls (Left Click on background to Rotate, Left/Right Click to Rotate, Left Click on character to Paint)
                 import("skinview3d").then((sv) => {
                   const controls = sv.createOrbitControls(viewerInstance);
                   controls.mouseButtons = {
-                    LEFT: null,
+                    LEFT: MOUSE.ROTATE,
                     MIDDLE: MOUSE.DOLLY,
                     RIGHT: MOUSE.ROTATE
                   };
                   controls.update();
+                  controlsRef.current = controls;
                 });
 
                 setViewer(viewerInstance);
