@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "sync-skills": "node scripts/sync-skills.mjs",
+    "postinstall": "node scripts/sync-skills.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.17",

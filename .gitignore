@@ -3,3 +3,9 @@ node_modules/
 .env
 .env.*
 tsconfig.tsbuildinfo
+
+# Generated bridge so Claude Code (which only reads .claude/skills/) sees the
+# canonical skills in .agents/skills/. Recreated by `npm run sync-skills`
+# (also runs on `npm install`). OpenCode and Gemini CLI read .agents/skills/
+# directly and need no bridge.
+.claude/skills/
