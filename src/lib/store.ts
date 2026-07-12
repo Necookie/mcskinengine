@@ -57,8 +57,17 @@ interface SkinState {
   saveSettings: (key: string) => Promise<void>;
 }
 
-// Initial default blank/transparent skin
-const createEmptySkin = () => new Uint8Array(64 * 64 * 4);
+// Initial default blank/transparent skin (white base for mannequin visibility)
+const createEmptySkin = () => {
+  const arr = new Uint8Array(64 * 64 * 4);
+  for (let i = 0; i < arr.length; i += 4) {
+    arr[i] = 255;     // R
+    arr[i + 1] = 255; // G
+    arr[i + 2] = 255; // B
+    arr[i + 3] = 255; // A
+  }
+  return arr;
+};
 
 export const useSkinStore = create<SkinState>((set, get) => ({
   skinArray: createEmptySkin(),

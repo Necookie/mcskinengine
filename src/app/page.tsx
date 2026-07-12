@@ -5,7 +5,7 @@ import { useUser, SignOutButton } from "@clerk/nextjs";
 import { useSkinStore } from "@/lib/store";
 import { motion } from "framer-motion";
 import TraitSelector from "./components/TraitSelector";
-import PixelEditor2D from "./components/PixelEditor2D";
+import PixelEditor3D from "./components/PixelEditor3D";
 import ModelPreview3D from "./components/ModelPreview3D";
 import ImageDropzone from "./components/ImageDropzone";
 import { LandingPage, LoadingScreen } from "./components/LandingPage";
@@ -143,6 +143,12 @@ export default function WorkspacePage() {
     if (confirm("Are you sure you want to clear the canvas? This will reset all pixels.")) {
       pushUndo(skinArray);
       const blank = new Uint8Array(64 * 64 * 4);
+      for (let i = 0; i < blank.length; i += 4) {
+        blank[i] = 255;
+        blank[i + 1] = 255;
+        blank[i + 2] = 255;
+        blank[i + 3] = 255;
+      }
       setSkinArray(blank);
       setTimeout(() => saveSkin(), 100);
     }
@@ -359,7 +365,7 @@ export default function WorkspacePage() {
             </div>
           )}
           <div style={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", paddingBottom: consoleExpanded ? "240px" : "56px" }}>
-            <PixelEditor2D />
+            <PixelEditor3D />
           </div>
 
           {/* Collapsible Bottom console tray locked inside the canvas card container */}
