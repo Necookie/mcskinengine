@@ -4,12 +4,28 @@ import { generateSkinArray, skinToBase64 } from "@/lib/skinEngine";
 
 export const runtime = "edge";
 
+const VALID_STENCILS = ["hoodie", "blazer", "labcoat"] as const;
+const VALID_DEMOGRAPHICS = ["East Asian", "South Asian", "Caucasian", "Black"] as const;
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+
 function verifyMcpAuth(req: NextRequest): boolean {
   const mcpKey = process.env.MCP_API_KEY;
   if (!mcpKey) return false;
   const authHeader = req.headers.get("authorization");
   if (!authHeader) return false;
   return authHeader === `Bearer ${mcpKey}`;
+}
+
+function isValidHex(val: unknown): val is string {
+  return typeof val === "string" && HEX_COLOR_RE.test(val);
+}
+
+function errorResponse(code: number, message: string, status: number, id?: unknown) {
+  return NextResponse.json({
+    jsonrpc: "2.0",
+    error: { code, message },
+    id: id ?? null
+  }, { status });
 }
 
 // Tool list schema for GET requests
@@ -78,18 +94,16 @@ export async function POST(req: NextRequest) {
     }
 
     if (method === "tools/call") {
+      if (!params) {
+        return errorResponse(-32602, "Missing params object", 400, reqId);
+      }
       const { name, arguments: args } = params;
 
-      if (!args || !args.userId) {
-        return NextResponse.json({
-          jsonrpc: "2.0",
-          error: { code: -32602, message: "Missing required argument: userId" },
-          id: reqId
-        }, { status: 400 });
+      if (!args || !args.userId || typeof args.userId !== "string") {
+        return errorResponse(-32602, "Missing required argument: userId", 400, reqId);
       }
 
       const userId = args.userId;
-      let status = "success";
       let message = "";
 
       // Fetch current avatar state if it exists
@@ -111,6 +125,17 @@ export async function POST(req: NextRequest) {
 
       if (name === "apply_apparel") {
         const stencilKey = args.stencilKey;
+        if (!VALID_STENCILS.includes(stencilKey)) {
+          return errorResponse(-32602, `Invalid stencilKey. Must be one of: ${VALID_STENCILS.join(", ")}`, 400, reqId);
+        }
+
+        const colorFields = ["primaryColor", "secondaryColor", "trimColor", "shirtColor", "tieColor", "pantsColor"] as const;
+        for (const field of colorFields) {
+          if (!isValidHex(args[field])) {
+            return errorResponse(-32602, `Invalid or missing ${field}: must be a hex color (e.g. #ff0000)`, 400, reqId);
+          }
+        }
+
         const isAlex = args.isAlex !== undefined ? !!args.isAlex : (currentModelType === "alex");
         
         const skinArray = generateSkinArray(
@@ -144,6 +169,9 @@ export async function POST(req: NextRequest) {
 
       } else if (name === "paint_demographic_base") {
         const demographic = args.demographic;
+        if (!VALID_DEMOGRAPHICS.includes(demographic)) {
+          return errorResponse(-32602, `Invalid demographic. Must be one of: ${VALID_DEMOGRAPHICS.join(", ")}`, 400, reqId);
+        }
         const isAlex = args.isAlex !== undefined ? !!args.isAlex : (currentModelType === "alex");
 
         // Use default apparel colors for current role
@@ -176,38 +204,34 @@ export async function POST(req: NextRequest) {
         message = `Painted demographic base ${demographic} for user ${userId}`;
 
       } else {
-        return NextResponse.json({
-          jsonrpc: "2.0",
-          error: { code: -32601, message: `Method not found: ${name}` },
-          id: reqId
-        }, { status: 404 });
+        return errorResponse(-32601, `Method not found: ${name}`, 404, reqId);
       }
 
-      // Log the MCP call to database
       await db.execute({
         sql: `INSERT INTO mcp_logs (user_id, tool_name, arguments, status) VALUES (?, ?, ?, ?)`,
-        args: [userId, name, JSON.stringify(args), status]
+        args: [userId, name, JSON.stringify(args), "success"]
       });
 
-      // Hit Supabase Realtime broadcast hook (simulated endpoint)
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://REDACTED.supabase.co";
-      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "REDACTED_SUPABASE_KEY";
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
       
-      try {
-        await fetch(`${supabaseUrl}/functions/v1/broadcast`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${supabaseKey}`
-          },
-          body: JSON.stringify({
-            channel: "mcp-updates",
-            event: "skin_updated",
-            payload: { userId, tool: name, message, timestamp: new Date().toISOString() }
-          })
-        });
-      } catch (err) {
-        // Suppress network errors in edge sandbox
+      if (supabaseUrl && supabaseKey) {
+        try {
+          await fetch(`${supabaseUrl}/functions/v1/broadcast`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseKey}`
+            },
+            body: JSON.stringify({
+              channel: "mcp-updates",
+              event: "skin_updated",
+              payload: { userId, tool: name, message, timestamp: new Date().toISOString() }
+            })
+          });
+        } catch (err) {
+          console.error("Supabase broadcast error:", err);
+        }
       }
 
       return NextResponse.json({
@@ -224,17 +248,11 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({
-      jsonrpc: "2.0",
-      error: { code: -32600, message: "Invalid Request" },
-      id: reqId
-    }, { status: 400 });
+    return errorResponse(-32600, "Invalid Request", 400, reqId);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal Error";
     console.error("MCP endpoint error:", error);
-    return NextResponse.json({
-      jsonrpc: "2.0",
-      error: { code: -32603, message: error.message || "Internal Error" }
-    }, { status: 500 });
+    return errorResponse(-32603, message, 500);
   }
 }
