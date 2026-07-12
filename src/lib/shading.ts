@@ -107,11 +107,12 @@ export function bayerThreshold(x: number, y: number): number {
   return (BAYER_4X4[row][col] + 0.5) / 16;
 }
 
-export function quantizeShade(offset: number, x: number, y: number, bandSize: number = 8): number {
+export function quantizeShade(offset: number, x: number, y: number, bandSize: number = 8, dither: boolean = true): number {
   const band = offset / bandSize;
   const flooredBand = Math.floor(band);
   const frac = band - flooredBand;
-  const steppedBand = frac > bayerThreshold(x, y) ? flooredBand + 1 : flooredBand;
+  const threshold = dither ? bayerThreshold(x, y) : 0.5;
+  const steppedBand = frac > threshold ? flooredBand + 1 : flooredBand;
   return steppedBand * bandSize;
 }
 
