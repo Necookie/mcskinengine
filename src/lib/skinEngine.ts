@@ -9,6 +9,8 @@ import {
   PATTERN_KEYS,
   ShadeBounds,
   ShadeOptions,
+  MaterialId,
+  MATERIAL_INDEX,
 } from "./shading";
 import { HAIR_BASE, HAIR_STYLES } from "./hairStyles";
 import { EYE_STYLES } from "./eyeStyles";
@@ -59,6 +61,9 @@ export function generateSkinArray(
 ): Uint8Array {
   // Initialize with transparent pixels
   const array = new Uint8Array(64 * 64 * 4);
+  // Tracks which "material" occupies each pixel, independent of its shaded
+  // RGB value, so a later contour pass can tell shapes apart reliably.
+  const materialMap = new Uint8Array(64 * 64);
 
   const demo = DEMOGRAPHICS[demographicKey] || DEMOGRAPHICS["East Asian"];
   const skinRgb = hexToRgb(traits?.skinColor || demo.skinColor);
@@ -77,7 +82,7 @@ export function generateSkinArray(
     Math.floor(hash2(seedBase.length, seedBase.charCodeAt(0) + seedBase.length, 7) * 65536);
 
   // Helper to set a pixel color with chiaroscuro shading
-  const setPixel = (x: number, y: number, r: number, g: number, b: number, a: number = 255, bounds?: ShadeBounds, isSkin: boolean = false, pattern: PatternType = 'none', applyShade: boolean = true, lightDir: ShadeOptions['lightDir'] = 'top') => {
+  const setPixel = (x: number, y: number, r: number, g: number, b: number, a: number = 255, bounds?: ShadeBounds, isSkin: boolean = false, pattern: PatternType = 'none', applyShade: boolean = true, lightDir: ShadeOptions['lightDir'] = 'top', material: MaterialId = 'none') => {
     if (x < 0 || x >= 64 || y < 0 || y >= 64) return;
     const idx = (y * 64 + x) * 4;
     if (applyShade && a > 0) {
@@ -92,13 +97,16 @@ export function generateSkinArray(
       array[idx + 2] = b;
       array[idx + 3] = a;
     }
+    if (a > 0 && material !== 'none') {
+      materialMap[y * 64 + x] = MATERIAL_INDEX[material];
+    }
   };
 
   // Helper to fill a rectangle
-  const fillRect = (x1: number, y1: number, x2: number, y2: number, r: number, g: number, b: number, a: number = 255, isSkin: boolean = false, pattern: PatternType = 'none', lightDir: ShadeOptions['lightDir'] = 'top') => {
+  const fillRect = (x1: number, y1: number, x2: number, y2: number, r: number, g: number, b: number, a: number = 255, isSkin: boolean = false, pattern: PatternType = 'none', lightDir: ShadeOptions['lightDir'] = 'top', material: MaterialId = 'none') => {
     for (let y = y1; y <= y2; y++) {
       for (let x = x1; x <= x2; x++) {
-        setPixel(x, y, r, g, b, a, { x1, y1, x2, y2 }, isSkin, pattern, true, lightDir);
+        setPixel(x, y, r, g, b, a, { x1, y1, x2, y2 }, isSkin, pattern, true, lightDir, material);
       }
     }
   };
