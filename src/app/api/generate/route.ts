@@ -6,6 +6,28 @@ import { generateSkinArray, skinToBase64 } from "@/lib/skinEngine";
 
 export const runtime = "edge";
 
+interface GeminiPart {
+  text?: string;
+  inlineData?: { mimeType: string; data: string };
+}
+
+interface GeminiContent {
+  parts: GeminiPart[];
+}
+
+interface ApparelResult {
+  stencilKey: string;
+  primary: string;
+  secondary: string;
+  trim: string;
+  shirt: string;
+  tie: string;
+  pants: string;
+}
+
+const VALID_STENCILS = ["hoodie", "blazer", "labcoat"];
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
@@ -13,7 +35,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get the user's encrypted Gemini key
     const settingsResult = await db.execute({
       sql: "SELECT gemini_key FROM user_settings WHERE user_id = ? LIMIT 1",
       args: [userId],
@@ -30,24 +51,22 @@ export async function POST(req: NextRequest) {
     let apiKey: string;
     try {
       apiKey = await decrypt(encryptedKey);
-    } catch (e) {
+    } catch {
       return NextResponse.json({ error: "Failed to decrypt API Key. Please re-enter it." }, { status: 500 });
     }
 
-    const { prompt, image, demographic, isAlex } = await req.json();
+    const body = await req.json();
+    const { prompt, image, demographic, isAlex } = body;
 
-    if (!prompt) {
+    if (!prompt || typeof prompt !== "string") {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
     }
 
-    // Build the request contents for Gemini
-    const contents: any[] = [];
-    const textPart = { text: `You are an expert designer analyzing a uniform reference description or image to generate styling attributes. Based on: "${prompt}", determine the closest stencil style and hex colors. Stencil keys are "hoodie", "blazer", "labcoat". Output standard hex strings for: primary, secondary, trim, shirt, tie, pants.` };
-    
-    const parts: any[] = [textPart];
+    const parts: GeminiPart[] = [{
+      text: `You are an expert designer analyzing a uniform reference description or image to generate styling attributes. Based on the user's description, determine the closest stencil style and hex colors. Stencil keys are "hoodie", "blazer", "labcoat". Output standard hex strings for: primary, secondary, trim, shirt, tie, pants. User description: ${prompt}`
+    }];
 
-    if (image) {
-      // Ingesting reference picture. Assuming base64 format (e.g. "data:image/png;base64,iVBORw...")
+    if (image && typeof image === "string") {
       const match = image.match(/^data:(image\/\w+);base64,(.+)$/);
       if (match) {
         parts.push({
@@ -59,9 +78,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    contents.push({ parts });
+    const contents: GeminiContent[] = [{ parts }];
 
-    // Call Gemini API
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     const response = await fetch(geminiUrl, {
       method: "POST",
@@ -88,8 +106,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      return NextResponse.json({ error: `Gemini API error: ${errorText}` }, { status: response.status });
+      return NextResponse.json({ error: "Gemini API request failed" }, { status: response.status });
     }
 
     const data = await response.json();
@@ -98,9 +115,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No response layout from Gemini." }, { status: 500 });
     }
 
-    const apparel = JSON.parse(resultText.trim());
+    let apparel: ApparelResult;
+    try {
+      apparel = JSON.parse(resultText.trim());
+    } catch {
+      return NextResponse.json({ error: "Failed to parse Gemini response" }, { status: 500 });
+    }
 
-    // Generate skin array via the skin engine
+    if (!VALID_STENCILS.includes(apparel.stencilKey)) {
+      return NextResponse.json({ error: "Invalid stencil key from Gemini" }, { status: 500 });
+    }
+
+    const colorFields: (keyof ApparelResult)[] = ["primary", "secondary", "trim", "shirt", "tie", "pants"];
+    for (const field of colorFields) {
+      if (!HEX_COLOR_RE.test(apparel[field])) {
+        return NextResponse.json({ error: `Invalid color value for ${field} from Gemini` }, { status: 500 });
+      }
+    }
+
     const skinArray = generateSkinArray(
       demographic || "East Asian",
       apparel.stencilKey,
@@ -117,7 +149,6 @@ export async function POST(req: NextRequest) {
 
     const base64Skin = skinToBase64(skinArray);
 
-    // Save generated skin to Turso DB
     await db.execute({
       sql: `INSERT INTO avatar_registry (user_id, skin_array, role, ethnicity, model_type)
             VALUES (?, ?, ?, ?, ?)

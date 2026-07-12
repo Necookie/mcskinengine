@@ -1,4 +1,4 @@
-import { DEMOGRAPHICS, STENCILS, Stencil, StencilRegion, STUDENT_HOODIE_STENCIL } from "./stencils";
+import { DEMOGRAPHICS, STENCILS, Stencil, STUDENT_HOODIE_STENCIL } from "./stencils";
 
 // Helper to convert HEX color to RGB object
 export function hexToRgb(hex: string): { r: number; g: number; b: number } {
