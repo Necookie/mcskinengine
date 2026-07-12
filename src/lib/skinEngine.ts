@@ -127,6 +127,17 @@ export function generateSkinArray(
     fillRect(rect.x1, rect.y1, rect.x2, rect.y2, c.r, c.g, c.b, 255, false, 'none', 'top', 'hair');
   }
 
+  // Hat-layer hair strands (poke over the forehead/sides for extra depth).
+  // Skipped when the outfit already claims the head overlay UV (e.g. a hood).
+  const stencilForHat: Stencil = STENCILS[stencilKey] || STUDENT_HOODIE_STENCIL;
+  const stencilUsesHatLayer = stencilForHat.regions.some((r) => r.x1 >= 32 && r.y2 <= 15);
+  if (!stencilUsesHatLayer && resolvedHairStyle.hatRects) {
+    for (const rect of resolvedHairStyle.hatRects) {
+      const c = rect.shade ? applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, rect.shade, false) : hairRgb;
+      fillRect(rect.x1, rect.y1, rect.x2, rect.y2, c.r, c.g, c.b, 255, false, 'none', 'top', 'hair');
+    }
+  }
+
   // Hair Highlight Halo around y = 10 (adds shine and volume to the hair)
   const hairHighlight = applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, 18, false);
   fillRect(9, 10, 14, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, 'none', 'top', 'hair');
