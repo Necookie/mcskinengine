@@ -109,15 +109,26 @@ export function generateSkinArray(
     pants: string;
   },
   isAlex: boolean,
-  accessories: string[] = []
+  accessories: string[] = [],
+  traits?: {
+    skinColor?: string;
+    hairColor?: string;
+    eyeColor?: string;
+    hairStyle?: string;
+    eyeStyle?: string;
+    detailTexture?: string;
+  }
 ): Uint8Array {
   // Initialize with transparent pixels
   const array = new Uint8Array(64 * 64 * 4);
 
   const demo = DEMOGRAPHICS[demographicKey] || DEMOGRAPHICS["East Asian"];
-  const skinRgb = hexToRgb(demo.skinColor);
-  const hairRgb = hexToRgb(demo.hairColor);
-  const eyeRgb = hexToRgb(demo.eyeColor);
+  const skinRgb = hexToRgb(traits?.skinColor || demo.skinColor);
+  const hairRgb = hexToRgb(traits?.hairColor || demo.hairColor);
+  const eyeRgb = hexToRgb(traits?.eyeColor || demo.eyeColor);
+  const hairStyle = traits?.hairStyle || "messy-fringe";
+  const eyeStyle = traits?.eyeStyle || "cool-highlight";
+  const detailTexture = traits?.detailTexture || "none";
 
   // Helper to set a pixel color with chiaroscuro shading
   const setPixel = (x: number, y: number, r: number, g: number, b: number, a: number = 255, bounds?: { x1: number; y1: number; x2: number; y2: number }, isSkin: boolean = false, pattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none', applyShade: boolean = true) => {
@@ -146,21 +157,58 @@ export function generateSkinArray(
     }
   };
 
-  // --- 1. DRAW DEMOGRAPHIC BASE BODY ---
-
   // Head Base: x in [0, 31], y in [0, 15]
   fillRect(0, 0, 31, 15, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
 
-  // Hair - Draw on head back, left, right, and top
+  // Hair - Draw base helmet on head back, left, right, and top
   fillRect(8, 0, 15, 7, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
   fillRect(0, 0, 7, 7, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
   fillRect(16, 0, 23, 7, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
   fillRect(24, 8, 31, 15, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
   fillRect(0, 8, 7, 11, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
   fillRect(16, 8, 23, 11, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-  fillRect(8, 8, 15, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-  fillRect(8, 10, 8, 10, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-  fillRect(15, 10, 15, 10, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+
+  // Procedural Hair Style overlays:
+  if (hairStyle === "undercut") {
+    const shavedRgb = applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, -30, false);
+    // Left/Right shaved sides:
+    fillRect(0, 10, 7, 15, shavedRgb.r, shavedRgb.g, shavedRgb.b, 255, false);
+    fillRect(16, 10, 23, 15, shavedRgb.r, shavedRgb.g, shavedRgb.b, 255, false);
+    // High top front hair:
+    fillRect(8, 8, 15, 8, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  } else if (hairStyle === "long-curly") {
+    // Back hair goes down all the way
+    fillRect(24, 8, 31, 15, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    // Shoulders front locks:
+    fillRect(8, 8, 15, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    fillRect(8, 10, 8, 12, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    fillRect(15, 10, 15, 12, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    // Hair strands resting on Torso Base:
+    fillRect(20, 16, 21, 19, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    fillRect(26, 16, 27, 19, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  } else if (hairStyle === "parted-curtains") {
+    // Curtains fringe: parted in the middle
+    fillRect(8, 8, 9, 10, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    fillRect(14, 8, 15, 10, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    fillRect(10, 8, 13, 8, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    // Side locks:
+    fillRect(7, 10, 7, 11, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    fillRect(16, 10, 16, 11, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  } else if (hairStyle === "short-spiky") {
+    // Spiky hairline:
+    fillRect(8, 8, 15, 8, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    setPixel(9, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, undefined, false);
+    setPixel(11, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, undefined, false);
+    setPixel(13, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, undefined, false);
+    setPixel(15, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, undefined, false);
+  } else {
+    // Default/messy-fringe:
+    fillRect(8, 8, 15, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    fillRect(9, 10, 10, 10, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    fillRect(13, 10, 14, 10, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    fillRect(7, 10, 7, 12, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+    fillRect(16, 10, 16, 12, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  }
 
   // Hair Highlight Halo around y = 10 (adds shine and volume to the hair)
   const hairHighlight = applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, 18, false);
@@ -170,12 +218,38 @@ export function generateSkinArray(
   fillRect(25, 10, 30, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false);
 
   // Eyes on Head Front: (8, 8) to (15, 15)
-  // Left eye: (10, 12) white, (11, 12) eye color
-  setPixel(10, 12, 255, 255, 255, 255, undefined, false);
-  setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, undefined, false);
-  // Right eye: (13, 12) eye color, (14, 12) white
-  setPixel(13, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, undefined, false);
-  setPixel(14, 12, 255, 255, 255, 255, undefined, false);
+  if (eyeStyle === "shadow-2x2") {
+    fillRect(10, 12, 11, 13, clamp(eyeRgb.r - 30), clamp(eyeRgb.g - 30), clamp(eyeRgb.b - 30), 255);
+    fillRect(13, 12, 14, 13, clamp(eyeRgb.r - 30), clamp(eyeRgb.g - 30), clamp(eyeRgb.b - 30), 255);
+    setPixel(9, 12, 255, 255, 255, 255, undefined, false);
+    setPixel(12, 12, 255, 255, 255, 255, undefined, false);
+  } else if (eyeStyle === "anime-glowing") {
+    const brightColor = applyHueShift(eyeRgb.r, eyeRgb.g, eyeRgb.b, 40, false);
+    fillRect(10, 12, 11, 12, brightColor.r, brightColor.g, brightColor.b, 255, false);
+    fillRect(13, 12, 14, 12, brightColor.r, brightColor.g, brightColor.b, 255, false);
+    setPixel(9, 12, 255, 255, 255, 255, undefined, false);
+    setPixel(12, 12, 255, 255, 255, 255, undefined, false);
+  } else if (eyeStyle === "classic-simple") {
+    setPixel(10, 12, 255, 255, 255, 255, undefined, false);
+    setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, undefined, false);
+    setPixel(13, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, undefined, false);
+    setPixel(14, 12, 255, 255, 255, 255, undefined, false);
+  } else {
+    // cool-highlight default:
+    setPixel(9, 12, 255, 255, 255, 255, undefined, false);
+    setPixel(10, 12, 255, 255, 255, 255, undefined, false);
+    setPixel(13, 12, 255, 255, 255, 255, undefined, false);
+    setPixel(14, 12, 255, 255, 255, 255, undefined, false);
+    
+    setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, undefined, false);
+    setPixel(11, 13, clamp(eyeRgb.r - 20), clamp(eyeRgb.g - 20), clamp(eyeRgb.b - 20), 255, undefined, false);
+    setPixel(12, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, undefined, false);
+    setPixel(12, 13, clamp(eyeRgb.r - 20), clamp(eyeRgb.g - 20), clamp(eyeRgb.b - 20), 255, undefined, false);
+    
+    setPixel(10, 12, 255, 255, 255, 220, undefined, false);
+    setPixel(13, 12, 255, 255, 255, 220, undefined, false);
+    fillRect(9, 11, 14, 11, clamp(skinRgb.r - 35), clamp(skinRgb.g - 45), clamp(skinRgb.b - 45), 255, true);
+  }
 
   // Nose/Mouth details (optional, subtle skin color differences or shadow)
   setPixel(11, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, undefined, false);
@@ -238,14 +312,20 @@ export function generateSkinArray(
   }
 
   // Torso Base Layer:
-  // x in [16, 39], y in [16, 31]. Front of torso base is (20, 20) to (27, 31).
   let torsoRgb = skinRgb;
   let torsoPattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none';
   let isTorsoSkin = true;
 
+  if (detailTexture === "knit") torsoPattern = "knit";
+  else if (detailTexture === "tweed" || detailTexture === "flannel") torsoPattern = "tweed";
+  else if (detailTexture === "pinstripe" || detailTexture === "denim") torsoPattern = "pinstripe";
+  else {
+    if (stencilKey === "hoodie") torsoPattern = "knit";
+    else if (stencilKey === "blazer") torsoPattern = "tweed";
+  }
+
   if (stencilKey === "hoodie") {
     torsoRgb = hexToRgb(apparelColors.primary);
-    torsoPattern = 'knit';
     isTorsoSkin = false;
   } else if (stencilKey === "blazer") {
     torsoRgb = hexToRgb(apparelColors.shirt);
@@ -276,24 +356,26 @@ export function generateSkinArray(
   }
 
   // Legs Base Layer:
-  // Right Leg: (0, 16)-(15, 31)
-  // Left Leg: (16, 48)-(31, 63)
   const pantsColor = hexToRgb(apparelColors.pants);
   fillRect(0, 16, 15, 31, pantsColor.r, pantsColor.g, pantsColor.b, 255, false);
   fillRect(16, 48, 31, 63, pantsColor.r, pantsColor.g, pantsColor.b, 255, false);
 
   // Arms Base Layer:
-  // Steve: (40, 16)-(55, 31) and (32, 48)-(47, 63)
-  // Alex: (40, 16)-(54, 31) and (32, 46)-(46, 61)
-  // Bottom 4px are bare hands, upper arm is sleeve cloth.
   let sleeveRgb = skinRgb;
   let isArmSkin = true;
   let armPattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none';
 
+  if (detailTexture === "knit") armPattern = "knit";
+  else if (detailTexture === "tweed" || detailTexture === "flannel") armPattern = "tweed";
+  else if (detailTexture === "pinstripe" || detailTexture === "denim") armPattern = "pinstripe";
+  else {
+    if (stencilKey === "hoodie") armPattern = "knit";
+    else if (stencilKey === "blazer") armPattern = "tweed";
+  }
+
   if (stencilKey === "hoodie") {
     sleeveRgb = hexToRgb(apparelColors.primary);
     isArmSkin = false;
-    armPattern = 'knit';
   } else if (stencilKey === "blazer" || stencilKey === "labcoat") {
     sleeveRgb = hexToRgb(apparelColors.shirt); // shirt sleeve underneath jacket
     isArmSkin = false;
@@ -337,12 +419,18 @@ export function generateSkinArray(
     
     // Choose appropriate texture pattern
     let pattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none';
-    if (stencilKey === "hoodie" && (region.name.includes("Hoodie") || region.name.includes("Sleeve") || region.name.includes("Hood"))) {
+    if (detailTexture === "knit") {
       pattern = 'knit';
-    } else if (stencilKey === "blazer" && (region.name.includes("Blazer") || region.name.includes("Sleeve"))) {
+    } else if (detailTexture === "tweed" || detailTexture === "flannel") {
       pattern = 'tweed';
-    } else if (stencilKey === "labcoat" && region.name.includes("Coat")) {
-      pattern = 'none';
+    } else if (detailTexture === "pinstripe" || detailTexture === "denim") {
+      pattern = 'pinstripe';
+    } else {
+      if (stencilKey === "hoodie" && (region.name.includes("Hoodie") || region.name.includes("Sleeve") || region.name.includes("Hood"))) {
+        pattern = 'knit';
+      } else if (stencilKey === "blazer" && (region.name.includes("Blazer") || region.name.includes("Sleeve"))) {
+        pattern = 'tweed';
+      }
     }
 
     if (isAlex && region.name.includes("Sleeve")) {

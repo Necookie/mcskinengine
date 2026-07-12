@@ -23,6 +23,12 @@ interface ApparelResult {
   shirt: string;
   tie: string;
   pants: string;
+  skinColor: string;
+  hairColor: string;
+  eyeColor: string;
+  hairStyle: string;
+  eyeStyle: string;
+  detailTexture: string;
   accessories?: string[];
   enhancedPrompt?: string;
 }
@@ -88,7 +94,7 @@ Your goal is to make sure the output skin looks highly-detailed, textured, and f
 If the user's prompt is generic, simple, or plain (e.g., "cs student with glasses" or "casual hoodie"), you MUST expand it mentally into a descriptive, high-quality, professional skin design concept with rich textures, color coordination, and accessories (e.g. "a sleek dark-charcoal hoodie with soft fabric shading, thin-rimmed academic spectacles, and dark blue jeans").
 Write this beautifully expanded description in the "enhancedPrompt" key.
 
-Determine the stencil, colors, and face accessories.
+Determine the stencil, colors, skin/hair traits, styles, and face accessories.
 You must return a JSON object with EXACTLY the following keys:
 - stencilKey (must be "hoodie", "blazer", or "labcoat")
 - primary (hex color string like "#ffffff")
@@ -97,6 +103,12 @@ You must return a JSON object with EXACTLY the following keys:
 - shirt (hex color string)
 - tie (hex color string)
 - pants (hex color string)
+- skinColor (hex color string for skin tone, matching demographic/origin, e.g. #c68d5f for Filipino/Hispanic, #ebd3be for East Asian, #59361a for African)
+- hairColor (hex color string for hair)
+- eyeColor (hex color string for eyes)
+- hairStyle (must be "messy-fringe", "undercut", "long-curly", "parted-curtains", or "short-spiky")
+- eyeStyle (must be "cool-highlight", "shadow-2x2", "anime-glowing", or "classic-simple")
+- detailTexture (must be "knit", "tweed", "pinstripe", "denim", "flannel", or "none")
 - accessories (an array of strings representing active face accessories. Choose only from: "glasses", "headphones", "mask", "beard", "eyebrows")
 - enhancedPrompt (your beautifully expanded version of the user's prompt)
 
@@ -191,6 +203,12 @@ User description: ${prompt}`;
                 shirt: { type: "STRING", description: "Shirt hex color" },
                 tie: { type: "STRING", description: "Tie hex color" },
                 pants: { type: "STRING", description: "Pants hex color" },
+                skinColor: { type: "STRING", description: "Skin tone hex color" },
+                hairColor: { type: "STRING", description: "Hair hex color" },
+                eyeColor: { type: "STRING", description: "Eye hex color" },
+                hairStyle: { type: "STRING", enum: ["messy-fringe", "undercut", "long-curly", "parted-curtains", "short-spiky"] },
+                eyeStyle: { type: "STRING", enum: ["cool-highlight", "shadow-2x2", "anime-glowing", "classic-simple"] },
+                detailTexture: { type: "STRING", enum: ["knit", "tweed", "pinstripe", "denim", "flannel", "none"] },
                 accessories: {
                   type: "ARRAY",
                   items: { type: "STRING", enum: ["glasses", "headphones", "mask", "beard", "eyebrows"] },
@@ -198,7 +216,7 @@ User description: ${prompt}`;
                 },
                 enhancedPrompt: { type: "STRING", description: "An enhanced, detailed version of the user's prompt" }
               },
-              required: ["stencilKey", "primary", "secondary", "trim", "shirt", "tie", "pants", "accessories", "enhancedPrompt"],
+              required: ["stencilKey", "primary", "secondary", "trim", "shirt", "tie", "pants", "skinColor", "hairColor", "eyeColor", "hairStyle", "eyeStyle", "detailTexture", "accessories", "enhancedPrompt"],
             },
           },
         }),
@@ -242,7 +260,15 @@ User description: ${prompt}`;
         pants: apparel.pants,
       },
       !!isAlex,
-      apparel.accessories || []
+      apparel.accessories || [],
+      {
+        skinColor: apparel.skinColor,
+        hairColor: apparel.hairColor,
+        eyeColor: apparel.eyeColor,
+        hairStyle: apparel.hairStyle,
+        eyeStyle: apparel.eyeStyle,
+        detailTexture: apparel.detailTexture,
+      }
     );
 
     const base64Skin = skinToBase64(skinArray);
