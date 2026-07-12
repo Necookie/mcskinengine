@@ -57,6 +57,7 @@ export default function WorkspacePage() {
   const [geminiKeyInput, setGeminiKeyInput] = useState("");
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
   const [selectedModel, setSelectedModel] = useState("gemini-3.5-flash");
+  const [enhancedPrompt, setEnhancedPrompt] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -127,6 +128,13 @@ export default function WorkspacePage() {
       // Update store traits
       if (data.apparel) {
         setRole(data.apparel.stencilKey);
+        if (data.apparel.enhancedPrompt) {
+          setEnhancedPrompt(data.apparel.enhancedPrompt);
+        } else {
+          setEnhancedPrompt("");
+        }
+      } else {
+        setEnhancedPrompt("");
       }
 
       const phpCost = data.cost !== undefined ? data.cost * 58.5 : 0;
@@ -590,6 +598,12 @@ export default function WorkspacePage() {
                     >
                       {isGenerating ? "GENERATING SKIN..." : "GENERATE SKIN"}
                     </button>
+                    {enhancedPrompt && (
+                      <div style={{ marginTop: "12px", padding: "8px", border: "1px dashed var(--color-accent-ai)", backgroundColor: "#fff9fb" }}>
+                        <div className="font-mono text-[9px] font-bold text-[#ff2a85] uppercase tracking-wider mb-1">Optimized Prompt</div>
+                        <p className="text-[10px] italic leading-relaxed text-[#555558] font-sans">{enhancedPrompt}</p>
+                      </div>
+                    )}
                   </>
                 )}
               </div>

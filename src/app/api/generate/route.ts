@@ -23,6 +23,8 @@ interface ApparelResult {
   shirt: string;
   tie: string;
   pants: string;
+  accessories?: string[];
+  enhancedPrompt?: string;
 }
 
 const VALID_STENCILS = ["hoodie", "blazer", "labcoat"];
@@ -81,8 +83,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to decrypt API Key. Please re-enter it." }, { status: 500 });
     }
 
-    const promptText = `You are an expert designer analyzing a uniform reference description or image to generate styling attributes.
-Based on the user's description, determine the closest stencil style and hex colors.
+    const promptText = `You are an expert designer analyzing a Minecraft skin request and image to generate styling attributes.
+Your goal is to make sure the output skin looks highly-detailed, textured, and fashionable.
+If the user's prompt is generic, simple, or plain (e.g., "cs student with glasses" or "casual hoodie"), you MUST expand it mentally into a descriptive, high-quality, professional skin design concept with rich textures, color coordination, and accessories (e.g. "a sleek dark-charcoal hoodie with soft fabric shading, thin-rimmed academic spectacles, and dark blue jeans").
+Write this beautifully expanded description in the "enhancedPrompt" key.
+
+Determine the stencil, colors, and face accessories.
 You must return a JSON object with EXACTLY the following keys:
 - stencilKey (must be "hoodie", "blazer", or "labcoat")
 - primary (hex color string like "#ffffff")
@@ -91,6 +97,8 @@ You must return a JSON object with EXACTLY the following keys:
 - shirt (hex color string)
 - tie (hex color string)
 - pants (hex color string)
+- accessories (an array of strings representing active face accessories. Choose only from: "glasses", "headphones", "mask", "beard", "eyebrows")
+- enhancedPrompt (your beautifully expanded version of the user's prompt)
 
 User description: ${prompt}`;
 
@@ -183,8 +191,14 @@ User description: ${prompt}`;
                 shirt: { type: "STRING", description: "Shirt hex color" },
                 tie: { type: "STRING", description: "Tie hex color" },
                 pants: { type: "STRING", description: "Pants hex color" },
+                accessories: {
+                  type: "ARRAY",
+                  items: { type: "STRING", enum: ["glasses", "headphones", "mask", "beard", "eyebrows"] },
+                  description: "Face accessories to render"
+                },
+                enhancedPrompt: { type: "STRING", description: "An enhanced, detailed version of the user's prompt" }
               },
-              required: ["stencilKey", "primary", "secondary", "trim", "shirt", "tie", "pants"],
+              required: ["stencilKey", "primary", "secondary", "trim", "shirt", "tie", "pants", "accessories", "enhancedPrompt"],
             },
           },
         }),
@@ -216,8 +230,6 @@ User description: ${prompt}`;
       }
     }
 
-    const drawGlasses = prompt.toLowerCase().includes("glass");
-
     const skinArray = generateSkinArray(
       demographic || "East Asian",
       apparel.stencilKey,
@@ -230,7 +242,7 @@ User description: ${prompt}`;
         pants: apparel.pants,
       },
       !!isAlex,
-      drawGlasses
+      apparel.accessories || []
     );
 
     const base64Skin = skinToBase64(skinArray);

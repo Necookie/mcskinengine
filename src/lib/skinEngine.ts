@@ -16,13 +16,42 @@ export function clamp(val: number): number {
   return Math.max(0, Math.min(255, val));
 }
 
-// Procedural Chiaroscuro shader: Base_Color + Random(-12, 12)
-export function applyChiaroscuro(r: number, g: number, b: number): { r: number; g: number; b: number } {
-  const offset = Math.floor(Math.random() * 25) - 12; // -12 to 12
+// Procedural 3D shading: Sunlight gradient (Y) + Cylindrical Curve (X) + Random Texture Grain
+export function applyVolumeShader(
+  x: number,
+  y: number,
+  r: number,
+  g: number,
+  b: number,
+  bounds?: { x1: number; y1: number; x2: number; y2: number }
+): { r: number; g: number; b: number } {
+  if (!bounds) {
+    const offset = Math.floor(Math.random() * 25) - 12;
+    return { r: clamp(r + offset), g: clamp(g + offset), b: clamp(b + offset) };
+  }
+
+  const { x1, y1, x2, y2 } = bounds;
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+
+  const pctX = dx > 0 ? (x - x1) / dx : 0.5;
+  const pctY = dy > 0 ? (y - y1) / dy : 0.5;
+
+  // 1. Vertical Sunlight Gradient (lighter at top, darker at bottom)
+  const verticalOffset = (1 - pctY) * 16 - 8; // -8 to +8
+
+  // 2. Horizontal Cylinder Curve (brighter center, darker edges)
+  const horizontalOffset = Math.sin(pctX * Math.PI) * 14 - 7; // -7 to +7
+
+  // 3. Subtle Texture Grain (adds fabric details)
+  const grain = Math.floor(Math.random() * 10) - 5; // -5 to +5
+
+  const totalOffset = Math.round(verticalOffset + horizontalOffset + grain);
+
   return {
-    r: clamp(r + offset),
-    g: clamp(g + offset),
-    b: clamp(b + offset),
+    r: clamp(r + totalOffset),
+    g: clamp(g + totalOffset),
+    b: clamp(b + totalOffset),
   };
 }
 
@@ -41,7 +70,7 @@ export function generateSkinArray(
     pants: string;
   },
   isAlex: boolean,
-  drawGlasses: boolean = false
+  accessories: string[] = []
 ): Uint8Array {
   // Initialize with transparent pixels
   const array = new Uint8Array(64 * 64 * 4);
@@ -52,11 +81,11 @@ export function generateSkinArray(
   const eyeRgb = hexToRgb(demo.eyeColor);
 
   // Helper to set a pixel color with chiaroscuro shading
-  const setPixel = (x: number, y: number, r: number, g: number, b: number, a: number = 255, applyShade: boolean = true) => {
+  const setPixel = (x: number, y: number, r: number, g: number, b: number, a: number = 255, bounds?: { x1: number; y1: number; x2: number; y2: number }, applyShade: boolean = true) => {
     if (x < 0 || x >= 64 || y < 0 || y >= 64) return;
     const idx = (y * 64 + x) * 4;
     if (applyShade && a > 0) {
-      const shaded = applyChiaroscuro(r, g, b);
+      const shaded = applyVolumeShader(x, y, r, g, b, bounds);
       array[idx] = shaded.r;
       array[idx + 1] = shaded.g;
       array[idx + 2] = shaded.b;
@@ -73,7 +102,7 @@ export function generateSkinArray(
   const fillRect = (x1: number, y1: number, x2: number, y2: number, r: number, g: number, b: number, a: number = 255) => {
     for (let y = y1; y <= y2; y++) {
       for (let x = x1; x <= x2; x++) {
-        setPixel(x, y, r, g, b, a);
+        setPixel(x, y, r, g, b, a, { x1, y1, x2, y2 });
       }
     }
   };
@@ -111,29 +140,60 @@ export function generateSkinArray(
   setPixel(11, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, false);
   setPixel(12, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, false);
 
-  if (drawGlasses) {
-    const glassColor = { r: 40, g: 30, b: 30 }; // dark brown frames
+  if (accessories && Array.isArray(accessories)) {
+    const darkColor = { r: 35, g: 30, b: 30 }; // dark charcoal
     
-    // Bridge between eyes: (12, 12)
-    setPixel(12, 12, glassColor.r, glassColor.g, glassColor.b, 255, false);
+    if (accessories.includes("glasses")) {
+      // Bridge between eyes: (12, 12)
+      setPixel(12, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false);
 
-    // Left frame box: border of (9, 11) to (12, 13)
-    fillRect(9, 11, 12, 11, glassColor.r, glassColor.g, glassColor.b, 255, false);
-    fillRect(9, 13, 12, 13, glassColor.r, glassColor.g, glassColor.b, 255, false);
-    setPixel(9, 12, glassColor.r, glassColor.g, glassColor.b, 255, false);
-    setPixel(12, 12, glassColor.r, glassColor.g, glassColor.b, 255, false); // merge bridge
+      // Left frame box: border of (9, 11) to (12, 13)
+      fillRect(9, 11, 12, 11, darkColor.r, darkColor.g, darkColor.b, 255);
+      fillRect(9, 13, 12, 13, darkColor.r, darkColor.g, darkColor.b, 255);
+      setPixel(9, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false);
+      setPixel(12, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false);
 
-    // Right frame box: border of (13, 11) to (16, 13)
-    fillRect(13, 11, 16, 11, glassColor.r, glassColor.g, glassColor.b, 255, false);
-    fillRect(13, 13, 16, 13, glassColor.r, glassColor.g, glassColor.b, 255, false);
-    setPixel(13, 12, glassColor.r, glassColor.g, glassColor.b, 255, false);
-    setPixel(16, 12, glassColor.r, glassColor.g, glassColor.b, 255, false);
+      // Right frame box: border of (13, 11) to (16, 13)
+      fillRect(13, 11, 16, 11, darkColor.r, darkColor.g, darkColor.b, 255);
+      fillRect(13, 13, 16, 13, darkColor.r, darkColor.g, darkColor.b, 255);
+      setPixel(13, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false);
+      setPixel(16, 12, darkColor.r, darkColor.g, darkColor.b, 255, undefined, false);
 
-    // Temples (sides of head):
-    // Right side temple: (7, 12) to (3, 12)
-    fillRect(3, 12, 7, 12, glassColor.r, glassColor.g, glassColor.b, 255, false);
-    // Left side temple: (16, 12) to (20, 12)
-    fillRect(16, 12, 20, 12, glassColor.r, glassColor.g, glassColor.b, 255, false);
+      // Temples:
+      fillRect(3, 12, 7, 12, darkColor.r, darkColor.g, darkColor.b, 255);
+      fillRect(16, 12, 20, 12, darkColor.r, darkColor.g, darkColor.b, 255);
+    }
+
+    if (accessories.includes("headphones")) {
+      const hpColor = hexToRgb(apparelColors.secondary || "#ff0000");
+      // Band over head top (Front top rim: 8,0 to 15,0)
+      fillRect(8, 0, 15, 0, hpColor.r, hpColor.g, hpColor.b, 255);
+      // Sides down (4, 9 to 4, 11 on right, 19, 9 to 19, 11 on left)
+      fillRect(4, 9, 4, 11, hpColor.r, hpColor.g, hpColor.b, 255);
+      fillRect(19, 9, 19, 11, hpColor.r, hpColor.g, hpColor.b, 255);
+      // Ear cups
+      fillRect(3, 10, 5, 12, hpColor.r, hpColor.g, hpColor.b, 255);
+      fillRect(18, 10, 20, 12, hpColor.r, hpColor.g, hpColor.b, 255);
+    }
+
+    if (accessories.includes("mask")) {
+      const maskColor = hexToRgb(apparelColors.shirt || "#ffffff");
+      fillRect(10, 13, 13, 14, maskColor.r, maskColor.g, maskColor.b, 255);
+      // Mask straps
+      setPixel(9, 13, maskColor.r, maskColor.g, maskColor.b, 255, undefined, false);
+      setPixel(14, 13, maskColor.r, maskColor.g, maskColor.b, 255, undefined, false);
+    }
+
+    if (accessories.includes("beard")) {
+      fillRect(9, 15, 14, 15, darkColor.r, darkColor.g, darkColor.b, 255);
+      fillRect(8, 13, 8, 14, darkColor.r, darkColor.g, darkColor.b, 255);
+      fillRect(15, 13, 15, 14, darkColor.r, darkColor.g, darkColor.b, 255);
+    }
+
+    if (accessories.includes("eyebrows")) {
+      fillRect(9, 11, 11, 11, darkColor.r, darkColor.g, darkColor.b, 255);
+      fillRect(12, 11, 14, 11, darkColor.r, darkColor.g, darkColor.b, 255);
+    }
   }
 
   // Torso Base: (16, 16) to (40, 32)
