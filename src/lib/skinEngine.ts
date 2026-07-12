@@ -6,6 +6,7 @@ import {
   applyVolumeShaderV2,
   hash2,
   PatternType,
+  PATTERN_KEYS,
   ShadeBounds,
   ShadeOptions,
 } from "./shading";
@@ -49,7 +50,8 @@ export function generateSkinArray(
     hairStyle?: string;
     eyeStyle?: string;
     detailTexture?: string;
-  }
+  },
+  seed?: number
 ): Uint8Array {
   // Initialize with transparent pixels
   const array = new Uint8Array(64 * 64 * 4);
@@ -62,12 +64,17 @@ export function generateSkinArray(
   const eyeStyle = traits?.eyeStyle || "cool-highlight";
   const detailTexture = traits?.detailTexture || "none";
 
+  const seedBase = `${stencilKey}|${hairStyle}|${apparelColors.primary}`;
+  const resolvedSeed =
+    seed ??
+    Math.floor(hash2(seedBase.length, seedBase.charCodeAt(0) + seedBase.length, 7) * 65536);
+
   // Helper to set a pixel color with chiaroscuro shading
-  const setPixel = (x: number, y: number, r: number, g: number, b: number, a: number = 255, bounds?: { x1: number; y1: number; x2: number; y2: number }, isSkin: boolean = false, pattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none', applyShade: boolean = true) => {
+  const setPixel = (x: number, y: number, r: number, g: number, b: number, a: number = 255, bounds?: ShadeBounds, isSkin: boolean = false, pattern: PatternType = 'none', applyShade: boolean = true, lightDir: ShadeOptions['lightDir'] = 'top') => {
     if (x < 0 || x >= 64 || y < 0 || y >= 64) return;
     const idx = (y * 64 + x) * 4;
     if (applyShade && a > 0) {
-      const shaded = applyVolumeShader(x, y, r, g, b, bounds, isSkin, pattern);
+      const shaded = applyVolumeShaderV2(x, y, r, g, b, bounds, { isSkin, pattern, seed: resolvedSeed, lightDir });
       array[idx] = shaded.r;
       array[idx + 1] = shaded.g;
       array[idx + 2] = shaded.b;
@@ -81,10 +88,10 @@ export function generateSkinArray(
   };
 
   // Helper to fill a rectangle
-  const fillRect = (x1: number, y1: number, x2: number, y2: number, r: number, g: number, b: number, a: number = 255, isSkin: boolean = false, pattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none') => {
+  const fillRect = (x1: number, y1: number, x2: number, y2: number, r: number, g: number, b: number, a: number = 255, isSkin: boolean = false, pattern: PatternType = 'none', lightDir: ShadeOptions['lightDir'] = 'top') => {
     for (let y = y1; y <= y2; y++) {
       for (let x = x1; x <= x2; x++) {
-        setPixel(x, y, r, g, b, a, { x1, y1, x2, y2 }, isSkin, pattern);
+        setPixel(x, y, r, g, b, a, { x1, y1, x2, y2 }, isSkin, pattern, true, lightDir);
       }
     }
   };
@@ -245,12 +252,10 @@ export function generateSkinArray(
 
   // Torso Base Layer:
   let torsoRgb = skinRgb;
-  let torsoPattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none';
+  let torsoPattern: PatternType = 'none';
   let isTorsoSkin = true;
 
-  if (detailTexture === "knit") torsoPattern = "knit";
-  else if (detailTexture === "tweed" || detailTexture === "flannel") torsoPattern = "tweed";
-  else if (detailTexture === "pinstripe" || detailTexture === "denim") torsoPattern = "pinstripe";
+  if (PATTERN_KEYS.includes(detailTexture as PatternType) && detailTexture !== "none") torsoPattern = detailTexture as PatternType;
   else {
     if (stencilKey === "hoodie") torsoPattern = "knit";
     else if (stencilKey === "blazer") torsoPattern = "tweed";
@@ -289,17 +294,15 @@ export function generateSkinArray(
 
   // Legs Base Layer:
   const pantsColor = hexToRgb(apparelColors.pants);
-  fillRect(0, 16, 15, 31, pantsColor.r, pantsColor.g, pantsColor.b, 255, false);
-  fillRect(16, 48, 31, 63, pantsColor.r, pantsColor.g, pantsColor.b, 255, false);
+  fillRect(0, 16, 15, 31, pantsColor.r, pantsColor.g, pantsColor.b, 255, false, 'none', 'top-right');
+  fillRect(16, 48, 31, 63, pantsColor.r, pantsColor.g, pantsColor.b, 255, false, 'none', 'top-left');
 
   // Arms Base Layer:
   let sleeveRgb = skinRgb;
   let isArmSkin = true;
-  let armPattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none';
+  let armPattern: PatternType = 'none';
 
-  if (detailTexture === "knit") armPattern = "knit";
-  else if (detailTexture === "tweed" || detailTexture === "flannel") armPattern = "tweed";
-  else if (detailTexture === "pinstripe" || detailTexture === "denim") armPattern = "pinstripe";
+  if (PATTERN_KEYS.includes(detailTexture as PatternType) && detailTexture !== "none") armPattern = detailTexture as PatternType;
   else {
     if (stencilKey === "hoodie") armPattern = "knit";
     else if (stencilKey === "blazer") armPattern = "tweed";
@@ -315,20 +318,20 @@ export function generateSkinArray(
 
   // Right Arm Base
   if (isAlex) {
-    fillRect(40, 16, 54, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern);
-    fillRect(40, 28, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
+    fillRect(40, 16, 54, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right');
+    fillRect(40, 28, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
   } else {
-    fillRect(40, 16, 55, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern);
-    fillRect(40, 28, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
+    fillRect(40, 16, 55, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right');
+    fillRect(40, 28, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
   }
 
   // Left Arm Base
   if (isAlex) {
-    fillRect(32, 46, 46, 57, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern);
-    fillRect(32, 58, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
+    fillRect(32, 46, 46, 57, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left');
+    fillRect(32, 58, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
   } else {
-    fillRect(32, 48, 47, 59, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern);
-    fillRect(32, 60, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
+    fillRect(32, 48, 47, 59, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left');
+    fillRect(32, 60, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
   }
 
   // --- 2. OVERLAY THE INSTITUTIONAL UNIFORM STENCIL ---
@@ -350,13 +353,9 @@ export function generateSkinArray(
     const rgb = hexToRgb(hex);
     
     // Choose appropriate texture pattern
-    let pattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none';
-    if (detailTexture === "knit") {
-      pattern = 'knit';
-    } else if (detailTexture === "tweed" || detailTexture === "flannel") {
-      pattern = 'tweed';
-    } else if (detailTexture === "pinstripe" || detailTexture === "denim") {
-      pattern = 'pinstripe';
+    let pattern: PatternType = 'none';
+    if (PATTERN_KEYS.includes(detailTexture as PatternType) && detailTexture !== "none") {
+      pattern = detailTexture as PatternType;
     } else {
       if (stencilKey === "hoodie" && (region.name.includes("Hoodie") || region.name.includes("Sleeve") || region.name.includes("Hood"))) {
         pattern = 'knit';
@@ -365,18 +364,24 @@ export function generateSkinArray(
       }
     }
 
+    const regionLightDir: ShadeOptions['lightDir'] = region.name.includes("Right")
+      ? 'top-right'
+      : region.name.includes("Left")
+      ? 'top-left'
+      : 'top';
+
     if (isAlex && region.name.includes("Sleeve")) {
       if (region.name.includes("Right Sleeve")) {
         const adjustedX2 = Math.min(region.x2, 54);
-        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern);
+        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern, regionLightDir);
       } else if (region.name.includes("Left Sleeve")) {
         const adjustedX2 = Math.min(region.x2, 62);
-        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern);
+        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern, regionLightDir);
       } else {
-        fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern);
+        fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern, regionLightDir);
       }
     } else {
-      fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b, 255, region.colorType === "skin", pattern);
+      fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b, 255, region.colorType === "skin", pattern, regionLightDir);
     }
   }
 
