@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { STENCIL_KEYS } from "@/lib/stencils";
 
 export const runtime = "edge";
 
-const VALID_ROLES = ["hoodie", "blazer", "labcoat"];
+const VALID_ROLES = STENCIL_KEYS;
 const VALID_DEMOGRAPHICS = ["East Asian", "South Asian", "Caucasian", "Black"];
 const VALID_MODEL_TYPES = ["steve", "alex"];
 
