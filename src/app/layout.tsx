@@ -12,12 +12,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Enforcing Clerk credentials programmatically as fallback
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_REDACTED";
-
   return (
     <ClerkProvider 
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
       appearance={{
         variables: {
           colorPrimary: "#1c1c1d",

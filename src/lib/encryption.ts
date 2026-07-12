@@ -1,4 +1,4 @@
-const ENCRYPTION_KEY_STRING = "REDACTED_ENCRYPTION_KEY";
+const ENCRYPTION_KEY_STRING = process.env.ENCRYPTION_KEY || "fallback_dev_key_change_in_production";
 
 async function getKey(): Promise<CryptoKey> {
   const enc = new TextEncoder();

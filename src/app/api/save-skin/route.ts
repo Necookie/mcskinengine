@@ -4,10 +4,6 @@ import { db } from "@/lib/db";
 
 export const runtime = "edge";
 
-// Hardwire Clerk credentials
-process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_REDACTED";
-process.env.CLERK_SECRET_KEY = "sk_test_REDACTED";
-
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
