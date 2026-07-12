@@ -16,18 +16,57 @@ export function clamp(val: number): number {
   return Math.max(0, Math.min(255, val));
 }
 
-// Procedural 3D shading: Sunlight gradient (Y) + Cylindrical Curve (X) + Random Texture Grain
+export function applyHueShift(
+  r: number,
+  g: number,
+  b: number,
+  offset: number,
+  isSkin: boolean
+): { r: number; g: number; b: number } {
+  if (offset === 0) return { r, g, b };
+  
+  let targetR = r;
+  let targetG = g;
+  let targetB = b;
+
+  if (isSkin) {
+    if (offset > 0) {
+      targetR = clamp(r + offset * 1.2);
+      targetG = clamp(g + offset * 1.0);
+      targetB = clamp(b + offset * 0.6);
+    } else {
+      targetR = clamp(r + offset * 0.8);
+      targetG = clamp(g + offset * 1.2);
+      targetB = clamp(b + offset * 1.3);
+    }
+  } else {
+    if (offset > 0) {
+      targetR = clamp(r + offset * 1.1);
+      targetG = clamp(g + offset * 1.1);
+      targetB = clamp(b + offset * 0.9);
+    } else {
+      targetR = clamp(r + offset * 1.3);
+      targetG = clamp(g + offset * 1.1);
+      targetB = clamp(b + offset * 0.7);
+    }
+  }
+
+  return { r: targetR, g: targetG, b: targetB };
+}
+
 export function applyVolumeShader(
   x: number,
   y: number,
   r: number,
   g: number,
   b: number,
-  bounds?: { x1: number; y1: number; x2: number; y2: number }
+  bounds?: { x1: number; y1: number; x2: number; y2: number },
+  isSkin: boolean = false,
+  pattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none'
 ): { r: number; g: number; b: number } {
   if (!bounds) {
     const offset = Math.floor(Math.random() * 25) - 12;
-    return { r: clamp(r + offset), g: clamp(g + offset), b: clamp(b + offset) };
+    return applyHueShift(r, g, b, offset, isSkin);
   }
 
   const { x1, y1, x2, y2 } = bounds;
@@ -37,22 +76,22 @@ export function applyVolumeShader(
   const pctX = dx > 0 ? (x - x1) / dx : 0.5;
   const pctY = dy > 0 ? (y - y1) / dy : 0.5;
 
-  // 1. Vertical Sunlight Gradient (lighter at top, darker at bottom)
-  const verticalOffset = (1 - pctY) * 16 - 8; // -8 to +8
+  const verticalOffset = (1 - pctY) * 14 - 7;
+  const horizontalOffset = Math.sin(pctX * Math.PI) * 12 - 6;
 
-  // 2. Horizontal Cylinder Curve (brighter center, darker edges)
-  const horizontalOffset = Math.sin(pctX * Math.PI) * 14 - 7; // -7 to +7
+  let patternOffset = Math.floor(Math.random() * 8) - 4;
 
-  // 3. Subtle Texture Grain (adds fabric details)
-  const grain = Math.floor(Math.random() * 10) - 5; // -5 to +5
+  if (pattern === 'knit') {
+    patternOffset += (x + y) % 2 === 0 ? 3 : -3;
+  } else if (pattern === 'tweed') {
+    patternOffset += (x % 2 === 0 && y % 2 === 0) || (x % 2 === 1 && y % 2 === 1) ? 4 : -4;
+  } else if (pattern === 'pinstripe') {
+    patternOffset += x % 4 === 0 ? 5 : -2;
+  }
 
-  const totalOffset = Math.round(verticalOffset + horizontalOffset + grain);
+  const totalOffset = Math.round(verticalOffset + horizontalOffset + patternOffset);
 
-  return {
-    r: clamp(r + totalOffset),
-    g: clamp(g + totalOffset),
-    b: clamp(b + totalOffset),
-  };
+  return applyHueShift(r, g, b, totalOffset, isSkin);
 }
 
 /**
