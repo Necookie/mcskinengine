@@ -2,12 +2,17 @@
 
 import React from "react";
 import { useSkinStore } from "@/lib/store";
-import { GraduationCap, Briefcase, FlaskConical, User, UserCheck } from "lucide-react";
+import { GraduationCap, Briefcase, FlaskConical, User, UserCheck, Shirt, Dumbbell, Flame, Sparkles, Wand2 } from "lucide-react";
 
 const ROLES = [
   { key: "hoodie", label: "Student (Hoodie)", icon: GraduationCap },
   { key: "blazer", label: "Professor (Blazer)", icon: Briefcase },
-  { key: "labcoat", label: "STEM Lab Coat", icon: FlaskConical }
+  { key: "labcoat", label: "STEM Lab Coat", icon: FlaskConical },
+  { key: "crewneck", label: "Crewneck Sweater", icon: Shirt },
+  { key: "tracksuit", label: "Athletic Tracksuit", icon: Dumbbell },
+  { key: "bomber", label: "Streetwear Bomber", icon: Flame },
+  { key: "summer-dress", label: "Summer Dress", icon: Sparkles },
+  { key: "skirt-top", label: "Skirt & Fitted Top", icon: Wand2 }
 ] as const;
 
 const ETHNICITIES = ["East Asian", "South Asian", "Caucasian", "Black"] as const;
