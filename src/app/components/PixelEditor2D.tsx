@@ -55,13 +55,13 @@ export default function PixelEditor2D() {
     return () => clearTimeout(timer);
   }, [skinArray, saveSkin]);
 
-  const getCanvasCoords = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+  const getCanvasCoords = useCallback((clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
 
     const rect = canvas.getBoundingClientRect();
-    const x = Math.floor(((e.clientX - rect.left) / rect.width) * 64);
-    const y = Math.floor(((e.clientY - rect.top) / rect.height) * 64);
+    const x = Math.floor(((clientX - rect.left) / rect.width) * 64);
+    const y = Math.floor(((clientY - rect.top) / rect.height) * 64);
 
     if (x >= 0 && x < 64 && y >= 0 && y < 64) {
       return { x, y };
@@ -72,7 +72,7 @@ export default function PixelEditor2D() {
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (e.button !== 0) return;
     setIsDrawing(true);
-    const coords = getCanvasCoords(e);
+    const coords = getCanvasCoords(e.clientX, e.clientY);
     if (coords) {
       pushUndo(skinArray);
       lastUndoPos.current = coords;
@@ -81,7 +81,7 @@ export default function PixelEditor2D() {
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const coords = getCanvasCoords(e);
+    const coords = getCanvasCoords(e.clientX, e.clientY);
     if (coords) {
       const last = lastHoverCoords.current;
       if (!last || last.x !== coords.x || last.y !== coords.y) {
@@ -100,6 +100,34 @@ export default function PixelEditor2D() {
   };
 
   const handleMouseUpOrLeave = () => {
+    setIsDrawing(false);
+    lastUndoPos.current = null;
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (!touch) return;
+    setIsDrawing(true);
+    const coords = getCanvasCoords(touch.clientX, touch.clientY);
+    if (coords) {
+      pushUndo(skinArray);
+      lastUndoPos.current = coords;
+      applyPaint(coords.x, coords.y);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (!touch) return;
+    const coords = getCanvasCoords(touch.clientX, touch.clientY);
+    if (coords && isDrawing) {
+      applyPaint(coords.x, coords.y);
+    }
+  };
+
+  const handleTouchEnd = () => {
     setIsDrawing(false);
     lastUndoPos.current = null;
   };
@@ -150,11 +178,14 @@ export default function PixelEditor2D() {
               ref={canvasRef}
               width={64}
               height={64}
-              className="w-full h-full pixelated cursor-crosshair block"
+              className="w-full h-full pixelated cursor-crosshair block touch-none"
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             />
 
             {/* Guide Grid Overlays */}
