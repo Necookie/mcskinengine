@@ -4,7 +4,15 @@ import { db } from "@/lib/db";
 
 export const runtime = "edge";
 
-export async function GET(req: NextRequest) {
+function safeJsonParse(str: string): Record<string, unknown> {
+  try {
+    return JSON.parse(str);
+  } catch {
+    return {};
+  }
+}
+
+export async function GET() {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -21,13 +29,14 @@ export async function GET(req: NextRequest) {
       timestamp: row.timestamp,
       userId: row.user_id,
       toolName: row.tool_name,
-      arguments: JSON.parse(row.arguments as string || "{}"),
+      arguments: safeJsonParse((row.arguments as string) || "{}"),
       status: row.status
     }));
 
     return NextResponse.json({ logs });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal Server Error";
     console.error("MCP Logs GET error:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

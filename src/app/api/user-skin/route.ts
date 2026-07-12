@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { db, initializeDatabase } from "@/lib/db";
+import { db } from "@/lib/db";
 import { generateSkinArray, skinToBase64 } from "@/lib/skinEngine";
 
 export const runtime = "edge";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    await initializeDatabase();
-    
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -29,7 +27,6 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Default skin generation if first-time load
     const defaultSkinArray = generateSkinArray(
       "East Asian",
       "hoodie",
@@ -47,7 +44,8 @@ export async function GET(req: NextRequest) {
 
     await db.execute({
       sql: `INSERT INTO avatar_registry (user_id, skin_array, role, ethnicity, model_type)
-            VALUES (?, ?, ?, ?, ?)`,
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(user_id) DO NOTHING`,
       args: [userId, defaultSkinBase64, "hoodie", "East Asian", "steve"]
     });
 
@@ -57,8 +55,9 @@ export async function GET(req: NextRequest) {
       ethnicity: "East Asian",
       modelType: "steve"
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal Server Error";
     console.error("User Skin GET error:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

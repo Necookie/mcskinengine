@@ -4,6 +4,10 @@ import { db } from "@/lib/db";
 
 export const runtime = "edge";
 
+const VALID_ROLES = ["hoodie", "blazer", "labcoat"];
+const VALID_DEMOGRAPHICS = ["East Asian", "South Asian", "Caucasian", "Black"];
+const VALID_MODEL_TYPES = ["steve", "alex"];
+
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
@@ -11,13 +15,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { skin, role, ethnicity, modelType } = await req.json();
+    const body = await req.json();
+    const { skin, role, ethnicity, modelType } = body;
 
-    if (!skin) {
-      return NextResponse.json({ error: "Skin data is required" }, { status: 400 });
+    if (!skin || typeof skin !== "string") {
+      return NextResponse.json({ error: "Skin data must be a non-empty string" }, { status: 400 });
     }
 
-    // Save manual modifications directly
+    if (role && !VALID_ROLES.includes(role)) {
+      return NextResponse.json({ error: `Invalid role. Must be one of: ${VALID_ROLES.join(", ")}` }, { status: 400 });
+    }
+
+    if (ethnicity && !VALID_DEMOGRAPHICS.includes(ethnicity)) {
+      return NextResponse.json({ error: `Invalid ethnicity. Must be one of: ${VALID_DEMOGRAPHICS.join(", ")}` }, { status: 400 });
+    }
+
+    if (modelType && !VALID_MODEL_TYPES.includes(modelType)) {
+      return NextResponse.json({ error: `Invalid modelType. Must be one of: ${VALID_MODEL_TYPES.join(", ")}` }, { status: 400 });
+    }
+
     await db.execute({
       sql: `INSERT INTO avatar_registry (user_id, skin_array, role, ethnicity, model_type)
             VALUES (?, ?, ?, ?, ?)
@@ -36,8 +52,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal Server Error";
     console.error("Save skin API error:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
