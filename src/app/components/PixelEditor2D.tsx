@@ -30,6 +30,7 @@ export default function PixelEditor2D() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [hoverCoords, setHoverCoords] = useState<{ x: number; y: number } | null>(null);
   const lastUndoPos = useRef<{ x: number; y: number } | null>(null);
+  const lastHoverCoords = useRef<{ x: number; y: number } | null>(null);
 
   // Draw skin array to canvas
   useEffect(() => {
@@ -82,12 +83,19 @@ export default function PixelEditor2D() {
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const coords = getCanvasCoords(e);
     if (coords) {
-      setHoverCoords(coords);
+      const last = lastHoverCoords.current;
+      if (!last || last.x !== coords.x || last.y !== coords.y) {
+        lastHoverCoords.current = coords;
+        setHoverCoords(coords);
+      }
       if (isDrawing) {
         applyPaint(coords.x, coords.y);
       }
     } else {
-      setHoverCoords(null);
+      if (lastHoverCoords.current !== null) {
+        lastHoverCoords.current = null;
+        setHoverCoords(null);
+      }
     }
   };
 
