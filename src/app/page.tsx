@@ -364,7 +364,7 @@ export default function WorkspacePage() {
               </button>
             </div>
           )}
-          <div className={`editor-container-wrap ${consoleExpanded ? "console-open" : ""}`}>
+          <div className="editor-container-wrap">
             <PixelEditor3D />
           </div>
 

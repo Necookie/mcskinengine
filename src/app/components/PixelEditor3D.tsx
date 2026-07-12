@@ -299,8 +299,8 @@ export default function PixelEditor3D() {
           {skinArray ? (
             <ReactSkinview3d
               skinUrl=""
-              height={360}
-              width={360}
+              height={280}
+              width={280}
               onReady={(viewerInstance: any) => {
                 // NearestFilter for pixel crispness
                 if (viewerInstance.skinTexture) {
