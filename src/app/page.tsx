@@ -329,60 +329,95 @@ export default function WorkspacePage() {
         <main className="canvas-column">
           {/* Conditional Settings Panel overlay */}
           {settingsOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="settings-overlay"
-            >
-              <div className="settings-overlay-header">
-                <div className="settings-overlay-title">
-                  <Key size={13} className="text-yellow-500" style={{ marginRight: "4px" }} />
-                  <span>API Settings</span>
+            <div className="modal-backdrop">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="settings-overlay"
+              >
+                <div className="settings-overlay-header">
+                  <div className="settings-overlay-title">
+                    <Key size={13} className="text-yellow-500" style={{ marginRight: "4px" }} />
+                    <span>API Settings</span>
+                  </div>
+                  <button 
+                    onClick={() => setSettingsOpen(false)}
+                    className="settings-overlay-close"
+                  >
+                    ✕
+                  </button>
                 </div>
-                <button 
-                  onClick={() => setSettingsOpen(false)}
-                  className="settings-overlay-close"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label className="form-group-label">Gemini Developer API Key</label>
-                <input
-                  type="password"
-                  value={geminiKeyInput}
-                  onChange={(e) => setGeminiKeyInput(e.target.value)}
-                  placeholder={hasGeminiKey ? "•••••••• (Saved)" : "AIzaSy..."}
-                  className="voxel-input"
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: "16px" }}>
-                <label className="form-group-label">OpenAI API Key</label>
-                <input
-                  type="password"
-                  value={openaiKeyInput}
-                  onChange={(e) => setOpenaiKeyInput(e.target.value)}
-                  placeholder={hasOpenaiKey ? "•••••••• (Saved)" : "sk-proj-..."}
-                  className="voxel-input"
-                />
-              </div>
-              <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                <button
-                  onClick={() => setSettingsOpen(false)}
-                  className="voxel-btn"
-                  style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px", backgroundColor: "#fff" }}
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={handleSaveSettings} 
-                  className="voxel-btn btn-primary"
-                  style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px" }}
-                >
-                  Save Key
-                </button>
-              </div>
-            </motion.div>
+                
+                <div className="form-group" style={{ marginBottom: "12px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                    <label className="form-group-label" style={{ marginBottom: 0 }}>Gemini Developer API Key</label>
+                    {hasGeminiKey && (
+                      <button 
+                        onClick={async () => {
+                          await saveSettings("", undefined);
+                          setGeminiKeyInput("");
+                          setSuccessMsg("Gemini API key removed.");
+                          setTimeout(() => setSuccessMsg(""), 3000);
+                        }}
+                        style={{ fontSize: "9px", color: "#ff2a85", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    type="password"
+                    value={geminiKeyInput}
+                    onChange={(e) => setGeminiKeyInput(e.target.value)}
+                    placeholder={hasGeminiKey ? "•••••••• (Saved)" : "AIzaSy..."}
+                    className="voxel-input"
+                  />
+                </div>
+                
+                <div className="form-group" style={{ marginBottom: "16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                    <label className="form-group-label" style={{ marginBottom: 0 }}>OpenAI API Key</label>
+                    {hasOpenaiKey && (
+                      <button 
+                        onClick={async () => {
+                          await saveSettings(undefined, "");
+                          setOpenaiKeyInput("");
+                          setSuccessMsg("OpenAI API key removed.");
+                          setTimeout(() => setSuccessMsg(""), 3000);
+                        }}
+                        style={{ fontSize: "9px", color: "#ff2a85", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    type="password"
+                    value={openaiKeyInput}
+                    onChange={(e) => setOpenaiKeyInput(e.target.value)}
+                    placeholder={hasOpenaiKey ? "•••••••• (Saved)" : "sk-proj-..."}
+                    className="voxel-input"
+                  />
+                </div>
+                
+                <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                  <button
+                    onClick={() => setSettingsOpen(false)}
+                    className="voxel-btn"
+                    style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px", backgroundColor: "#fff" }}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleSaveSettings} 
+                    className="voxel-btn btn-primary"
+                    style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px" }}
+                  >
+                    Save Key
+                  </button>
+                </div>
+              </motion.div>
+            </div>
           )}
 
           {/* User Feedback Status */}
