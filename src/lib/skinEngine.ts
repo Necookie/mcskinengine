@@ -81,11 +81,11 @@ export function generateSkinArray(
   const eyeRgb = hexToRgb(demo.eyeColor);
 
   // Helper to set a pixel color with chiaroscuro shading
-  const setPixel = (x: number, y: number, r: number, g: number, b: number, a: number = 255, bounds?: { x1: number; y1: number; x2: number; y2: number }, applyShade: boolean = true) => {
+  const setPixel = (x: number, y: number, r: number, g: number, b: number, a: number = 255, bounds?: { x1: number; y1: number; x2: number; y2: number }, isSkin: boolean = false, pattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none', applyShade: boolean = true) => {
     if (x < 0 || x >= 64 || y < 0 || y >= 64) return;
     const idx = (y * 64 + x) * 4;
     if (applyShade && a > 0) {
-      const shaded = applyVolumeShader(x, y, r, g, b, bounds);
+      const shaded = applyVolumeShader(x, y, r, g, b, bounds, isSkin, pattern);
       array[idx] = shaded.r;
       array[idx + 1] = shaded.g;
       array[idx + 2] = shaded.b;
@@ -99,10 +99,10 @@ export function generateSkinArray(
   };
 
   // Helper to fill a rectangle
-  const fillRect = (x1: number, y1: number, x2: number, y2: number, r: number, g: number, b: number, a: number = 255) => {
+  const fillRect = (x1: number, y1: number, x2: number, y2: number, r: number, g: number, b: number, a: number = 255, isSkin: boolean = false, pattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none') => {
     for (let y = y1; y <= y2; y++) {
       for (let x = x1; x <= x2; x++) {
-        setPixel(x, y, r, g, b, a, { x1, y1, x2, y2 });
+        setPixel(x, y, r, g, b, a, { x1, y1, x2, y2 }, isSkin, pattern);
       }
     }
   };
@@ -110,35 +110,37 @@ export function generateSkinArray(
   // --- 1. DRAW DEMOGRAPHIC BASE BODY ---
 
   // Head Base: x in [0, 31], y in [0, 15]
-  fillRect(0, 0, 31, 15, skinRgb.r, skinRgb.g, skinRgb.b);
+  fillRect(0, 0, 31, 15, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
 
   // Hair - Draw on head back, left, right, and top
-  // Hair on head top: (8, 0) to (15, 7)
-  fillRect(8, 0, 15, 7, hairRgb.r, hairRgb.g, hairRgb.b);
-  // Hair on sides: Right (0, 0)-(7, 7) and Left (16, 0)-(23, 7)
-  fillRect(0, 0, 7, 7, hairRgb.r, hairRgb.g, hairRgb.b);
-  fillRect(16, 0, 23, 7, hairRgb.r, hairRgb.g, hairRgb.b);
-  // Hair on head back: (24, 8) to (31, 15)
-  fillRect(24, 8, 31, 15, hairRgb.r, hairRgb.g, hairRgb.b);
-  // Hair sides down: (0, 8) to (7, 15) and (16, 8) to (23, 15) upper parts
-  fillRect(0, 8, 7, 11, hairRgb.r, hairRgb.g, hairRgb.b);
-  fillRect(16, 8, 23, 11, hairRgb.r, hairRgb.g, hairRgb.b);
-  // Forehead hairline on Head Front (8,8) to (15,15)
-  fillRect(8, 8, 15, 9, hairRgb.r, hairRgb.g, hairRgb.b);
-  fillRect(8, 10, 8, 10, hairRgb.r, hairRgb.g, hairRgb.b); // hair side lock
-  fillRect(15, 10, 15, 10, hairRgb.r, hairRgb.g, hairRgb.b); // hair side lock
+  fillRect(8, 0, 15, 7, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  fillRect(0, 0, 7, 7, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  fillRect(16, 0, 23, 7, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  fillRect(24, 8, 31, 15, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  fillRect(0, 8, 7, 11, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  fillRect(16, 8, 23, 11, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  fillRect(8, 8, 15, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  fillRect(8, 10, 8, 10, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  fillRect(15, 10, 15, 10, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+
+  // Hair Highlight Halo around y = 10 (adds shine and volume to the hair)
+  const hairHighlight = applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, 18, false);
+  fillRect(9, 10, 14, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false);
+  fillRect(1, 10, 6, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false);
+  fillRect(17, 10, 22, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false);
+  fillRect(25, 10, 30, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false);
 
   // Eyes on Head Front: (8, 8) to (15, 15)
   // Left eye: (10, 12) white, (11, 12) eye color
-  setPixel(10, 12, 255, 255, 255, 255, false);
-  setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
+  setPixel(10, 12, 255, 255, 255, 255, undefined, false);
+  setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, undefined, false);
   // Right eye: (13, 12) eye color, (14, 12) white
-  setPixel(13, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
-  setPixel(14, 12, 255, 255, 255, 255, false);
+  setPixel(13, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, undefined, false);
+  setPixel(14, 12, 255, 255, 255, 255, undefined, false);
 
   // Nose/Mouth details (optional, subtle skin color differences or shadow)
-  setPixel(11, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, false);
-  setPixel(12, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, false);
+  setPixel(11, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, undefined, false);
+  setPixel(12, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, undefined, false);
 
   if (accessories && Array.isArray(accessories)) {
     const darkColor = { r: 35, g: 30, b: 30 }; // dark charcoal
@@ -196,26 +198,84 @@ export function generateSkinArray(
     }
   }
 
-  // Torso Base: (16, 16) to (40, 32)
-  fillRect(16, 16, 39, 31, skinRgb.r, skinRgb.g, skinRgb.b);
+  // Torso Base Layer:
+  // x in [16, 39], y in [16, 31]. Front of torso base is (20, 20) to (27, 31).
+  let torsoRgb = skinRgb;
+  let torsoPattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none';
+  let isTorsoSkin = true;
 
-  // Right Leg Base: (0, 16) to (15, 32)
-  fillRect(0, 16, 15, 31, skinRgb.r, skinRgb.g, skinRgb.b);
+  if (stencilKey === "hoodie") {
+    torsoRgb = hexToRgb(apparelColors.primary);
+    torsoPattern = 'knit';
+    isTorsoSkin = false;
+  } else if (stencilKey === "blazer") {
+    torsoRgb = hexToRgb(apparelColors.shirt);
+    isTorsoSkin = false;
+  } else if (stencilKey === "labcoat") {
+    torsoRgb = hexToRgb(apparelColors.shirt);
+    isTorsoSkin = false;
+  }
 
-  // Left Leg Base: (16, 48) to (31, 64)
-  fillRect(16, 48, 31, 63, skinRgb.r, skinRgb.g, skinRgb.b);
+  // Draw base torso (e.g. shirt underneath outer jacket overlay)
+  fillRect(16, 16, 39, 31, torsoRgb.r, torsoRgb.g, torsoRgb.b, 255, isTorsoSkin, torsoPattern);
 
-  // Arms Base depending on Steve vs Alex
+  if (!isTorsoSkin) {
+    // V-neck cutout at front neck top: x in [22, 25], y in [20, 21]
+    fillRect(22, 20, 25, 21, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
+    
+    // Draw base neck shadow
+    setPixel(22, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false);
+    setPixel(23, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false);
+    setPixel(24, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false);
+    setPixel(25, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false);
+    
+    // Draw base tie (underneath tweed jacket)
+    if (stencilKey === "blazer") {
+      const tieColor = hexToRgb(apparelColors.tie);
+      fillRect(23, 21, 24, 27, tieColor.r, tieColor.g, tieColor.b, 255, false);
+    }
+  }
+
+  // Legs Base Layer:
+  // Right Leg: (0, 16)-(15, 31)
+  // Left Leg: (16, 48)-(31, 63)
+  const pantsColor = hexToRgb(apparelColors.pants);
+  fillRect(0, 16, 15, 31, pantsColor.r, pantsColor.g, pantsColor.b, 255, false);
+  fillRect(16, 48, 31, 63, pantsColor.r, pantsColor.g, pantsColor.b, 255, false);
+
+  // Arms Base Layer:
+  // Steve: (40, 16)-(55, 31) and (32, 48)-(47, 63)
+  // Alex: (40, 16)-(54, 31) and (32, 46)-(46, 61)
+  // Bottom 4px are bare hands, upper arm is sleeve cloth.
+  let sleeveRgb = skinRgb;
+  let isArmSkin = true;
+  let armPattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none';
+
+  if (stencilKey === "hoodie") {
+    sleeveRgb = hexToRgb(apparelColors.primary);
+    isArmSkin = false;
+    armPattern = 'knit';
+  } else if (stencilKey === "blazer" || stencilKey === "labcoat") {
+    sleeveRgb = hexToRgb(apparelColors.shirt); // shirt sleeve underneath jacket
+    isArmSkin = false;
+  }
+
+  // Right Arm Base
   if (isAlex) {
-    // Alex right arm base: (40, 16) to (54, 32)
-    fillRect(40, 16, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b);
-    // Alex left arm base: (32, 46) to (46, 62)
-    fillRect(32, 46, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b);
+    fillRect(40, 16, 54, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern);
+    fillRect(40, 28, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
   } else {
-    // Steve right arm base: (40, 16) to (55, 32)
-    fillRect(40, 16, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b);
-    // Steve left arm base: (32, 48) to (47, 64)
-    fillRect(32, 48, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b);
+    fillRect(40, 16, 55, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern);
+    fillRect(40, 28, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
+  }
+
+  // Left Arm Base
+  if (isAlex) {
+    fillRect(32, 46, 46, 57, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern);
+    fillRect(32, 58, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
+  } else {
+    fillRect(32, 48, 47, 59, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern);
+    fillRect(32, 60, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
   }
 
   // --- 2. OVERLAY THE INSTITUTIONAL UNIFORM STENCIL ---
@@ -223,7 +283,6 @@ export function generateSkinArray(
   const stencil: Stencil = STENCILS[stencilKey] || STUDENT_HOODIE_STENCIL;
 
   for (const region of stencil.regions) {
-    // Get colors mapping to the type
     let hex = "#ffffff";
     if (region.colorType === "primary") hex = apparelColors.primary;
     else if (region.colorType === "secondary") hex = apparelColors.secondary;
@@ -236,32 +295,36 @@ export function generateSkinArray(
     else if (region.colorType === "eyes") hex = demo.eyeColor;
 
     const rgb = hexToRgb(hex);
+    
+    // Choose appropriate texture pattern
+    let pattern: 'knit' | 'tweed' | 'pinstripe' | 'none' = 'none';
+    if (stencilKey === "hoodie" && (region.name.includes("Hoodie") || region.name.includes("Sleeve") || region.name.includes("Hood"))) {
+      pattern = 'knit';
+    } else if (stencilKey === "blazer" && (region.name.includes("Blazer") || region.name.includes("Sleeve"))) {
+      pattern = 'tweed';
+    } else if (stencilKey === "labcoat" && region.name.includes("Coat")) {
+      pattern = 'none';
+    }
 
-    // If it's an arm sleeve region, handle Alex arm adjustment
     if (isAlex && region.name.includes("Sleeve")) {
-      // Alex sleeve overlays are slightly smaller (3px instead of 4px wide)
       if (region.name.includes("Right Sleeve")) {
-        // Right sleeve overlay coordinates for Alex are x in [40, 54], y in [32, 47]
         const adjustedX2 = Math.min(region.x2, 54);
-        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b);
+        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern);
       } else if (region.name.includes("Left Sleeve")) {
-        // Left sleeve overlay coordinates for Alex are x in [48, 62], y in [48, 63]
         const adjustedX2 = Math.min(region.x2, 62);
-        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b);
+        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern);
       } else {
-        fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b);
+        fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern);
       }
     } else {
-      fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b);
+      fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b, 255, region.colorType === "skin", pattern);
     }
   }
 
   // Draw boots/shoes on leg bases (as decorative default elements)
   const shoeRgb = hexToRgb("#302015");
-  // Right boot on bottom of Right Leg (0, 16)-(15, 32). Bottom is y=31
-  fillRect(0, 30, 15, 31, shoeRgb.r, shoeRgb.g, shoeRgb.b);
-  // Left boot on bottom of Left Leg (16, 48)-(31, 64). Bottom is y=63
-  fillRect(16, 62, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b);
+  fillRect(0, 30, 15, 31, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
+  fillRect(16, 62, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false);
 
   return array;
 }
