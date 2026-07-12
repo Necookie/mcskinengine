@@ -10,6 +10,7 @@ import {
   ShadeBounds,
   ShadeOptions,
 } from "./shading";
+import { HAIR_BASE, HAIR_STYLES } from "./hairStyles";
 
 export { hexToRgb, clamp, applyHueShift };
 
@@ -100,54 +101,15 @@ export function generateSkinArray(
   // Head Base: x in [0, 31], y in [0, 15]
   fillRect(0, 0, 31, 15, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
 
-  // Hair - Draw base helmet on head back, left, right, and top
-  fillRect(8, 0, 15, 7, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-  fillRect(0, 0, 7, 7, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-  fillRect(16, 0, 23, 7, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-  fillRect(24, 8, 31, 15, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-  fillRect(0, 8, 7, 11, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-  fillRect(16, 8, 23, 11, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  // Hair - Draw base helmet, then the chosen style's overlay rects
+  for (const rect of HAIR_BASE) {
+    fillRect(rect.x1, rect.y1, rect.x2, rect.y2, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  }
 
-  // Procedural Hair Style overlays:
-  if (hairStyle === "undercut") {
-    const shavedRgb = applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, -30, false);
-    // Left/Right shaved sides:
-    fillRect(0, 10, 7, 15, shavedRgb.r, shavedRgb.g, shavedRgb.b, 255, false);
-    fillRect(16, 10, 23, 15, shavedRgb.r, shavedRgb.g, shavedRgb.b, 255, false);
-    // High top front hair:
-    fillRect(8, 8, 15, 8, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-  } else if (hairStyle === "long-curly") {
-    // Back hair goes down all the way
-    fillRect(24, 8, 31, 15, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    // Shoulders front locks:
-    fillRect(8, 8, 15, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    fillRect(8, 10, 8, 12, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    fillRect(15, 10, 15, 12, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    // Hair strands resting on Torso Base:
-    fillRect(20, 16, 21, 19, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    fillRect(26, 16, 27, 19, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-  } else if (hairStyle === "parted-curtains") {
-    // Curtains fringe: parted in the middle
-    fillRect(8, 8, 9, 10, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    fillRect(14, 8, 15, 10, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    fillRect(10, 8, 13, 8, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    // Side locks:
-    fillRect(7, 10, 7, 11, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    fillRect(16, 10, 16, 11, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-  } else if (hairStyle === "short-spiky") {
-    // Spiky hairline:
-    fillRect(8, 8, 15, 8, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    setPixel(9, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, undefined, false);
-    setPixel(11, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, undefined, false);
-    setPixel(13, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, undefined, false);
-    setPixel(15, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, undefined, false);
-  } else {
-    // Default/messy-fringe:
-    fillRect(8, 8, 15, 9, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    fillRect(9, 10, 10, 10, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    fillRect(13, 10, 14, 10, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    fillRect(7, 10, 7, 12, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
-    fillRect(16, 10, 16, 12, hairRgb.r, hairRgb.g, hairRgb.b, 255, false);
+  const resolvedHairStyle = HAIR_STYLES[hairStyle] || HAIR_STYLES["messy-fringe"];
+  for (const rect of resolvedHairStyle.rects) {
+    const c = rect.shade ? applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, rect.shade, false) : hairRgb;
+    fillRect(rect.x1, rect.y1, rect.x2, rect.y2, c.r, c.g, c.b, 255, false);
   }
 
   // Hair Highlight Halo around y = 10 (adds shine and volume to the hair)
