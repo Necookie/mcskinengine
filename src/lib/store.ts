@@ -6,7 +6,7 @@ interface LogEntry {
   timestamp: string;
   userId: string;
   toolName: string;
-  arguments: any;
+  arguments: Record<string, unknown>;
   status: string;
 }
 
@@ -171,13 +171,15 @@ export const useSkinStore = create<SkinState>((set, get) => ({
       const res = await fetch("/api/user-skin");
       if (res.ok) {
         const data = await res.json();
-        set({
-          skinBase64: data.skin,
-          skinArray: base64ToSkin(data.skin),
-          role: data.role,
-          ethnicity: data.ethnicity,
-          modelType: data.modelType,
-        });
+        if (data.skin && typeof data.skin === "string") {
+          set({
+            skinBase64: data.skin,
+            skinArray: base64ToSkin(data.skin),
+            role: data.role || "hoodie",
+            ethnicity: data.ethnicity || "East Asian",
+            modelType: data.modelType || "steve",
+          });
+        }
       }
     } catch (err) {
       console.error("Error fetching user skin:", err);
@@ -186,8 +188,9 @@ export const useSkinStore = create<SkinState>((set, get) => ({
 
   saveSkin: async () => {
     const { skinBase64, role, ethnicity, modelType } = get();
+    if (!skinBase64) return;
     try {
-      await fetch("/api/save-skin", {
+      const res = await fetch("/api/save-skin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -197,6 +200,9 @@ export const useSkinStore = create<SkinState>((set, get) => ({
           modelType,
         }),
       });
+      if (!res.ok) {
+        console.error("Save skin failed:", res.status);
+      }
     } catch (err) {
       console.error("Error saving skin:", err);
     }
