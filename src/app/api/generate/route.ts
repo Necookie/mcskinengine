@@ -3,6 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { decrypt } from "@/lib/encryption";
 import { generateSkinArray, skinToBase64 } from "@/lib/skinEngine";
+import { STENCILS, STENCIL_KEYS } from "@/lib/stencils";
+import { HAIR_STYLES, HAIR_STYLE_KEYS } from "@/lib/hairStyles";
+import { EYE_STYLES, EYE_STYLE_KEYS } from "@/lib/eyeStyles";
+import { PATTERN_KEYS } from "@/lib/shading";
+import { ACCESSORY_KEYS } from "@/lib/accessories";
 
 export const runtime = "edge";
 
@@ -23,18 +28,20 @@ interface ApparelResult {
   shirt: string;
   tie: string;
   pants: string;
+  shoes?: string;
   skinColor: string;
   hairColor: string;
   eyeColor: string;
   hairStyle: string;
   eyeStyle: string;
   detailTexture: string;
+  styleVibe?: string;
   accessories?: string[];
   enhancedPrompt?: string;
 }
 
-const VALID_STENCILS = ["hoodie", "blazer", "labcoat"];
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+const VIBE_KEYS = ["masculine", "feminine", "neutral"];
 
 const PRICING: Record<string, { inRate: number; outRate: number }> = {
   "gemini-3.5-flash": { inRate: 1.50 / 1000000, outRate: 9.00 / 1000000 },
@@ -89,27 +96,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to decrypt API Key. Please re-enter it." }, { status: 500 });
     }
 
+    const stencilList = STENCIL_KEYS.map((k) => `- "${k}": ${STENCILS[k].name} (${STENCILS[k].vibe})`).join("\n");
+    const hairList = HAIR_STYLE_KEYS.map((k) => `- "${k}": ${HAIR_STYLES[k].name} (${HAIR_STYLES[k].vibe})`).join("\n");
+    const eyeList = EYE_STYLE_KEYS.map((k) => `- "${k}": ${EYE_STYLES[k].name} (${EYE_STYLES[k].vibe})`).join("\n");
+
     const promptText = `You are an expert designer analyzing a Minecraft skin request and image to generate styling attributes.
 Your goal is to make sure the output skin looks highly-detailed, textured, and fashionable.
 If the user's prompt is generic, simple, or plain (e.g., "cs student with glasses" or "casual hoodie"), you MUST expand it mentally into a descriptive, high-quality, professional skin design concept with rich textures, color coordination, and accessories (e.g. "a sleek dark-charcoal hoodie with soft fabric shading, thin-rimmed academic spectacles, and dark blue jeans").
 Write this beautifully expanded description in the "enhancedPrompt" key.
 
+Do NOT default to "hoodie", "messy-fringe", or "cool-highlight" unless the user's request specifically calls for them. Choose the stencil, hair, eyes, and texture that best express the user's description; when the description is ambiguous, prefer a distinctive combination over a safe one. Every generation should look meaningfully different from a generic default.
+
+If the request implies a feminine or masculine presentation (names, pronouns, "girl", "guy", "dress", "beard", etc.), set styleVibe accordingly and prefer hair/eye/outfit options tagged with that vibe below; otherwise use "neutral". Any vibe may be combined with any outfit — these are style choices, not hard rules.
+
+Pick a coherent 3-color palette (primary/secondary/trim) with real contrast between the colors; avoid washed-out grays unless specifically requested.
+
+Available outfit stencils (stencilKey):
+${stencilList}
+
+Available hairstyles (hairStyle):
+${hairList}
+
+Available eye styles (eyeStyle):
+${eyeList}
+
 Determine the stencil, colors, skin/hair traits, styles, and face accessories.
 You must return a JSON object with EXACTLY the following keys:
-- stencilKey (must be "hoodie", "blazer", or "labcoat")
+- stencilKey (one of the stencil keys listed above)
 - primary (hex color string like "#ffffff")
 - secondary (hex color string)
 - trim (hex color string)
 - shirt (hex color string)
 - tie (hex color string)
 - pants (hex color string)
+- shoes (hex color string for shoes/footwear)
 - skinColor (hex color string for skin tone, matching demographic/origin, e.g. #c68d5f for Filipino/Hispanic, #ebd3be for East Asian, #59361a for African)
 - hairColor (hex color string for hair)
 - eyeColor (hex color string for eyes)
-- hairStyle (must be "messy-fringe", "undercut", "long-curly", "parted-curtains", or "short-spiky")
-- eyeStyle (must be "cool-highlight", "shadow-2x2", "anime-glowing", or "classic-simple")
-- detailTexture (must be "knit", "tweed", "pinstripe", "denim", "flannel", or "none")
-- accessories (an array of strings representing active face accessories. Choose only from: "glasses", "headphones", "mask", "beard", "eyebrows")
+- hairStyle (one of the hairstyle keys listed above)
+- eyeStyle (one of the eye style keys listed above)
+- detailTexture (must be one of: ${PATTERN_KEYS.map((p) => `"${p}"`).join(", ")})
+- styleVibe (must be "masculine", "feminine", or "neutral")
+- accessories (an array of strings representing active face accessories. Choose only from: ${ACCESSORY_KEYS.map((a) => `"${a}"`).join(", ")})
 - enhancedPrompt (your beautifully expanded version of the user's prompt)
 
 User description: ${prompt}`;
@@ -196,27 +224,29 @@ User description: ${prompt}`;
             responseSchema: {
               type: "OBJECT",
               properties: {
-                stencilKey: { type: "STRING", enum: ["hoodie", "blazer", "labcoat"] },
+                stencilKey: { type: "STRING", enum: STENCIL_KEYS },
                 primary: { type: "STRING", description: "Primary hex color" },
                 secondary: { type: "STRING", description: "Secondary hex color" },
                 trim: { type: "STRING", description: "Trim hex color" },
                 shirt: { type: "STRING", description: "Shirt hex color" },
                 tie: { type: "STRING", description: "Tie hex color" },
                 pants: { type: "STRING", description: "Pants hex color" },
+                shoes: { type: "STRING", description: "Shoes hex color" },
                 skinColor: { type: "STRING", description: "Skin tone hex color" },
                 hairColor: { type: "STRING", description: "Hair hex color" },
                 eyeColor: { type: "STRING", description: "Eye hex color" },
-                hairStyle: { type: "STRING", enum: ["messy-fringe", "undercut", "long-curly", "parted-curtains", "short-spiky"] },
-                eyeStyle: { type: "STRING", enum: ["cool-highlight", "shadow-2x2", "anime-glowing", "classic-simple"] },
-                detailTexture: { type: "STRING", enum: ["knit", "tweed", "pinstripe", "denim", "flannel", "none"] },
+                hairStyle: { type: "STRING", enum: HAIR_STYLE_KEYS },
+                eyeStyle: { type: "STRING", enum: EYE_STYLE_KEYS },
+                detailTexture: { type: "STRING", enum: PATTERN_KEYS },
+                styleVibe: { type: "STRING", enum: VIBE_KEYS },
                 accessories: {
                   type: "ARRAY",
-                  items: { type: "STRING", enum: ["glasses", "headphones", "mask", "beard", "eyebrows"] },
+                  items: { type: "STRING", enum: ACCESSORY_KEYS },
                   description: "Face accessories to render"
                 },
                 enhancedPrompt: { type: "STRING", description: "An enhanced, detailed version of the user's prompt" }
               },
-              required: ["stencilKey", "primary", "secondary", "trim", "shirt", "tie", "pants", "skinColor", "hairColor", "eyeColor", "hairStyle", "eyeStyle", "detailTexture", "accessories", "enhancedPrompt"],
+              required: ["stencilKey", "primary", "secondary", "trim", "shirt", "tie", "pants", "shoes", "skinColor", "hairColor", "eyeColor", "hairStyle", "eyeStyle", "detailTexture", "styleVibe", "accessories", "enhancedPrompt"],
             },
           },
         }),
@@ -237,16 +267,23 @@ User description: ${prompt}`;
       outputTokens = data.usageMetadata?.candidatesTokenCount || 0;
     }
 
-    if (!VALID_STENCILS.includes(apparel.stencilKey)) {
+    if (!STENCIL_KEYS.includes(apparel.stencilKey)) {
       return NextResponse.json({ error: "Invalid stencil key from AI model" }, { status: 500 });
     }
 
     const colorFields: (keyof ApparelResult)[] = ["primary", "secondary", "trim", "shirt", "tie", "pants"];
     for (const field of colorFields) {
-      if (!HEX_COLOR_RE.test(apparel[field])) {
+      if (!HEX_COLOR_RE.test(apparel[field] as string)) {
         return NextResponse.json({ error: `Invalid color value for ${field} from AI model` }, { status: 500 });
       }
     }
+    if (apparel.shoes && !HEX_COLOR_RE.test(apparel.shoes)) apparel.shoes = undefined;
+
+    // OpenAI has no schema enforcement, so fall back to safe defaults for any invalid enum value.
+    if (!HAIR_STYLE_KEYS.includes(apparel.hairStyle)) apparel.hairStyle = "messy-fringe";
+    if (!EYE_STYLE_KEYS.includes(apparel.eyeStyle)) apparel.eyeStyle = "cool-highlight";
+    if (!PATTERN_KEYS.includes(apparel.detailTexture as any)) apparel.detailTexture = "none";
+    if (!VIBE_KEYS.includes(apparel.styleVibe || "")) apparel.styleVibe = "neutral";
 
     const skinArray = generateSkinArray(
       demographic || "East Asian",
@@ -258,6 +295,7 @@ User description: ${prompt}`;
         shirt: apparel.shirt,
         tie: apparel.tie,
         pants: apparel.pants,
+        shoes: apparel.shoes,
       },
       !!isAlex,
       apparel.accessories || [],
@@ -268,6 +306,7 @@ User description: ${prompt}`;
         hairStyle: apparel.hairStyle,
         eyeStyle: apparel.eyeStyle,
         detailTexture: apparel.detailTexture,
+        styleVibe: apparel.styleVibe as 'masculine' | 'feminine' | 'neutral' | undefined,
       }
     );
 
