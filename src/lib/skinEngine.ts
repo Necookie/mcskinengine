@@ -250,27 +250,25 @@ export function generateSkinArray(
     }
   }
 
+  // Resolve the outfit stencil early so base-layer fills can be data-driven.
+  const stencil: Stencil = STENCILS[stencilKey] || STUDENT_HOODIE_STENCIL;
+
+  const layerColor = (source: 'skin' | 'primary' | 'secondary' | 'shirt'): { r: number; g: number; b: number } => {
+    if (source === 'skin') return skinRgb;
+    if (source === 'primary') return hexToRgb(apparelColors.primary);
+    if (source === 'secondary') return hexToRgb(apparelColors.secondary);
+    return hexToRgb(apparelColors.shirt);
+  };
+
+  const resolvedPattern = (fallback: PatternType): PatternType =>
+    PATTERN_KEYS.includes(detailTexture as PatternType) && detailTexture !== "none"
+      ? (detailTexture as PatternType)
+      : fallback;
+
   // Torso Base Layer:
-  let torsoRgb = skinRgb;
-  let torsoPattern: PatternType = 'none';
-  let isTorsoSkin = true;
-
-  if (PATTERN_KEYS.includes(detailTexture as PatternType) && detailTexture !== "none") torsoPattern = detailTexture as PatternType;
-  else {
-    if (stencilKey === "hoodie") torsoPattern = "knit";
-    else if (stencilKey === "blazer") torsoPattern = "tweed";
-  }
-
-  if (stencilKey === "hoodie") {
-    torsoRgb = hexToRgb(apparelColors.primary);
-    isTorsoSkin = false;
-  } else if (stencilKey === "blazer") {
-    torsoRgb = hexToRgb(apparelColors.shirt);
-    isTorsoSkin = false;
-  } else if (stencilKey === "labcoat") {
-    torsoRgb = hexToRgb(apparelColors.shirt);
-    isTorsoSkin = false;
-  }
+  const torsoRgb = layerColor(stencil.baseTorso);
+  const isTorsoSkin = stencil.baseTorso === 'skin';
+  const torsoPattern = resolvedPattern(stencil.defaultPattern);
 
   // Draw base torso (e.g. shirt underneath outer jacket overlay)
   fillRect(16, 16, 39, 31, torsoRgb.r, torsoRgb.g, torsoRgb.b, 255, isTorsoSkin, torsoPattern);
@@ -278,15 +276,15 @@ export function generateSkinArray(
   if (!isTorsoSkin) {
     // V-neck cutout at front neck top: x in [22, 25], y in [20, 21]
     fillRect(22, 20, 25, 21, skinRgb.r, skinRgb.g, skinRgb.b, 255, true);
-    
+
     // Draw base neck shadow
     setPixel(22, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false);
     setPixel(23, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false);
     setPixel(24, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false);
     setPixel(25, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, undefined, false);
-    
-    // Draw base tie (underneath tweed jacket)
-    if (stencilKey === "blazer") {
+
+    // Draw base tie (underneath jacket)
+    if (stencil.baseTie) {
       const tieColor = hexToRgb(apparelColors.tie);
       fillRect(23, 21, 24, 27, tieColor.r, tieColor.g, tieColor.b, 255, false);
     }
@@ -294,49 +292,65 @@ export function generateSkinArray(
 
   // Legs Base Layer:
   const pantsColor = hexToRgb(apparelColors.pants);
-  fillRect(0, 16, 15, 31, pantsColor.r, pantsColor.g, pantsColor.b, 255, false, 'none', 'top-right');
-  fillRect(16, 48, 31, 63, pantsColor.r, pantsColor.g, pantsColor.b, 255, false, 'none', 'top-left');
+  const legHem = stencil.legStyle === 'shorts' ? 4 : stencil.legStyle === 'skirt' ? 3 : stencil.legStyle === 'bare' ? -1 : 16;
+  if (legHem >= 0) {
+    fillRect(0, 16, 15, 16 + legHem - 1, pantsColor.r, pantsColor.g, pantsColor.b, 255, false, 'none', 'top-right');
+    fillRect(16, 48, 31, 48 + legHem - 1, pantsColor.r, pantsColor.g, pantsColor.b, 255, false, 'none', 'top-left');
+  }
 
   // Arms Base Layer:
-  let sleeveRgb = skinRgb;
-  let isArmSkin = true;
-  let armPattern: PatternType = 'none';
-
-  if (PATTERN_KEYS.includes(detailTexture as PatternType) && detailTexture !== "none") armPattern = detailTexture as PatternType;
-  else {
-    if (stencilKey === "hoodie") armPattern = "knit";
-    else if (stencilKey === "blazer") armPattern = "tweed";
-  }
-
-  if (stencilKey === "hoodie") {
-    sleeveRgb = hexToRgb(apparelColors.primary);
-    isArmSkin = false;
-  } else if (stencilKey === "blazer" || stencilKey === "labcoat") {
-    sleeveRgb = hexToRgb(apparelColors.shirt); // shirt sleeve underneath jacket
-    isArmSkin = false;
-  }
+  const sleeveRgb = layerColor(stencil.baseSleeve);
+  const isArmSkin = stencil.baseSleeve === 'skin';
+  const armPattern = resolvedPattern(stencil.defaultPattern);
+  const shortSleeveRows = 6;
 
   // Right Arm Base
   if (isAlex) {
-    fillRect(40, 16, 54, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right');
-    fillRect(40, 28, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+    if (stencil.sleeveLength === 'short') {
+      fillRect(40, 16, 54, 16 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right');
+      fillRect(40, 16 + shortSleeveRows, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+    } else if (stencil.sleeveLength === 'none') {
+      fillRect(40, 16, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+    } else {
+      fillRect(40, 16, 54, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right');
+      fillRect(40, 28, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+    }
   } else {
-    fillRect(40, 16, 55, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right');
-    fillRect(40, 28, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+    if (stencil.sleeveLength === 'short') {
+      fillRect(40, 16, 55, 16 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right');
+      fillRect(40, 16 + shortSleeveRows, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+    } else if (stencil.sleeveLength === 'none') {
+      fillRect(40, 16, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+    } else {
+      fillRect(40, 16, 55, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-right');
+      fillRect(40, 28, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-right');
+    }
   }
 
   // Left Arm Base
   if (isAlex) {
-    fillRect(32, 46, 46, 57, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left');
-    fillRect(32, 58, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+    if (stencil.sleeveLength === 'short') {
+      fillRect(32, 46, 46, 46 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left');
+      fillRect(32, 46 + shortSleeveRows, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+    } else if (stencil.sleeveLength === 'none') {
+      fillRect(32, 46, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+    } else {
+      fillRect(32, 46, 46, 57, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left');
+      fillRect(32, 58, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+    }
   } else {
-    fillRect(32, 48, 47, 59, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left');
-    fillRect(32, 60, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+    if (stencil.sleeveLength === 'short') {
+      fillRect(32, 48, 47, 48 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left');
+      fillRect(32, 48 + shortSleeveRows, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+    } else if (stencil.sleeveLength === 'none') {
+      fillRect(32, 48, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+    } else {
+      fillRect(32, 48, 47, 59, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, 'top-left');
+      fillRect(32, 60, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top-left');
+    }
   }
 
   // --- 2. OVERLAY THE INSTITUTIONAL UNIFORM STENCIL ---
-
-  const stencil: Stencil = STENCILS[stencilKey] || STUDENT_HOODIE_STENCIL;
 
   for (const region of stencil.regions) {
     let hex = "#ffffff";
