@@ -5,6 +5,11 @@ import { encrypt, decrypt } from "@/lib/encryption";
 
 export const runtime = "edge";
 
+function maskKey(key: string): string {
+  if (key.length <= 8) return "••••••••";
+  return `${key.slice(0, 4)}${"•".repeat(key.length - 8)}${key.slice(-4)}`;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { userId } = await auth();
@@ -18,14 +23,15 @@ export async function GET(req: NextRequest) {
     });
 
     if (result.rows.length === 0 || !result.rows[0].gemini_key) {
-      return NextResponse.json({ geminiKey: "" });
+      return NextResponse.json({ hasKey: false, maskedKey: "" });
     }
 
     const decryptedKey = await decrypt(result.rows[0].gemini_key as string);
-    return NextResponse.json({ geminiKey: decryptedKey });
-  } catch (error: any) {
+    return NextResponse.json({ hasKey: true, maskedKey: maskKey(decryptedKey) });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal Server Error";
     console.error("Settings GET error:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -38,6 +44,10 @@ export async function POST(req: NextRequest) {
 
     const { geminiKey } = await req.json();
     
+    if (typeof geminiKey !== "string") {
+      return NextResponse.json({ error: "geminiKey must be a string" }, { status: 400 });
+    }
+
     let encryptedKey = "";
     if (geminiKey) {
       encryptedKey = await encrypt(geminiKey);
@@ -51,8 +61,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal Server Error";
     console.error("Settings POST error:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -19,14 +19,13 @@ export default function WorkspacePage() {
   const {
     skinBase64,
     geminiPrompt,
-    geminiKey,
+    hasGeminiKey,
     isGenerating,
     mcpLogs,
     role,
     ethnicity,
     modelType,
     setGeminiPrompt,
-    setGeminiKey,
     setIsGenerating,
     setSkinArray,
     setRole,
@@ -84,15 +83,8 @@ export default function WorkspacePage() {
     }
   }, [isSignedIn]);
 
-  useEffect(() => {
-    if (geminiKey) {
-      setKeyInput(geminiKey);
-    }
-  }, [geminiKey]);
-
-  // Handle Gemini Skin Generation
   const handleGenerateSkin = async () => {
-    if (!geminiKey) {
+    if (!hasGeminiKey) {
       setErrorMsg("Please configure your Gemini API Key in Settings first.");
       setSettingsOpen(true);
       return;

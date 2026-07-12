@@ -20,7 +20,7 @@ interface SkinState {
   brushSize: number;
   
   geminiPrompt: string;
-  geminiKey: string;
+  hasGeminiKey: boolean;
   isGenerating: boolean;
   mcpLogs: LogEntry[];
 
@@ -39,7 +39,6 @@ interface SkinState {
   setSelectedColor: (color: string) => void;
   setBrushSize: (size: number) => void;
   setGeminiPrompt: (prompt: string) => void;
-  setGeminiKey: (key: string) => void;
   setIsGenerating: (val: boolean) => void;
   setMcpLogs: (logs: LogEntry[]) => void;
 
@@ -71,7 +70,7 @@ export const useSkinStore = create<SkinState>((set, get) => ({
   brushSize: 1,
   
   geminiPrompt: "",
-  geminiKey: "",
+  hasGeminiKey: false,
   isGenerating: false,
   mcpLogs: [],
 
@@ -164,7 +163,6 @@ export const useSkinStore = create<SkinState>((set, get) => ({
   setSelectedColor: (selectedColor) => set({ selectedColor }),
   setBrushSize: (brushSize) => set({ brushSize }),
   setGeminiPrompt: (geminiPrompt) => set({ geminiPrompt }),
-  setGeminiKey: (geminiKey) => set({ geminiKey }),
   setIsGenerating: (isGenerating) => set({ isGenerating }),
   setMcpLogs: (mcpLogs) => set({ mcpLogs }),
 
@@ -221,7 +219,7 @@ export const useSkinStore = create<SkinState>((set, get) => ({
       const res = await fetch("/api/settings");
       if (res.ok) {
         const data = await res.json();
-        set({ geminiKey: data.geminiKey || "" });
+        set({ hasGeminiKey: data.hasKey || false });
       }
     } catch (err) {
       console.error("Error fetching settings:", err);
@@ -236,7 +234,7 @@ export const useSkinStore = create<SkinState>((set, get) => ({
         body: JSON.stringify({ geminiKey: key }),
       });
       if (res.ok) {
-        set({ geminiKey: key });
+        set({ hasGeminiKey: !!key });
       }
     } catch (err) {
       console.error("Error saving settings:", err);
