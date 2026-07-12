@@ -34,3 +34,29 @@ export function valueNoise2(x: number, y: number, scale: number, seed: number): 
   const bottom = v01 + (v11 - v01) * fx;
   return top + (bottom - top) * fy;
 }
+
+/**
+ * Ordered (Bayer) dithering and stepped-band quantization, so shading reads
+ * as deliberate pixel-art value bands instead of a smooth gradient.
+ */
+
+export const BAYER_4X4: number[][] = [
+  [0, 8, 2, 10],
+  [12, 4, 14, 6],
+  [3, 11, 1, 9],
+  [15, 7, 13, 5],
+];
+
+export function bayerThreshold(x: number, y: number): number {
+  const row = ((y % 4) + 4) % 4;
+  const col = ((x % 4) + 4) % 4;
+  return (BAYER_4X4[row][col] + 0.5) / 16;
+}
+
+export function quantizeShade(offset: number, x: number, y: number, bandSize: number = 8): number {
+  const band = offset / bandSize;
+  const flooredBand = Math.floor(band);
+  const frac = band - flooredBand;
+  const steppedBand = frac > bayerThreshold(x, y) ? flooredBand + 1 : flooredBand;
+  return steppedBand * bandSize;
+}
