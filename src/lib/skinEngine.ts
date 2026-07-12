@@ -53,6 +53,7 @@ export function generateSkinArray(
     hairStyle?: string;
     eyeStyle?: string;
     detailTexture?: string;
+    styleVibe?: 'masculine' | 'feminine' | 'neutral';
   },
   seed?: number
 ): Uint8Array {
@@ -63,8 +64,11 @@ export function generateSkinArray(
   const skinRgb = hexToRgb(traits?.skinColor || demo.skinColor);
   const hairRgb = hexToRgb(traits?.hairColor || demo.hairColor);
   const eyeRgb = hexToRgb(traits?.eyeColor || demo.eyeColor);
-  const hairStyle = traits?.hairStyle || "messy-fringe";
-  const eyeStyle = traits?.eyeStyle || "cool-highlight";
+  const styleVibe = traits?.styleVibe || "neutral";
+  const vibeHairDefault = styleVibe === 'feminine' ? "long-straight" : styleVibe === 'masculine' ? "short-spiky" : "messy-fringe";
+  const vibeEyeDefault = styleVibe === 'feminine' ? "long-lashes" : styleVibe === 'masculine' ? "narrow-serious" : "cool-highlight";
+  const hairStyle = traits?.hairStyle || vibeHairDefault;
+  const eyeStyle = traits?.eyeStyle || vibeEyeDefault;
   const detailTexture = traits?.detailTexture || "none";
 
   const seedBase = `${stencilKey}|${hairStyle}|${apparelColors.primary}`;
@@ -186,6 +190,34 @@ export function generateSkinArray(
     if (accessories.includes("eyebrows")) {
       fillRect(9, 11, 11, 11, darkColor.r, darkColor.g, darkColor.b, 255);
       fillRect(12, 11, 14, 11, darkColor.r, darkColor.g, darkColor.b, 255);
+    }
+
+    if (accessories.includes("freckles")) {
+      const freckleRgb = { r: clamp(skinRgb.r - 45), g: clamp(skinRgb.g - 45), b: clamp(skinRgb.b - 55) };
+      const spots: Array<[number, number]> = [[9, 13], [10, 14], [13, 14], [14, 13], [9, 14], [14, 14]];
+      for (const [x, y] of spots) {
+        if (hash2(x, y, resolvedSeed) > 0.4) {
+          setPixel(x, y, freckleRgb.r, freckleRgb.g, freckleRgb.b, 255, undefined, false);
+        }
+      }
+    }
+
+    if (accessories.includes("blush")) {
+      const blushRgb = applyHueShift(skinRgb.r, skinRgb.g, skinRgb.b, 22, true);
+      setPixel(8, 13, blushRgb.r, blushRgb.g, blushRgb.b, 200, undefined, false);
+      setPixel(15, 13, blushRgb.r, blushRgb.g, blushRgb.b, 200, undefined, false);
+    }
+
+    if (accessories.includes("lipstick")) {
+      const lipRgb = hexToRgb("#b03a4a");
+      setPixel(11, 14, lipRgb.r, lipRgb.g, lipRgb.b, 255, undefined, false);
+      setPixel(12, 14, lipRgb.r, lipRgb.g, lipRgb.b, 255, undefined, false);
+    }
+
+    if (accessories.includes("earrings")) {
+      const earringRgb = hexToRgb(apparelColors.trim || "#d4af37");
+      setPixel(7, 13, earringRgb.r, earringRgb.g, earringRgb.b, 255, undefined, false);
+      setPixel(16, 13, earringRgb.r, earringRgb.g, earringRgb.b, 255, undefined, false);
     }
   }
 
