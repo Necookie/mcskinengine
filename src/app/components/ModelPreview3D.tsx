@@ -190,7 +190,7 @@ export default function ModelPreview3D() {
         <button
           onClick={downloadSkin}
           className="voxel-btn"
-          style={{ padding: "6px 0", fontSize: "10px", borderRadius: "9999px", borderWidth: "1px", justifyContent: "center", width: "100%" }}
+          style={{ padding: "6px 0", fontSize: "10px", justifyContent: "center", width: "100%" }}
         >
           <Download size={13} />
           <span>Download</span>
@@ -198,7 +198,7 @@ export default function ModelPreview3D() {
         <button
           onClick={handleUploadClick}
           className="voxel-btn"
-          style={{ padding: "6px 0", fontSize: "10px", borderRadius: "9999px", borderWidth: "1px", justifyContent: "center", width: "100%" }}
+          style={{ padding: "6px 0", fontSize: "10px", justifyContent: "center", width: "100%" }}
         >
           <Upload size={13} />
           <span>Upload Skin</span>

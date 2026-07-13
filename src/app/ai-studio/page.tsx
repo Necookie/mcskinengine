@@ -424,7 +424,7 @@ export default function AiStudioPage() {
                   <button
                     onClick={downloadSkin}
                     className="voxel-btn"
-                    style={{ width: "100%", justifyContent: "center", fontSize: "10px", borderRadius: "9999px" }}
+                    style={{ width: "100%", justifyContent: "center", fontSize: "10px" }}
                   >
                     <Download size={13} strokeWidth={2} />
                     <span>Download PNG</span>
@@ -433,7 +433,7 @@ export default function AiStudioPage() {
                   <a
                     href="/editor"
                     className="voxel-btn btn-accent"
-                    style={{ width: "100%", justifyContent: "center", fontSize: "10px", textDecoration: "none", borderRadius: "9999px" }}
+                    style={{ width: "100%", justifyContent: "center", fontSize: "10px", textDecoration: "none" }}
                   >
                     <Maximize size={12} strokeWidth={2} />
                     <span>Open in Editor</span>
