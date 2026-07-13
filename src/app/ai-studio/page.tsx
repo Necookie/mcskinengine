@@ -273,7 +273,7 @@ export default function AiStudioPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="voxel-btn text-[10px]"
-                    style={{ padding: "6px 0", fontSize: "10px", borderRadius: "9999px", borderWidth: "2px", justifyContent: "center", width: "100%", textDecoration: "none", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)" }}
+                    style={{ justifyContent: "center", width: "100%", textDecoration: "none", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)" }}
                   >
                     Get Gemini API Key (Free) ↗
                   </a>
@@ -293,7 +293,7 @@ export default function AiStudioPage() {
                     onClick={handleSaveSettings}
                     disabled={!geminiKeyInput}
                     className="voxel-btn btn-accent"
-                    style={{ width: "100%", justifyContent: "center", marginTop: "4px", borderRadius: "9999px" }}
+                    style={{ width: "100%", justifyContent: "center", marginTop: "4px" }}
                   >
                     Save Key
                   </button>
@@ -302,14 +302,14 @@ export default function AiStudioPage() {
                     <button
                       onClick={() => setShowAiSetup(false)}
                       className="voxel-btn"
-                      style={{ flex: 1, padding: "6px 0", fontSize: "10px", borderRadius: "9999px", borderWidth: "2px", justifyContent: "center", backgroundColor: "#fff", color: "#1c1c1d" }}
+                      style={{ flex: 1, justifyContent: "center" }}
                     >
                       ← Skip
                     </button>
                     <a
                       href="/"
                       className="voxel-btn"
-                      style={{ flex: 1, padding: "6px 0", fontSize: "10px", borderRadius: "9999px", borderWidth: "2px", justifyContent: "center", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d" }}
+                      style={{ flex: 1, justifyContent: "center", textDecoration: "none" }}
                     >
                       ← Exit
                     </a>
@@ -369,7 +369,7 @@ export default function AiStudioPage() {
                     onClick={handleGenerateSkin}
                     disabled={isGenerating || !geminiPrompt}
                     className="voxel-btn btn-accent"
-                    style={{ width: "100%", justifyContent: "center", borderRadius: "9999px" }}
+                    style={{ width: "100%", justifyContent: "center" }}
                   >
                     {isGenerating ? "Generating..." : "Generate Skin"}
                   </button>
