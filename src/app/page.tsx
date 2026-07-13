@@ -180,22 +180,25 @@ export default function DashboardPage() {
               {/* Column 1: Action Cards */}
               <div className="dashboard-card-column">
                 {/* Launch Editor Card */}
-                <div className="dashboard-action-card steve">
+                <div className="dashboard-action-card steve" style={{ padding: "28px 24px", gap: "16px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
-                      <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
-                        3D Skin Editor
+                      <span className="text-grid-tag" style={{ color: "var(--color-primary)", display: "block", marginBottom: "6px" }}>
+                        Studio Canvas
+                      </span>
+                      <h2 className="text-panel-head" style={{ fontSize: "20px", fontWeight: 700, margin: "0 0 6px 0", letterSpacing: "-0.4px", lineHeight: 1.1 }}>
+                        3D Skin Studio
                       </h2>
-                      <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4" }}>
+                      <p className="text-body-ui" style={{ fontSize: "12px", color: "#2d2d2f", lineHeight: "1.5" }}>
                         Paint directly onto a 3D model. Choose brush sizes, toggle pixel grids, and preview your changes in real time.
                       </p>
                     </div>
-                    <Paintbrush size={20} strokeWidth={2} style={{ color: "var(--color-primary)", flexShrink: 0 }} />
+                    <Paintbrush size={20} strokeWidth={2} style={{ color: "var(--color-primary)", flexShrink: 0, marginTop: "4px" }} />
                   </div>
                   <a
                     href="/editor"
                     className="voxel-btn btn-primary"
-                    style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none", borderRadius: "9999px" }}
+                    style={{ width: "max-content", padding: "10px 20px", fontSize: "10px", textDecoration: "none", borderRadius: "9999px" }}
                   >
                     <span>Open Editor</span>
                     <ArrowRight size={12} strokeWidth={2} />
@@ -203,22 +206,25 @@ export default function DashboardPage() {
                 </div>
 
                 {/* AI Generator Card */}
-                <div className="dashboard-action-card alex">
+                <div className="dashboard-action-card alex" style={{ padding: "28px 24px", gap: "16px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
-                      <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
-                        AI Skin Generator
+                      <span className="text-grid-tag" style={{ color: "var(--color-primary)", display: "block", marginBottom: "6px" }}>
+                        Cognitive Textures
+                      </span>
+                      <h2 className="text-panel-head" style={{ fontSize: "20px", fontWeight: 700, margin: "0 0 6px 0", letterSpacing: "-0.4px", lineHeight: 1.1 }}>
+                        AI Skin Studio
                       </h2>
-                      <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4" }}>
+                      <p className="text-body-ui" style={{ fontSize: "12px", color: "#2d2d2f", lineHeight: "1.5" }}>
                         Generate clothing textures and stencil designs from a text description using Gemini AI.
                       </p>
                     </div>
-                    <Sparkles size={20} strokeWidth={2} style={{ color: "var(--color-accent-ai)", flexShrink: 0 }} />
+                    <Sparkles size={20} strokeWidth={2} style={{ color: "var(--color-accent-ai)", flexShrink: 0, marginTop: "4px" }} />
                   </div>
                   <a
                     href="/ai-studio"
                     className="voxel-btn"
-                    style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d", borderRadius: "9999px" }}
+                    style={{ width: "max-content", padding: "10px 20px", fontSize: "10px", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d", borderRadius: "9999px" }}
                   >
                     <span>Generate with AI</span>
                     <ArrowRight size={12} strokeWidth={2} />
@@ -226,13 +232,16 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Credentials / Keys Card */}
-                <div className="dashboard-action-card">
+                <div className="dashboard-action-card" style={{ padding: "28px 24px", gap: "16px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
-                      <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
-                        API Settings
+                      <span className="text-grid-tag" style={{ color: "var(--color-primary)", display: "block", marginBottom: "6px" }}>
+                        System Registry
+                      </span>
+                      <h2 className="text-panel-head" style={{ fontSize: "20px", fontWeight: 700, margin: "0 0 6px 0", letterSpacing: "-0.4px", lineHeight: 1.1 }}>
+                        API Configuration
                       </h2>
-                      <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4", marginBottom: "8px" }}>
+                      <p className="text-body-ui" style={{ fontSize: "12px", color: "#2d2d2f", lineHeight: "1.5", marginBottom: "8px" }}>
                         Provide API keys to run Gemini and OpenAI generation features.
                       </p>
                       
@@ -252,13 +261,13 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </div>
-                    <Key size={20} strokeWidth={2} style={{ color: "var(--color-primary)", flexShrink: 0 }} />
+                    <Key size={20} strokeWidth={2} style={{ color: "var(--color-primary)", flexShrink: 0, marginTop: "4px" }} />
                   </div>
                   
                   <button
                     onClick={() => setSettingsOpen(true)}
                     className="voxel-btn"
-                    style={{ width: "max-content", marginTop: "4px", fontSize: "10px", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)", borderRadius: "9999px" }}
+                    style={{ width: "max-content", padding: "10px 20px", fontSize: "10px", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)", borderRadius: "9999px" }}
                   >
                     API Settings
                   </button>
