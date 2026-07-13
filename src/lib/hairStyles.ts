@@ -137,6 +137,14 @@ export const HAIR_STYLES: Record<string, HairStyle> = {
       { x1: 48, y1: 10, x2: 48, y2: 15, shade: 5 },
       { x1: 39, y1: 10, x2: 39, y2: 15, shade: -5 },
     ],
+    shoulderRects: [
+      // Braid tails hanging down the chest front, alternating shade so
+      // the plaits read; without these the braids are invisible head-on.
+      { x1: 20, y1: 20, x2: 20, y2: 22, shade: 8 },
+      { x1: 20, y1: 23, x2: 20, y2: 25, shade: -8 },
+      { x1: 27, y1: 20, x2: 27, y2: 22, shade: -8 },
+      { x1: 27, y1: 23, x2: 27, y2: 25, shade: 8 },
+    ],
   },
   "long-straight": {
     name: "Long Straight",
