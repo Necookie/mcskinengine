@@ -13,6 +13,7 @@ import {
   MATERIAL_INDEX,
   applyContourPass,
   BASE_FACE_RECTS,
+  resolveMonoAccentPalette,
 } from "./shading";
 import { HAIR_BASE, HAIR_STYLES } from "./hairStyles";
 import { EYE_STYLES } from "./eyeStyles";
@@ -58,6 +59,8 @@ export function generateSkinArray(
     eyeStyle?: string;
     detailTexture?: string;
     styleVibe?: 'masculine' | 'feminine' | 'neutral';
+    shadingMode?: 'soft' | 'graphic';
+    paletteMode?: 'full' | 'mono-accent';
   },
   seed?: number
 ): Uint8Array {
@@ -77,6 +80,12 @@ export function generateSkinArray(
   const hairStyle = traits?.hairStyle || vibeHairDefault;
   const eyeStyle = traits?.eyeStyle || vibeEyeDefault;
   const detailTexture = traits?.detailTexture || "none";
+  const shadingMode = traits?.shadingMode || "soft";
+  const paletteMode = traits?.paletteMode || "full";
+
+  if (paletteMode === "mono-accent") {
+    apparelColors = resolveMonoAccentPalette(apparelColors);
+  }
 
   const seedBase = `${stencilKey}|${hairStyle}|${apparelColors.primary}`;
   const resolvedSeed =
@@ -88,7 +97,7 @@ export function generateSkinArray(
     if (x < 0 || x >= 64 || y < 0 || y >= 64) return;
     const idx = (y * 64 + x) * 4;
     if (applyShade && a > 0) {
-      const shaded = applyVolumeShaderV2(x, y, r, g, b, bounds, { isSkin, pattern, seed: resolvedSeed, lightDir });
+      const shaded = applyVolumeShaderV2(x, y, r, g, b, bounds, { isSkin, pattern, seed: resolvedSeed, lightDir, mode: shadingMode });
       array[idx] = shaded.r;
       array[idx + 1] = shaded.g;
       array[idx + 2] = shaded.b;
