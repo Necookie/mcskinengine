@@ -67,33 +67,20 @@ export default function AiStudioPage() {
     setShowAiSetup(!hasGeminiKey && !hasOpenaiKey);
   }, [hasGeminiKey, hasOpenaiKey]);
 
-  // Sync texture changes to the 3D viewer
+  // Sync texture changes to the 3D viewer using loadSkin
   useEffect(() => {
     if (!viewer || !skinArray) return;
-    const ctx = viewer.skinCanvas.getContext("2d");
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = 64;
+    tempCanvas.height = 64;
+    const ctx = tempCanvas.getContext("2d");
     if (ctx) {
       const imgData = ctx.createImageData(64, 64);
       imgData.data.set(skinArray);
       ctx.putImageData(imgData, 0, 0);
-      viewer.skinTexture.needsUpdate = true;
+      viewer.loadSkin(tempCanvas.toDataURL(), { model: modelType === "alex" ? "slim" : "classic" });
     }
-  }, [viewer, skinArray]);
-
-  // Synchronize model type (Steve vs Alex)
-  useEffect(() => {
-    if (viewer && skinArray) {
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = 64;
-      tempCanvas.height = 64;
-      const ctx = tempCanvas.getContext("2d");
-      if (ctx) {
-        const imgData = ctx.createImageData(64, 64);
-        imgData.data.set(skinArray);
-        ctx.putImageData(imgData, 0, 0);
-        viewer.loadSkin(tempCanvas.toDataURL(), { model: modelType === "alex" ? "slim" : "classic" });
-      }
-    }
-  }, [viewer, modelType, skinArray]);
+  }, [viewer, skinArray, modelType]);
 
   const handleGenerateSkin = async () => {
     const isOpenAI = selectedModel.startsWith("gpt");
