@@ -38,64 +38,84 @@ export default function PixelEditor3D() {
   const isDrawingRef = useRef(false);
   const controlsRef = useRef<any>(null);
 
-  // Helper to update the WebGL texture with optional pixel grid overlay
-  const updateTexture = useCallback((arr: Uint8Array, showGrid: boolean) => {
+  // Helper to update the WebGL texture with optional pixel grid and brush preview overlays
+  const updateTexture = useCallback((
+    arr: Uint8Array,
+    showGrid: boolean,
+    hover: { x: number; y: number } | null
+  ) => {
     if (!viewer) return;
     const canvas = viewer.skinCanvas;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    if (showGrid) {
-      // Resize texture canvas to 512x512 for sub-pixel clean grid lines
+    // Keep texture canvas size fixed at 512x512 to avoid GPU texture re-allocations
+    if (canvas.width !== 512 || canvas.height !== 512) {
       canvas.width = 512;
       canvas.height = 512;
-      ctx.clearRect(0, 0, 512, 512);
+    }
+    ctx.clearRect(0, 0, 512, 512);
 
-      // Draw original 64x64 skin scaled up to 512x512
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = 64;
-      tempCanvas.height = 64;
-      const tempCtx = tempCanvas.getContext("2d");
-      if (tempCtx) {
-        const imgData = tempCtx.createImageData(64, 64);
-        imgData.data.set(arr);
-        tempCtx.putImageData(imgData, 0, 0);
+    // Draw original 64x64 skin scaled up to 512x512
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = 64;
+    tempCanvas.height = 64;
+    const tempCtx = tempCanvas.getContext("2d");
+    if (tempCtx) {
+      const imgData = tempCtx.createImageData(64, 64);
+      imgData.data.set(arr);
+      tempCtx.putImageData(imgData, 0, 0);
 
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(tempCanvas, 0, 0, 512, 512);
-      }
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(tempCanvas, 0, 0, 512, 512);
+    }
 
-      // Draw clean semi-transparent grid lines at 8px increments
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
+    // Draw clean semi-transparent grid lines at 8px increments
+    if (showGrid) {
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
       ctx.lineWidth = 1;
       ctx.beginPath();
       for (let i = 8; i < 512; i += 8) {
-        // Vertical line
         ctx.moveTo(i, 0);
         ctx.lineTo(i, 512);
-        // Horizontal line
         ctx.moveTo(0, i);
         ctx.lineTo(512, i);
       }
       ctx.stroke();
-    } else {
-      // Revert canvas size to 64x64 for raw rendering
-      canvas.width = 64;
-      canvas.height = 64;
-      const imgData = ctx.createImageData(64, 64);
-      imgData.data.set(arr);
-      ctx.putImageData(imgData, 0, 0);
+    }
+
+    // Draw brush preview indicator on hovered pixels
+    if (hover) {
+      const half = Math.floor(brushSize / 2);
+      const startX = (hover.x - half) * 8;
+      const startY = (hover.y - half) * 8;
+      const w = brushSize * 8;
+      const h = brushSize * 8;
+
+      // Fill preview pixels with semi-transparent color (magenta for eraser)
+      ctx.fillStyle = activeTool === "brush" ? `${selectedColor}66` : "rgba(255, 42, 133, 0.4)";
+      ctx.fillRect(startX, startY, w, h);
+
+      // Contrast outer border (black)
+      ctx.strokeStyle = "#1c1c1d";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(startX, startY, w, h);
+
+      // Contrast inner border (white)
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(startX + 1, startY + 1, w - 2, h - 2);
     }
 
     viewer.skinTexture.needsUpdate = true;
-  }, [viewer]);
+  }, [viewer, brushSize, activeTool, selectedColor]);
 
   // Synchronize skinArray changes (e.g. from Undo/Redo/AI Generation) to the 3D viewer texture
   useEffect(() => {
     if (viewer && skinArray) {
-      updateTexture(skinArray, showGuides);
+      updateTexture(skinArray, showGuides, hoverCoords);
     }
-  }, [viewer, skinArray, showGuides, updateTexture]);
+  }, [viewer, skinArray, showGuides, hoverCoords, updateTexture]);
 
   // Synchronize model type (Steve vs Alex)
   useEffect(() => {
@@ -110,11 +130,11 @@ export default function PixelEditor3D() {
         ctx.putImageData(imgData, 0, 0);
         viewer.loadSkin(tempCanvas.toDataURL(), { model: modelType === "alex" ? "slim" : "classic" })
           .then(() => {
-            updateTexture(skinArray, showGuides);
+            updateTexture(skinArray, showGuides, hoverCoords);
           });
       }
     }
-  }, [viewer, modelType, updateTexture, showGuides, skinArray]);
+  }, [viewer, modelType, updateTexture, showGuides, skinArray, hoverCoords]);
 
   // Sync zoom level (reusing zoom2D store property)
   useEffect(() => {
@@ -178,33 +198,29 @@ export default function PixelEditor3D() {
 
     // Update 3D canvas directly for zero-latency feedback
     if (viewer) {
-      const ctx = viewer.skinCanvas.getContext("2d");
-      if (ctx) {
-        const half = Math.floor(brushSize / 2);
-        const hex = color.replace("#", "");
-        const r = parseInt(hex.substring(0, 2), 16) || 0;
-        const g = parseInt(hex.substring(2, 4), 16) || 0;
-        const b = parseInt(hex.substring(4, 6), 16) || 0;
+      const tempArray = new Uint8Array(skinArray);
+      const half = Math.floor(brushSize / 2);
+      const hex = color.replace("#", "");
+      const r = parseInt(hex.substring(0, 2), 16) || 0;
+      const g = parseInt(hex.substring(2, 4), 16) || 0;
+      const b = parseInt(hex.substring(4, 6), 16) || 0;
 
-        const imgData = ctx.getImageData(0, 0, 64, 64);
-        for (let dy = -half; dy <= half; dy++) {
-          for (let dx = -half; dx <= half; dx++) {
-            const px = coords.x + dx;
-            const py = coords.y + dy;
-            if (px >= 0 && px < 64 && py >= 0 && py < 64) {
-              const idx = (py * 64 + px) * 4;
-              imgData.data[idx] = r;
-              imgData.data[idx + 1] = g;
-              imgData.data[idx + 2] = b;
-              imgData.data[idx + 3] = alpha;
-            }
+      for (let dy = -half; dy <= half; dy++) {
+        for (let dx = -half; dx <= half; dx++) {
+          const px = coords.x + dx;
+          const py = coords.y + dy;
+          if (px >= 0 && px < 64 && py >= 0 && py < 64) {
+            const idx = (py * 64 + px) * 4;
+            tempArray[idx] = r;
+            tempArray[idx + 1] = g;
+            tempArray[idx + 2] = b;
+            tempArray[idx + 3] = alpha;
           }
         }
-        ctx.putImageData(imgData, 0, 0);
-        viewer.skinTexture.needsUpdate = true;
       }
+      updateTexture(tempArray, showGuides, coords);
     }
-  }, [activeTool, selectedColor, brushSize, skinArray, pushUndo, setPixel, viewer]);
+  }, [activeTool, selectedColor, brushSize, skinArray, pushUndo, setPixel, viewer, updateTexture, showGuides]);
 
   // Add mouse event listeners to canvas
   useEffect(() => {
@@ -243,6 +259,7 @@ export default function PixelEditor3D() {
 
     const onMouseUpOrLeave = () => {
       isDrawingRef.current = false;
+      setHoverCoords(null); // Clear preview when leaving or releasing mouse click
       // Re-enable controls for future rotates
       if (controlsRef.current) {
         controlsRef.current.enabled = true;
@@ -284,6 +301,7 @@ export default function PixelEditor3D() {
 
     const onTouchEnd = () => {
       isDrawingRef.current = false;
+      setHoverCoords(null); // Clear preview when releasing touch
       if (controlsRef.current) {
         controlsRef.current.enabled = true;
       }
