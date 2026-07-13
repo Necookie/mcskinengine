@@ -1040,11 +1040,12 @@ textarea {
 
 .preview-3d-box {
   position: relative;
-  width: 170px;
-  height: 220px;
+  width: 100%;
+  height: 280px;
   margin: 0 auto;
   background-color: var(--color-canvas);
   border: 1px solid rgba(24, 24, 27, 0.12);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
