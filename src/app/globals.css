@@ -1339,7 +1339,7 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
   }
 }
 
-/* Dashboard layout classes */
+/* Dashboard layout classes - Docked Window layout */
 .dashboard-container {
   min-height: 100vh;
   background-color: var(--color-surface-soft);
@@ -1354,16 +1354,26 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 .dashboard-main-content {
   flex-grow: 1;
   padding: 24px;
-  max-width: 1100px;
+  max-width: 1000px;
   width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  justify-content: center;
+}
+
+.dashboard-window {
+  border: 4px solid var(--color-primary);
+  background-color: var(--color-canvas);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-shadow: none;
 }
 
 .dashboard-welcome-banner {
-  border: 4px solid var(--color-primary);
+  border: none;
+  border-bottom: 4px solid var(--color-primary);
   background-color: var(--color-block-tweed);
   padding: 20px;
   display: flex;
@@ -1373,8 +1383,8 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 
 .dashboard-grid-layout {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
+  grid-template-columns: 1.8fr 1.2fr;
+  gap: 0;
 }
 
 @media (max-width: 768px) {
@@ -1386,17 +1396,30 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 .dashboard-card-column {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 0;
+  border-right: 4px solid var(--color-primary);
+}
+
+@media (max-width: 768px) {
+  .dashboard-card-column {
+    border-right: none;
+    border-bottom: 4px solid var(--color-primary);
+  }
 }
 
 .dashboard-action-card {
-  border: 4px solid var(--color-primary);
+  border: none;
+  border-bottom: 4px solid var(--color-primary);
   display: flex;
   flex-direction: column;
   padding: 20px;
   gap: 12px;
   position: relative;
   background-color: var(--color-canvas);
+}
+
+.dashboard-action-card:last-child {
+  border-bottom: none;
 }
 
 .dashboard-action-card.steve {
@@ -1425,6 +1448,38 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
   font-weight: 700;
   color: var(--color-primary);
   text-transform: uppercase;
+}
+
+/* Dashboard 3D Preview Panel */
+.dashboard-preview-panel {
+  display: flex;
+  flex-direction: column;
+  background-color: #f4f4f6;
+  height: 100%;
+}
+
+.dashboard-preview-header {
+  height: 36px;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background-color: var(--color-canvas);
+  border-bottom: 4px solid var(--color-primary);
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.dashboard-preview-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
 }
 
 .dashboard-avatar-preview-box {
