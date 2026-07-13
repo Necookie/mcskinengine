@@ -208,7 +208,7 @@ export default function ModelPreview3D() {
           ref={fileInputRef}
           onChange={handleUploadSkin}
           accept="image/png"
-          className="hidden"
+          style={{ display: "none" }}
         />
       </div>
     </div>
