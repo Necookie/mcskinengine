@@ -1115,8 +1115,8 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus, select:f
 
 /* Image Dropzone styles */
 .voxel-dropzone {
-  border: 4px dashed var(--color-primary);
-  padding: 8px;
+  border: 1px dashed rgba(24, 24, 27, 0.2);
+  padding: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1124,8 +1124,9 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus, select:f
   text-align: center;
   cursor: pointer;
   background-color: var(--color-surface-soft);
-  color: var(--color-primary);
+  color: #555558;
   min-height: 90px;
+  border-radius: 8px;
   user-select: none;
 }
 .voxel-dropzone:hover {
