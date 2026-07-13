@@ -13,7 +13,8 @@ import {
   MATERIAL_INDEX,
   applyContourPass,
   BASE_FACE_RECTS,
-  resolveMonoAccentPalette,
+  resolvePaletteByScheme,
+  ColorScheme,
 } from "./shading";
 import { HAIR_BASE, HAIR_STYLES } from "./hairStyles";
 import { EYE_STYLES } from "./eyeStyles";
@@ -60,7 +61,7 @@ export function generateSkinArray(
     detailTexture?: string;
     styleVibe?: 'masculine' | 'feminine' | 'neutral';
     shadingMode?: 'soft' | 'graphic';
-    paletteMode?: 'full' | 'mono-accent';
+    paletteMode?: 'full' | ColorScheme;
   },
   seed?: number
 ): Uint8Array {
@@ -83,8 +84,8 @@ export function generateSkinArray(
   const shadingMode = traits?.shadingMode || "soft";
   const paletteMode = traits?.paletteMode || "full";
 
-  if (paletteMode === "mono-accent") {
-    apparelColors = resolveMonoAccentPalette(apparelColors);
+  if (paletteMode !== "full") {
+    apparelColors = resolvePaletteByScheme(apparelColors, paletteMode);
   }
 
   const seedBase = `${stencilKey}|${hairStyle}|${apparelColors.primary}`;
