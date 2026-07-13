@@ -67,22 +67,88 @@ export interface ApparelColors {
   shoes?: string;
 }
 
+export function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let h = 0, s = 0;
+  const d = max - min;
+  if (d !== 0) {
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      default: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return { h: h * 360, s, l };
+}
+
+export function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: number } {
+  const hh = (((h % 360) + 360) % 360) / 360;
+  if (s === 0) {
+    const v = clamp(Math.round(l * 255));
+    return { r: v, g: v, b: v };
+  }
+  const hue2rgb = (p: number, q: number, t: number) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  return {
+    r: clamp(Math.round(hue2rgb(p, q, hh + 1 / 3) * 255)),
+    g: clamp(Math.round(hue2rgb(p, q, hh) * 255)),
+    b: clamp(Math.round(hue2rgb(p, q, hh - 1 / 3) * 255)),
+  };
+}
+
 /**
- * Collapses an outfit's colors into shades of a single hue derived from
- * `primary`, the way high-contrast/monochrome popular skins read as one
- * cohesive silhouette. The single chroma "accent" is left to the eye
- * color, which this resolver never touches.
+ * Classic color-wheel relationships. Every scheme keeps the outfit's bulk
+ * (secondary/shirt/tie/pants) as pure lightness shades of `primary` - a
+ * true monochrome ramp - and reserves `trim` (and, for split-complementary,
+ * `tie`) as the one genuinely hue-rotated accent. This mirrors how popular
+ * hand-painted skins actually read: one dominant hue for ~80% of the
+ * silhouette, one deliberate color-wheel accent in a small area, never a
+ * scatter of independently-picked colors.
  */
-export function resolveMonoAccentPalette(colors: ApparelColors): ApparelColors {
+export type ColorScheme = 'monochrome' | 'complementary' | 'analogous' | 'split-complementary' | 'triadic';
+
+const SCHEME_ACCENT_HUE_OFFSETS: Record<ColorScheme, number[]> = {
+  monochrome: [],
+  complementary: [180],
+  analogous: [35],
+  'split-complementary': [150, 210],
+  triadic: [120],
+};
+
+function accentColor(baseHsl: { h: number; s: number; l: number }, hueOffset: number): { r: number; g: number; b: number } {
+  // Accents stay vivid and mid-lightness regardless of how dark/light the
+  // base is, so they read as a deliberate color-wheel "pop", not a tint.
+  return hslToRgb(baseHsl.h + hueOffset, Math.max(baseHsl.s, 0.55), 0.55);
+}
+
+/**
+ * Resolves an outfit's full color set from `primary` alone, following one
+ * real color-theory relationship instead of independently-chosen hues.
+ */
+export function resolvePaletteByScheme(colors: ApparelColors, scheme: ColorScheme = 'monochrome'): ApparelColors {
   const base = hexToRgb(colors.primary);
+  const baseHsl = rgbToHsl(base.r, base.g, base.b);
   const shade = (offset: number) => rgbToHex(applyHueShift(base.r, base.g, base.b, offset, false));
+  const offsets = SCHEME_ACCENT_HUE_OFFSETS[scheme];
 
   return {
     ...colors,
     secondary: shade(-22),
-    trim: shade(38),
+    trim: offsets[0] !== undefined ? rgbToHex(accentColor(baseHsl, offsets[0])) : shade(38),
     shirt: shade(-30),
-    tie: shade(-40),
+    tie: offsets[1] !== undefined ? rgbToHex(accentColor(baseHsl, offsets[1])) : shade(-40),
     pants: shade(-15),
     shoes: colors.shoes ? shade(-45) : colors.shoes,
   };
