@@ -136,22 +136,56 @@ function accentColor(baseHsl: { h: number; s: number; l: number }, hueOffset: nu
 /**
  * Resolves an outfit's full color set from `primary` alone, following one
  * real color-theory relationship instead of independently-chosen hues.
+ *
+ * Lightness is set as ABSOLUTE targets, not relative offsets: reference
+ * skins get their punch from a wide value range within one hue (a
+ * near-black hem against a mid torso against a near-white collar), and
+ * relative +-30 shifts of an already-mid primary produced an outfit of
+ * six nearly identical mid-tones - one flat slab.
  */
 export function resolvePaletteByScheme(colors: ApparelColors, scheme: ColorScheme = 'monochrome'): ApparelColors {
   const base = hexToRgb(colors.primary);
   const baseHsl = rgbToHsl(base.r, base.g, base.b);
-  const shade = (offset: number) => rgbToHex(applyHueShift(base.r, base.g, base.b, offset, false));
   const offsets = SCHEME_ACCENT_HUE_OFFSETS[scheme];
+
+  const at = (l: number, sScale = 1) =>
+    rgbToHex(hslToRgb(baseHsl.h, Math.min(1, baseHsl.s * sScale), Math.max(0.05, Math.min(0.95, l))));
+  const L = baseHsl.l;
 
   return {
     ...colors,
-    secondary: shade(-22),
-    trim: offsets[0] !== undefined ? rgbToHex(accentColor(baseHsl, offsets[0])) : shade(38),
-    shirt: shade(-30),
-    tie: offsets[1] !== undefined ? rgbToHex(accentColor(baseHsl, offsets[1])) : shade(-40),
-    pants: shade(-15),
-    shoes: colors.shoes ? shade(-45) : colors.shoes,
+    // One visible step below primary, for hems/cuffs/pockets.
+    secondary: at(L * 0.65),
+    // The light pop: near-white on dark outfits, near-black on light ones.
+    trim: offsets[0] !== undefined ? rgbToHex(accentColor(baseHsl, offsets[0])) : at(L < 0.5 ? 0.85 : 0.15, 0.5),
+    // Inner layer clearly separated from the outer garment.
+    shirt: at(L < 0.5 ? Math.min(0.9, L + 0.35) : Math.max(0.1, L - 0.35), 0.8),
+    tie: offsets[1] !== undefined ? rgbToHex(accentColor(baseHsl, offsets[1])) : at(Math.max(0.08, L * 0.4)),
+    // Legs anchor the silhouette: always distinctly darker than the torso.
+    pants: at(Math.max(0.12, L * 0.5)),
+    shoes: colors.shoes ? at(Math.max(0.06, L * 0.35)) : colors.shoes,
   };
+}
+
+/**
+ * Guarantees two colors read as distinct shapes by pushing the second
+ * one's lightness away from the first when both hue and lightness are
+ * close (e.g. AI picks hairColor identical to the outfit primary and the
+ * head visually melts into the torso).
+ */
+export function ensureValueContrast(
+  fixed: { r: number; g: number; b: number },
+  adjustable: { r: number; g: number; b: number },
+  minLightnessGap: number = 0.18
+): { r: number; g: number; b: number } {
+  const a = rgbToHsl(fixed.r, fixed.g, fixed.b);
+  const b = rgbToHsl(adjustable.r, adjustable.g, adjustable.b);
+  const hueGap = Math.abs(((a.h - b.h + 540) % 360) - 180);
+  if (hueGap > 40) return adjustable; // different hue: already distinct
+  if (Math.abs(a.l - b.l) >= minLightnessGap) return adjustable;
+  // Push away from the fixed color's lightness, toward whichever side has room.
+  const targetL = a.l >= 0.5 ? Math.max(0.08, a.l - minLightnessGap) : Math.min(0.92, a.l + minLightnessGap);
+  return hslToRgb(b.h, b.s, targetL);
 }
 
 /**
