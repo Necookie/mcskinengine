@@ -195,7 +195,7 @@ export default function WorkspacePage() {
             MCSE
           </div>
           <span className="header-title">
-            MCSkinEngine.dev // Voxel Workspace
+            MCSkinEngine Workspace
           </span>
         </div>
 
@@ -221,7 +221,7 @@ export default function WorkspacePage() {
             style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px" }}
             title="Settings"
           >
-            <Settings size={12} />
+            <Settings size={12} strokeWidth={2} />
             <span>Settings</span>
           </button>
           
@@ -237,7 +237,7 @@ export default function WorkspacePage() {
                 className="voxel-btn"
                 style={{ padding: "6px 10px", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: 0, borderWidth: "2px" }}
               >
-                <LogOut size={12} />
+                <LogOut size={12} strokeWidth={2} />
               </button>
             </SignOutButton>
           </div>
@@ -256,14 +256,14 @@ export default function WorkspacePage() {
               className={`tool-btn ${activeTool === "brush" ? "active" : ""}`}
               title="Paint Brush"
             >
-              <Paintbrush size={15} />
+              <Paintbrush size={15} strokeWidth={2} />
             </button>
             <button
               onClick={() => setActiveTool("eraser")}
               className={`tool-btn ${activeTool === "eraser" ? "active" : ""}`}
               title="Eraser"
             >
-              <Eraser size={15} />
+              <Eraser size={15} strokeWidth={2} />
             </button>
           </div>
 
@@ -278,7 +278,7 @@ export default function WorkspacePage() {
               className="tool-btn"
               title="Undo Last Action"
             >
-              <Undo size={15} />
+              <Undo size={15} strokeWidth={2} />
             </button>
             <button
               onClick={redo}
@@ -286,14 +286,14 @@ export default function WorkspacePage() {
               className="tool-btn"
               title="Redo Next Action"
             >
-              <Redo size={15} />
+              <Redo size={15} strokeWidth={2} />
             </button>
             <button
               onClick={handleClearCanvas}
               className="tool-btn hover:text-red-600 hover:border-red-500"
               title="Reset/Clear Canvas"
             >
-              <RotateCcw size={15} />
+              <RotateCcw size={15} strokeWidth={2} />
             </button>
           </div>
 
@@ -307,28 +307,28 @@ export default function WorkspacePage() {
               className={`tool-btn ${showGuides ? "active" : ""}`}
               title="Toggle Symmetry/Grid Guides"
             >
-              <Grid3X3 size={15} />
+              <Grid3X3 size={15} strokeWidth={2} />
             </button>
             <button
               onClick={() => setZoom2D(Math.min(3, zoom2D + 0.25))}
               className="tool-btn"
               title="Zoom In"
             >
-              <ZoomIn size={15} />
+              <ZoomIn size={15} strokeWidth={2} />
             </button>
             <button
               onClick={() => setZoom2D(Math.max(0.5, zoom2D - 0.25))}
               className="tool-btn"
               title="Zoom Out"
             >
-              <ZoomOut size={15} />
+              <ZoomOut size={15} strokeWidth={2} />
             </button>
             <button
               onClick={() => setZoom2D(1)}
               className="tool-btn"
               title="Zoom Reset (Fit)"
             >
-              <Maximize size={15} />
+              <Maximize size={15} strokeWidth={2} />
             </button>
           </div>
         </aside>
