@@ -8,7 +8,7 @@ import { HAIR_STYLES, HAIR_STYLE_KEYS } from "@/lib/hairStyles";
 import { EYE_STYLES, EYE_STYLE_KEYS } from "@/lib/eyeStyles";
 import { PATTERN_KEYS } from "@/lib/shading";
 import { ACCESSORY_KEYS } from "@/lib/accessories";
-import { retrieveAndFormatExamples } from "@/lib/skinRetrieval";
+import { retrieveAndFormatExamples, extractPromptAttributes } from "@/lib/skinRetrieval";
 
 export const runtime = "edge";
 
@@ -101,7 +101,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to decrypt API Key. Please re-enter it." }, { status: 500 });
     }
 
-    const fewShotExamples = await retrieveAndFormatExamples(prompt, 3);
+    const promptAttributes = extractPromptAttributes(prompt);
+    const fewShotExamples = await retrieveAndFormatExamples(prompt, 5);
 
     const stencilList = STENCIL_KEYS.map((k) => `- "${k}": ${STENCILS[k].name} (${STENCILS[k].vibe})`).join("\n");
     const hairList = HAIR_STYLE_KEYS.map((k) => `- "${k}": ${HAIR_STYLES[k].name} (${HAIR_STYLES[k].vibe})`).join("\n");

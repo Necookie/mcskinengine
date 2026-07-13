@@ -239,16 +239,24 @@ export default function AiStudioPage() {
         <main className="dashboard-main-content">
           {/* Welcome/Header Banner */}
           <div className="dashboard-welcome-banner">
-            <div className="text-grid-tag" style={{ color: "var(--color-primary)", marginBottom: "8px" }}>
-              Cognitive Studio
-            </div>
-            <h1 className="text-display-lg" style={{ textTransform: "uppercase", margin: 0, lineHeight: 1.0 }}>
-              AI Skin Generator
-            </h1>
-            <div style={{ marginTop: "8px" }}>
-              <span className="text-grid-tag" style={{ color: "#555558" }}>
-                Active Mesh: {modelType} | Arm Size: {modelType === "steve" ? "4px" : "3px"} | Stencil Base: {role}
-              </span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div className="text-grid-tag" style={{ color: "var(--color-primary)", marginBottom: "8px" }}>
+                  Cognitive Studio
+                </div>
+                <h1 className="text-display-lg" style={{ textTransform: "uppercase", margin: 0, lineHeight: 1.0 }}>
+                  AI Skin Generator
+                </h1>
+                <div style={{ marginTop: "8px" }}>
+                  <span className="text-grid-tag" style={{ color: "#555558" }}>
+                    Active Mesh: {modelType} | Arm Size: {modelType === "steve" ? "4px" : "3px"} | Stencil Base: {role}
+                  </span>
+                </div>
+              </div>
+              <a href="/" className="voxel-btn" style={{ textDecoration: "none" }}>
+                <Home size={14} strokeWidth={2} />
+                <span>Back to Dashboard</span>
+              </a>
             </div>
           </div>
 
@@ -390,35 +398,31 @@ export default function AiStudioPage() {
                 <span className="font-bold">Active Avatar</span>
               </div>
               <div className="dashboard-preview-body">
-                {skinArray ? (
-                  <div className="dashboard-avatar-preview-box">
-                    <ReactSkinview3d
-                      skinUrl=""
-                      height={220}
-                      width={160}
-                      onReady={(viewerInstance: any) => {
-                        if (viewerInstance.skinTexture) {
-                          viewerInstance.skinTexture.minFilter = 1003;
-                          viewerInstance.skinTexture.magFilter = 1003;
-                          viewerInstance.skinTexture.needsUpdate = true;
-                        }
+                <div className="dashboard-avatar-preview-box" key={modelType}>
+                  <ReactSkinview3d
+                    skinUrl=""
+                    height={220}
+                    width={160}
+                    onReady={(viewerInstance: any) => {
+                      if (viewerInstance.skinTexture) {
+                        viewerInstance.skinTexture.minFilter = 1003;
+                        viewerInstance.skinTexture.magFilter = 1003;
+                        viewerInstance.skinTexture.needsUpdate = true;
+                      }
 
-                        viewerInstance.background = 0xffffff;
-                        viewerInstance.autoRotate = true;
-                        viewerInstance.autoRotateSpeed = 0.6;
+                      viewerInstance.background = 0xffffff;
+                      viewerInstance.autoRotate = true;
+                      viewerInstance.autoRotateSpeed = 0.6;
 
-                        import("skinview3d").then((sv) => {
-                          viewerInstance.animations.add(sv.IdleAnimation);
-                          sv.createOrbitControls(viewerInstance);
-                        });
+                      import("skinview3d").then((sv) => {
+                        viewerInstance.animations.add(sv.IdleAnimation);
+                        sv.createOrbitControls(viewerInstance);
+                      });
 
-                        setViewer(viewerInstance);
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="text-grid-tag text-center">Loading 3D mesh...</div>
-                )}
+                      setViewer(viewerInstance);
+                    }}
+                  />
+                </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
                   <button

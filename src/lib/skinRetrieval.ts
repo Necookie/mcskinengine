@@ -18,6 +18,16 @@ interface RetrievedExample {
   description: string;
 }
 
+interface PromptAttributes {
+  colors: string[];
+  brightness: string | null;
+  saturation: string | null;
+  hasStyleMatch: boolean;
+  clothingItems: string[];
+  accessories: string[];
+  explicitParams: Record<string, any>;
+}
+
 const COLOR_KEYWORDS: Record<string, string[]> = {
   red: ["red", "crimson", "scarlet", "ruby", "maroon"],
   blue: ["blue", "navy", "azure", "cyan", "teal"],
@@ -31,13 +41,33 @@ const COLOR_KEYWORDS: Record<string, string[]> = {
   white: ["white", "ivory", "cream", "snow"],
 };
 
-const STYLE_KEYWORDS: Record<string, { brightness?: string; hue?: string; saturation?: string }> = {
-  emo: { brightness: "dark", hue: "black" },
-  goth: { brightness: "dark", hue: "purple" },
+const STYLE_KEYWORDS: Record<string, { brightness?: string; hue?: string; saturation?: string; hairStyles?: string[]; eyeStyles?: string[] }> = {
+  emo: { 
+    brightness: "dark", 
+    hue: "black",
+    hairStyles: ["messy-fringe", "long-straight", "side-part"],
+    eyeStyles: ["narrow-serious", "shadow-2x2", "cool-highlight"]
+  },
+  goth: { 
+    brightness: "dark", 
+    hue: "purple",
+    hairStyles: ["long-straight", "long-curly"],
+    eyeStyles: ["narrow-serious", "shadow-2x2"]
+  },
   dark: { brightness: "dark" },
   edgy: { brightness: "dark" },
-  preppy: { brightness: "light", saturation: "vivid" },
-  prep: { brightness: "light", saturation: "vivid" },
+  preppy: { 
+    brightness: "light", 
+    saturation: "vivid",
+    hairStyles: ["side-part", "parted-curtains", "bob"],
+    eyeStyles: ["classic-simple", "soft-round"]
+  },
+  prep: { 
+    brightness: "light", 
+    saturation: "vivid",
+    hairStyles: ["side-part", "parted-curtains", "bob"],
+    eyeStyles: ["classic-simple", "soft-round"]
+  },
   classy: { brightness: "medium", saturation: "moderate" },
   elegant: { brightness: "light", saturation: "moderate" },
   formal: { brightness: "medium" },
@@ -45,7 +75,11 @@ const STYLE_KEYWORDS: Record<string, { brightness?: string; hue?: string; satura
   chill: { brightness: "medium" },
   relaxed: { brightness: "medium" },
   comfy: { brightness: "medium" },
-  sporty: { saturation: "vivid" },
+  sporty: { 
+    saturation: "vivid",
+    hairStyles: ["short-spiky", "ponytail", "buzz-cut"],
+    eyeStyles: ["cool-highlight", "classic-simple"]
+  },
   athletic: { saturation: "vivid" },
   gym: { saturation: "vivid" },
   active: { saturation: "vivid" },
@@ -63,12 +97,48 @@ const STYLE_KEYWORDS: Record<string, { brightness?: string; hue?: string; satura
   student: { brightness: "medium" },
   school: { brightness: "medium" },
   college: { brightness: "medium" },
-  nerd: { brightness: "light" },
+  nerd: { 
+    brightness: "light",
+    hairStyles: ["side-part", "parted-curtains"],
+    eyeStyles: ["classic-simple"]
+  },
   geek: { brightness: "light" },
   skater: { brightness: "medium" },
   punk: { brightness: "dark" },
   alternative: { brightness: "dark" },
   hipster: { brightness: "medium" },
+};
+
+const CLOTHING_KEYWORDS: Record<string, { stencilKey?: string; primary?: string; secondary?: string; trim?: string }> = {
+  "dress": { stencilKey: "summer-dress" },
+  "white dress": { stencilKey: "summer-dress", primary: "#ffffff", secondary: "#f0f0f0" },
+  "black dress": { stencilKey: "summer-dress", primary: "#1a1a1a", secondary: "#2a2a2a" },
+  "red dress": { stencilKey: "summer-dress", primary: "#cc0000", secondary: "#990000" },
+  "skirt": { stencilKey: "skirt-top" },
+  "hoodie": { stencilKey: "hoodie" },
+  "blazer": { stencilKey: "blazer" },
+  "jacket": { stencilKey: "bomber" },
+  "suit": { stencilKey: "blazer" },
+  "tracksuit": { stencilKey: "tracksuit" },
+  "crewneck": { stencilKey: "crewneck" },
+  "sweater": { stencilKey: "crewneck" },
+  "lab coat": { stencilKey: "labcoat" },
+  "pants": { pants: "#000000" },
+  "black pants": { pants: "#1a1a1a" },
+  "jeans": { pants: "#4a6fa5" },
+  "shorts": { pants: "#5a5a5a" },
+};
+
+const ACCESSORY_KEYWORDS: Record<string, string> = {
+  "tie": "tie",
+  "red tie": "tie",
+  "glasses": "glasses",
+  "headphones": "headphones",
+  "mask": "mask",
+  "beard": "beard",
+  "earrings": "earrings",
+  "necklace": "necklace",
+  "hat": "hat",
 };
 
 const BRIGHTNESS_KEYWORDS: Record<string, string> = {
@@ -82,12 +152,36 @@ const BRIGHTNESS_KEYWORDS: Record<string, string> = {
   vivid: "light",
 };
 
-function extractPromptAttributes(prompt: string): {
-  colors: string[];
-  brightness: string | null;
-  saturation: string | null;
-  hasStyleMatch: boolean;
-} {
+function extractColorForItem(prompt: string, item: string): string | null {
+  const lower = prompt.toLowerCase();
+  const itemIndex = lower.indexOf(item);
+  
+  if (itemIndex === -1) return null;
+  
+  const before = lower.substring(Math.max(0, itemIndex - 30), itemIndex);
+  
+  for (const [color, keywords] of Object.entries(COLOR_KEYWORDS)) {
+    if (keywords.some(kw => before.includes(kw))) {
+      const colorMap: Record<string, string> = {
+        red: "#cc0000",
+        blue: "#3366cc",
+        green: "#339933",
+        yellow: "#cccc00",
+        purple: "#9933cc",
+        pink: "#ff66cc",
+        orange: "#ff9933",
+        brown: "#8b4513",
+        black: "#1a1a1a",
+        white: "#ffffff",
+      };
+      return colorMap[color] || null;
+    }
+  }
+  
+  return null;
+}
+
+export function extractPromptAttributes(prompt: string): PromptAttributes {
   const lower = prompt.toLowerCase();
   
   const colors: string[] = [];
@@ -100,6 +194,8 @@ function extractPromptAttributes(prompt: string): {
   let brightness: string | null = null;
   let saturation: string | null = null;
   let hasStyleMatch = false;
+  let matchedHairStyles: string[] = [];
+  let matchedEyeStyles: string[] = [];
   
   for (const [keyword, attrs] of Object.entries(STYLE_KEYWORDS)) {
     if (lower.includes(keyword)) {
@@ -107,6 +203,8 @@ function extractPromptAttributes(prompt: string): {
       if (attrs.brightness && !brightness) brightness = attrs.brightness;
       if (attrs.saturation && !saturation) saturation = attrs.saturation;
       if (attrs.hue && !colors.includes(attrs.hue)) colors.push(attrs.hue);
+      if (attrs.hairStyles) matchedHairStyles.push(...attrs.hairStyles);
+      if (attrs.eyeStyles) matchedEyeStyles.push(...attrs.eyeStyles);
     }
   }
   
@@ -119,33 +217,85 @@ function extractPromptAttributes(prompt: string): {
     }
   }
   
-  return { colors, brightness, saturation, hasStyleMatch };
+  const clothingItems: string[] = [];
+  const explicitParams: Record<string, any> = {};
+  
+  for (const [keyword, mapping] of Object.entries(CLOTHING_KEYWORDS)) {
+    if (lower.includes(keyword)) {
+      clothingItems.push(keyword);
+      if (mapping.stencilKey) explicitParams.stencilKey = mapping.stencilKey;
+      if (mapping.primary) {
+        const itemColor = extractColorForItem(prompt, keyword);
+        if (itemColor) {
+          explicitParams.primary = itemColor;
+        } else {
+          explicitParams.primary = mapping.primary;
+        }
+      }
+      if (mapping.secondary) explicitParams.secondary = mapping.secondary;
+      if (mapping.trim) explicitParams.trim = mapping.trim;
+      if (mapping.pants) {
+        const pantsColor = extractColorForItem(prompt, keyword);
+        explicitParams.pants = pantsColor || mapping.pants;
+      }
+    }
+  }
+  
+  const accessories: string[] = [];
+  for (const [keyword, accessory] of Object.entries(ACCESSORY_KEYWORDS)) {
+    if (lower.includes(keyword)) {
+      accessories.push(accessory);
+      if (keyword.includes("tie")) {
+        const tieColor = extractColorForItem(prompt, keyword);
+        if (tieColor) explicitParams.tie = tieColor;
+      }
+    }
+  }
+  
+  if (matchedHairStyles.length > 0) {
+    explicitParams.preferredHairStyles = matchedHairStyles;
+  }
+  if (matchedEyeStyles.length > 0) {
+    explicitParams.preferredEyeStyles = matchedEyeStyles;
+  }
+  
+  return { 
+    colors, 
+    brightness, 
+    saturation, 
+    hasStyleMatch,
+    clothingItems,
+    accessories,
+    explicitParams
+  };
 }
 
 async function querySimilarSkins(
-  colors: string[],
-  brightness: string | null,
-  saturation: string | null,
-  hasStyleMatch: boolean,
+  attributes: PromptAttributes,
   limit: number = 5
 ): Promise<SkinReference[]> {
   const conditions: string[] = [];
   const args: any[] = [];
   
-  if (colors.length > 0) {
-    const colorConditions = colors.map(() => "dominant_hue_category = ?").join(" OR ");
+  if (attributes.colors.length > 0) {
+    const colorConditions = attributes.colors.map(() => "dominant_hue_category = ?").join(" OR ");
     conditions.push(`(${colorConditions})`);
-    args.push(...colors);
+    args.push(...attributes.colors);
   }
   
-  if (brightness) {
+  if (attributes.brightness) {
     conditions.push("brightness_category = ?");
-    args.push(brightness);
+    args.push(attributes.brightness);
   }
   
-  if (saturation) {
+  if (attributes.saturation) {
     conditions.push("saturation_category = ?");
-    args.push(saturation);
+    args.push(attributes.saturation);
+  }
+  
+  if (attributes.explicitParams.stencilKey) {
+    conditions.push("json_extract(apparel_result, '$.stencilKey') = ?");
+    args.push(attributes.explicitParams.stencilKey);
   }
   
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
@@ -163,6 +313,25 @@ async function querySimilarSkins(
   
   const result = await db.execute({ sql, args });
   let rows = result.rows as unknown as SkinReference[];
+  
+  if (rows.length < limit && conditions.length > 1) {
+    const relaxedSql = `
+      SELECT id, filename, cluster_id, description, dominant_colors,
+             brightness_category, saturation_category, dominant_hue_category,
+             apparel_result, features_json
+      FROM skin_references
+      WHERE brightness_category = ?
+      ORDER BY RANDOM()
+      LIMIT ?
+    `;
+    const relaxedResult = await db.execute({ 
+      sql: relaxedSql, 
+      args: [attributes.brightness || "medium", limit - rows.length] 
+    });
+    const existingIds = new Set(rows.map(r => r.id));
+    const relaxedRows = (relaxedResult.rows as unknown as SkinReference[]).filter(r => !existingIds.has(r.id));
+    rows = [...rows, ...relaxedRows].slice(0, limit);
+  }
   
   if (rows.length < limit) {
     const fallbackSql = `
@@ -182,17 +351,20 @@ async function querySimilarSkins(
   return rows;
 }
 
-function formatExamplesForPrompt(examples: RetrievedExample[]): string {
+function formatExamplesForPrompt(examples: RetrievedExample[], attributes: PromptAttributes): string {
   if (examples.length === 0) return "";
   
   const formatted = examples.map((ex, i) => {
     const r = ex.apparelResult;
-    return `Reference ${i + 1} (${r.styleVibe || "neutral"} ${r.shadingMode || "soft"} style):
+    return `Reference ${i + 1}:
 ${JSON.stringify({
   stencilKey: r.stencilKey,
   primary: r.primary,
   secondary: r.secondary,
   trim: r.trim,
+  pants: r.pants,
+  shirt: r.shirt,
+  tie: r.tie,
   hairColor: r.hairColor,
   hairStyle: r.hairStyle,
   eyeStyle: r.eyeStyle,
@@ -200,20 +372,50 @@ ${JSON.stringify({
   paletteMode: r.paletteMode,
   detailTexture: r.detailTexture,
   accessories: r.accessories,
+  styleVibe: r.styleVibe,
 }, null, 2)}`;
   }).join("\n\n");
   
-  return `\n\nHere are real reference skins with their design parameters. Use these as inspiration for color palettes, style combinations, and attribute choices — vary your output based on these references:\n\n${formatted}\n`;
+  let instructions = "\n\nCRITICAL: The user requested specific items. You MUST include them:\n";
+  
+  if (attributes.explicitParams.stencilKey) {
+    instructions += `- Use stencilKey: "${attributes.explicitParams.stencilKey}"\n`;
+  }
+  if (attributes.explicitParams.primary) {
+    instructions += `- Primary color must be: ${attributes.explicitParams.primary}\n`;
+  }
+  if (attributes.explicitParams.pants) {
+    instructions += `- Pants color must be: ${attributes.explicitParams.pants}\n`;
+  }
+  if (attributes.explicitParams.tie) {
+    instructions += `- Tie color must be: ${attributes.explicitParams.tie}\n`;
+    if (!attributes.accessories.includes("tie")) {
+      attributes.accessories.push("tie");
+    }
+  }
+  if (attributes.accessories.length > 0) {
+    instructions += `- Must include accessories: ${JSON.stringify(attributes.accessories)}\n`;
+  }
+  if (attributes.explicitParams.preferredHairStyles) {
+    instructions += `- Preferred hair styles: ${attributes.explicitParams.preferredHairStyles.join(", ")}\n`;
+  }
+  if (attributes.explicitParams.preferredEyeStyles) {
+    instructions += `- Preferred eye styles: ${attributes.explicitParams.preferredEyeStyles.join(", ")}\n`;
+  }
+  
+  instructions += `\nHere are reference examples matching the requested style:\n\n${formatted}\n`;
+  
+  return instructions;
 }
 
 export async function retrieveAndFormatExamples(
   userPrompt: string,
-  maxExamples: number = 3
+  maxExamples: number = 5
 ): Promise<string> {
   try {
-    const { colors, brightness, saturation, hasStyleMatch } = extractPromptAttributes(userPrompt);
+    const attributes = extractPromptAttributes(userPrompt);
     
-    const references = await querySimilarSkins(colors, brightness, saturation, hasStyleMatch, maxExamples);
+    const references = await querySimilarSkins(attributes, maxExamples);
     
     if (references.length === 0) {
       return "";
@@ -240,7 +442,7 @@ export async function retrieveAndFormatExamples(
       return "";
     }
     
-    return formatExamplesForPrompt(examples);
+    return formatExamplesForPrompt(examples, attributes);
   } catch (error) {
     console.error("Failed to retrieve skin examples:", error);
     return "";
