@@ -134,8 +134,8 @@ export default function ModelPreview3D() {
         {skinArray ? (
           <ReactSkinview3d
             skinUrl=""
-            height={260}
-            width={200}
+            height={200}
+            width={150}
             onReady={(viewerInstance: any) => {
               // Force NearestFilter for Minecraft crisp pixels
               if (viewerInstance.skinTexture) {
