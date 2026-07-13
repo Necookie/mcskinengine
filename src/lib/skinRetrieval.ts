@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { colorSimilarity } from "./colorNaming";
 
 interface SkinReference {
   id: string;
@@ -6,11 +7,16 @@ interface SkinReference {
   cluster_id: number;
   description: string;
   dominant_colors: string;
-  brightness_category: string;
-  saturation_category: string;
-  dominant_hue_category: string;
+  clothing_hue_category: string;
+  clothing_brightness_category: string;
+  clothing_saturation_category: string;
   apparel_result: string;
   features_json: string;
+}
+
+interface ScoredSkinReference extends SkinReference {
+  _score: number;
+  _apparel: any;
 }
 
 interface RetrievedExample {
@@ -28,6 +34,7 @@ interface ExtractedEntity {
 
 interface PromptAttributes {
   colors: string[];
+  hueBuckets: string[];
   brightness: string | null;
   saturation: string | null;
   hasStyleMatch: boolean;
@@ -68,6 +75,16 @@ const COLOR_KEYWORDS: Record<string, string[]> = {
   black: ["black", "ebony", "charcoal", "jet", "onyx", "midnight"],
   white: ["white", "ivory", "cream", "snow", "pearl", "alabaster"],
   gray: ["gray", "grey", "silver", "slate", "ash", "steel"],
+};
+
+// Maps the color-name buckets above to the clothing_hue_category values
+// actually stored in the DB (see src/lib/colorNaming.ts). Hue is undefined
+// for near-grayscale colors, so black/white/gray map to "neutral" — matching
+// them against a hue bucket like "red" would never hit any row.
+const COLOR_TO_HUE_BUCKET: Record<string, string> = {
+  red: "red", blue: "blue", green: "green", yellow: "yellow",
+  purple: "purple", pink: "pink", orange: "orange", brown: "orange",
+  black: "neutral", white: "neutral", gray: "neutral",
 };
 
 const CLOTHING_PATTERNS: Record<string, { stencilKey: string; category: string; priority: number }> = {
@@ -425,6 +442,46 @@ const BRIGHTNESS_PATTERNS: Record<string, string> = {
   "moderate": "medium",
 };
 
+/**
+ * Finds the color name whose mention ends closest to the end of `before`
+ * (i.e. immediately preceding the item keyword) rather than whichever color
+ * happens to come first in COLOR_MAP's iteration order. Without this, "red
+ * tie, ... black pants" would assign "red" to pants too, since "red" is
+ * simply earlier in COLOR_MAP than "black" and both appear somewhere in the
+ * lookback window.
+ */
+const wordBoundaryCache = new Map<string, RegExp>();
+
+/**
+ * Word-boundary keyword match. Plain `.includes()` false-positives constantly
+ * against short dictionary keys — "suit" inside "tracksuit", "her" inside
+ * "leather", "man" inside "woman", "hat" inside "what" — which silently
+ * corrupts extraction (e.g. "black tracksuit" resolving to a blazer because
+ * "suit" is a higher-priority keyword hiding inside it).
+ */
+function hasWord(text: string, keyword: string): boolean {
+  let re = wordBoundaryCache.get(keyword);
+  if (!re) {
+    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    re = new RegExp(`\\b${escaped}\\b`);
+    wordBoundaryCache.set(keyword, re);
+  }
+  return re.test(text);
+}
+
+function nearestColorHexBefore(before: string): string | null {
+  let bestHex: string | null = null;
+  let bestIndex = -1;
+  for (const [colorName, colorHex] of Object.entries(COLOR_MAP)) {
+    const idx = before.lastIndexOf(colorName);
+    if (idx > bestIndex) {
+      bestIndex = idx;
+      bestHex = colorHex;
+    }
+  }
+  return bestHex;
+}
+
 function extractEntitiesFromPrompt(prompt: string): ExtractedEntity[] {
   const entities: ExtractedEntity[] = [];
   const lower = prompt.toLowerCase();
@@ -463,19 +520,11 @@ function extractEntitiesFromPrompt(prompt: string): ExtractedEntity[] {
   
   // Extract clothing items
   for (const [keyword, mapping] of Object.entries(CLOTHING_PATTERNS)) {
-    if (lower.includes(keyword)) {
-      // Find associated color
-      let color = null;
+    if (hasWord(lower, keyword)) {
       const keywordIndex = lower.indexOf(keyword);
       const before = lower.substring(Math.max(0, keywordIndex - 30), keywordIndex);
-      
-      for (const [colorName, colorHex] of Object.entries(COLOR_MAP)) {
-        if (before.includes(colorName)) {
-          color = colorHex;
-          break;
-        }
-      }
-      
+      const color = nearestColorHexBefore(before);
+
       entities.push({
         type: "clothing",
         value: keyword,
@@ -487,18 +536,11 @@ function extractEntitiesFromPrompt(prompt: string): ExtractedEntity[] {
   
   // Extract accessories
   for (const [keyword, mapping] of Object.entries(ACCESSORY_PATTERNS)) {
-    if (lower.includes(keyword)) {
-      let color = null;
+    if (hasWord(lower, keyword)) {
       const keywordIndex = lower.indexOf(keyword);
       const before = lower.substring(Math.max(0, keywordIndex - 30), keywordIndex);
-      
-      for (const [colorName, colorHex] of Object.entries(COLOR_MAP)) {
-        if (before.includes(colorName)) {
-          color = colorHex;
-          break;
-        }
-      }
-      
+      const color = nearestColorHexBefore(before);
+
       entities.push({
         type: "accessory",
         value: keyword,
@@ -533,7 +575,7 @@ export function extractPromptAttributes(prompt: string): PromptAttributes {
   let matchedVibe: string | null = null;
   
   for (const [keyword, attrs] of Object.entries(STYLE_PATTERNS)) {
-    if (lower.includes(keyword)) {
+    if (hasWord(lower, keyword)) {
       hasStyleMatch = true;
       style = keyword;
       if (attrs.brightness && !brightness) brightness = attrs.brightness;
@@ -552,35 +594,55 @@ export function extractPromptAttributes(prompt: string): PromptAttributes {
   // Extract brightness if not found in style
   if (!brightness) {
     for (const [keyword, category] of Object.entries(BRIGHTNESS_PATTERNS)) {
-      if (lower.includes(keyword)) {
+      if (hasWord(lower, keyword)) {
         brightness = category;
         break;
       }
     }
   }
-  
+
+  // Colors imply a brightness even without an explicit adjective — "black
+  // pants" should bias toward dark reference skins, "white dress" toward light.
+  if (!brightness) {
+    if (colors.includes("black")) brightness = "dark";
+    else if (colors.includes("white")) brightness = "light";
+  }
+
+  // Translate color-name buckets into the clothing_hue_category values
+  // actually stored in the DB (black/white/gray have no hue, so they map
+  // to "neutral" instead of being dropped from matching entirely).
+  const hueBuckets = [...new Set(colors.map((c) => COLOR_TO_HUE_BUCKET[c]).filter((v): v is string => !!v))];
+
   // Extract gender
   let gender: string | null = null;
   for (const [keyword, value] of Object.entries(GENDER_PATTERNS)) {
-    if (lower.includes(keyword)) {
+    if (hasWord(lower, keyword)) {
       gender = value;
       break;
     }
   }
   
-  // Extract age
+  // Extract age. A literal "N year(s) old" always wins over keyword
+  // matching — otherwise "18 year old" would trip the "old" -> elderly
+  // keyword below, since "old" is a substring match on its own.
   let age: string | null = null;
-  for (const [keyword, value] of Object.entries(AGE_PATTERNS)) {
-    if (lower.includes(keyword)) {
-      age = value;
-      break;
+  const numericAgeMatch = lower.match(/(\d{1,3})\s*(?:years?|yrs?)?\s*old/);
+  if (numericAgeMatch) {
+    const n = parseInt(numericAgeMatch[1], 10);
+    age = n < 13 ? "child" : n < 20 ? "teen" : n < 60 ? "adult" : "elderly";
+  } else {
+    for (const [keyword, value] of Object.entries(AGE_PATTERNS)) {
+      if (hasWord(lower, keyword)) {
+        age = value;
+        break;
+      }
     }
   }
   
   // Extract materials
   const materials: string[] = [];
   for (const [keyword, material] of Object.entries(MATERIAL_PATTERNS)) {
-    if (lower.includes(keyword) && !materials.includes(material)) {
+    if (hasWord(lower, keyword) && !materials.includes(material)) {
       materials.push(material);
     }
   }
@@ -588,7 +650,7 @@ export function extractPromptAttributes(prompt: string): PromptAttributes {
   // Extract textures
   const textures: string[] = [];
   for (const [keyword, texture] of Object.entries(TEXTURE_PATTERNS)) {
-    if (lower.includes(keyword) && !textures.includes(texture)) {
+    if (hasWord(lower, keyword) && !textures.includes(texture)) {
       textures.push(texture);
     }
   }
@@ -651,18 +713,11 @@ export function extractPromptAttributes(prompt: string): PromptAttributes {
   
   // Handle bottom wear
   for (const [keyword, mapping] of Object.entries(BOTTOM_PATTERNS)) {
-    if (lower.includes(keyword)) {
-      let pantsColor = mapping.color;
+    if (hasWord(lower, keyword)) {
       const keywordIndex = lower.indexOf(keyword);
       const before = lower.substring(Math.max(0, keywordIndex - 30), keywordIndex);
-      
-      for (const [colorName, colorHex] of Object.entries(COLOR_MAP)) {
-        if (before.includes(colorName)) {
-          pantsColor = colorHex;
-          break;
-        }
-      }
-      
+      const pantsColor = nearestColorHexBefore(before) || mapping.color;
+
       if (pantsColor) {
         explicitParams.pants = pantsColor;
       }
@@ -689,9 +744,10 @@ export function extractPromptAttributes(prompt: string): PromptAttributes {
   // Clean up temporary fields
   delete explicitParams._priority;
   
-  return { 
-    colors, 
-    brightness, 
+  return {
+    colors,
+    hueBuckets,
+    brightness,
     saturation, 
     hasStyleMatch,
     clothingItems,
@@ -706,91 +762,146 @@ export function extractPromptAttributes(prompt: string): PromptAttributes {
   };
 }
 
+const CANDIDATE_POOL_SIZE = 300;
+
+const CANDIDATE_SELECT = `id, filename, cluster_id, description, dominant_colors,
+           clothing_hue_category, clothing_brightness_category, clothing_saturation_category,
+           apparel_result, features_json`;
+
+function buildConditions(attributes: PromptAttributes): { clause: string; args: any[] }[] {
+  const parts: { clause: string; args: any[] }[] = [];
+  if (attributes.hueBuckets.length > 0) {
+    parts.push({
+      clause: `clothing_hue_category IN (${attributes.hueBuckets.map(() => "?").join(",")})`,
+      args: [...attributes.hueBuckets],
+    });
+  }
+  if (attributes.brightness) {
+    parts.push({ clause: "clothing_brightness_category = ?", args: [attributes.brightness] });
+  }
+  if (attributes.explicitParams.stencilKey) {
+    parts.push({ clause: "json_extract(apparel_result, '$.stencilKey') = ?", args: [attributes.explicitParams.stencilKey] });
+  }
+  if (attributes.explicitParams.accessories?.length) {
+    for (const accessory of attributes.explicitParams.accessories) {
+      parts.push({ clause: "json_extract(apparel_result, '$.accessories') LIKE ?", args: [`%"${accessory}"%`] });
+    }
+  }
+  return parts;
+}
+
+/**
+ * Fetches a broad, relevant candidate pool (no pixel_data — that's fetched
+ * separately only for the final winner). Runs a strict AND query first so
+ * rows matching *every* extracted attribute (e.g. hue=blue AND stencil=hoodie)
+ * are guaranteed to be in the pool instead of relying on a random OR'd
+ * sample to happen to include them, then tops up with a looser OR'd pool
+ * for scoring diversity and as a fallback when nothing matches everything.
+ */
+async function fetchCandidatePool(attributes: PromptAttributes): Promise<SkinReference[]> {
+  const conditions = buildConditions(attributes);
+  const rowsById = new Map<string, SkinReference>();
+
+  if (conditions.length > 1) {
+    const clause = conditions.map((c) => c.clause).join(" AND ");
+    const args = conditions.flatMap((c) => c.args);
+    const strict = await db.execute({
+      sql: `SELECT ${CANDIDATE_SELECT} FROM skin_references WHERE ${clause} ORDER BY RANDOM() LIMIT ?`,
+      args: [...args, CANDIDATE_POOL_SIZE],
+    });
+    for (const row of strict.rows as unknown as SkinReference[]) rowsById.set(row.id, row);
+  }
+
+  if (conditions.length > 0 && rowsById.size < CANDIDATE_POOL_SIZE) {
+    const clause = conditions.map((c) => c.clause).join(" OR ");
+    const args = conditions.flatMap((c) => c.args);
+    const loose = await db.execute({
+      sql: `SELECT ${CANDIDATE_SELECT} FROM skin_references WHERE ${clause} ORDER BY RANDOM() LIMIT ?`,
+      args: [...args, CANDIDATE_POOL_SIZE],
+    });
+    for (const row of loose.rows as unknown as SkinReference[]) rowsById.set(row.id, row);
+  }
+
+  // No attributes matched anything specific enough — fall back to a random
+  // pool so the caller still has something to rank/return.
+  if (rowsById.size === 0) {
+    const fallback = await db.execute({
+      sql: `SELECT ${CANDIDATE_SELECT} FROM skin_references ORDER BY RANDOM() LIMIT ?`,
+      args: [CANDIDATE_POOL_SIZE],
+    });
+    for (const row of fallback.rows as unknown as SkinReference[]) rowsById.set(row.id, row);
+  }
+
+  return [...rowsById.values()];
+}
+
+/** Higher is a better match for the extracted prompt attributes. */
+function scoreCandidate(row: SkinReference, attributes: PromptAttributes): ScoredSkinReference {
+  let apparel: any = {};
+  try {
+    apparel = row.apparel_result ? JSON.parse(row.apparel_result) : {};
+  } catch {
+    apparel = {};
+  }
+
+  let score = 0;
+
+  if (attributes.explicitParams.stencilKey && apparel.stencilKey === attributes.explicitParams.stencilKey) {
+    score += 40;
+  }
+
+  // The literal color word tied to the requested garment ("white dress") is
+  // a stronger, more specific signal than the prompt's overall inferred
+  // brightness (e.g. a "dark"-vibe style like "emo" elsewhere in the same
+  // prompt) — so it's weighted well above the generic hue/brightness match
+  // below, and compared by RGB distance rather than exact hex/bucket
+  // equality so a slightly warm "white" in the dataset still scores well
+  // against a pure #ffffff ask instead of getting zero credit.
+  if (attributes.explicitParams.primary && apparel.primary) {
+    score += 35 * Math.max(0, colorSimilarity(attributes.explicitParams.primary, apparel.primary));
+  } else {
+    if (attributes.hueBuckets.includes(row.clothing_hue_category)) score += 20;
+    if (attributes.brightness && row.clothing_brightness_category === attributes.brightness) score += 15;
+  }
+  if (attributes.saturation && row.clothing_saturation_category === attributes.saturation) score += 10;
+
+  const wantedAccessories: string[] = attributes.explicitParams.accessories || [];
+  if (wantedAccessories.length && Array.isArray(apparel.accessories)) {
+    const overlap = wantedAccessories.filter((a) => apparel.accessories.includes(a)).length;
+    score += overlap * 15;
+  }
+
+  if (attributes.gender === "female" && apparel.styleVibe === "feminine") score += 8;
+  if (attributes.gender === "male" && apparel.styleVibe === "masculine") score += 8;
+
+  const preferredHair: string[] = attributes.explicitParams.preferredHairStyles || [];
+  if (preferredHair.includes(apparel.hairStyle)) score += 10;
+  const preferredEyes: string[] = attributes.explicitParams.preferredEyeStyles || [];
+  if (preferredEyes.includes(apparel.eyeStyle)) score += 10;
+
+  if (attributes.textures.length && attributes.textures.includes(apparel.detailTexture)) score += 8;
+
+  // Explicit pants/tie/shirt color asks: reward a close RGB match.
+  for (const field of ["pants", "tie", "shirt"] as const) {
+    const wanted = attributes.explicitParams[field];
+    if (wanted && apparel[field]) {
+      score += 12 * Math.max(0, colorSimilarity(wanted, apparel[field]));
+    }
+  }
+
+  return { ...row, _score: score, _apparel: apparel };
+}
+
+function rankCandidates(rows: SkinReference[], attributes: PromptAttributes): ScoredSkinReference[] {
+  return rows.map((row) => scoreCandidate(row, attributes)).sort((a, b) => b._score - a._score);
+}
+
 async function querySimilarSkins(
   attributes: PromptAttributes,
   limit: number = 5
 ): Promise<SkinReference[]> {
-  const conditions: string[] = [];
-  const args: any[] = [];
-  
-  // Color matching
-  if (attributes.colors.length > 0) {
-    const colorConditions = attributes.colors.map(() => "dominant_hue_category = ?").join(" OR ");
-    conditions.push(`(${colorConditions})`);
-    args.push(...attributes.colors);
-  }
-  
-  // Brightness matching
-  if (attributes.brightness) {
-    conditions.push("brightness_category = ?");
-    args.push(attributes.brightness);
-  }
-  
-  // Saturation matching
-  if (attributes.saturation) {
-    conditions.push("saturation_category = ?");
-    args.push(attributes.saturation);
-  }
-  
-  // Stencil matching
-  if (attributes.explicitParams.stencilKey) {
-    conditions.push("json_extract(apparel_result, '$.stencilKey') = ?");
-    args.push(attributes.explicitParams.stencilKey);
-  }
-  
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
-  
-  const sql = `
-    SELECT id, filename, cluster_id, description, dominant_colors, 
-           brightness_category, saturation_category, dominant_hue_category,
-           apparel_result, features_json
-    FROM skin_references
-    ${whereClause}
-    ORDER BY RANDOM()
-    LIMIT ?
-  `;
-  args.push(limit);
-  
-  const result = await db.execute({ sql, args });
-  let rows = result.rows as unknown as SkinReference[];
-  
-  // Fallback with relaxed constraints
-  if (rows.length < limit && conditions.length > 1) {
-    const relaxedSql = `
-      SELECT id, filename, cluster_id, description, dominant_colors,
-             brightness_category, saturation_category, dominant_hue_category,
-             apparel_result, features_json
-      FROM skin_references
-      WHERE brightness_category = ?
-      ORDER BY RANDOM()
-      LIMIT ?
-    `;
-    const relaxedResult = await db.execute({ 
-      sql: relaxedSql, 
-      args: [attributes.brightness || "medium", limit - rows.length] 
-    });
-    const existingIds = new Set(rows.map(r => r.id));
-    const relaxedRows = (relaxedResult.rows as unknown as SkinReference[]).filter(r => !existingIds.has(r.id));
-    rows = [...rows, ...relaxedRows].slice(0, limit);
-  }
-  
-  // Final fallback
-  if (rows.length < limit) {
-    const fallbackSql = `
-      SELECT id, filename, cluster_id, description, dominant_colors,
-             brightness_category, saturation_category, dominant_hue_category,
-             apparel_result, features_json
-      FROM skin_references
-      ORDER BY RANDOM()
-      LIMIT ?
-    `;
-    const fallbackResult = await db.execute({ sql: fallbackSql, args: [limit - rows.length] });
-    const existingIds = new Set(rows.map(r => r.id));
-    const fallbackRows = (fallbackResult.rows as unknown as SkinReference[]).filter(r => !existingIds.has(r.id));
-    rows = [...rows, ...fallbackRows].slice(0, limit);
-  }
-  
-  return rows;
+  const pool = await fetchCandidatePool(attributes);
+  return rankCandidates(pool, attributes).slice(0, limit);
 }
 
 function formatExamplesForPrompt(examples: RetrievedExample[], attributes: PromptAttributes): string {
@@ -798,7 +909,7 @@ function formatExamplesForPrompt(examples: RetrievedExample[], attributes: Promp
   
   const formatted = examples.map((ex, i) => {
     const r = ex.apparelResult;
-    return `Reference ${i + 1}:
+    return `Reference ${i + 1}${ex.description ? ` (${ex.description})` : ""}:
 ${JSON.stringify({
   stencilKey: r.stencilKey,
   primary: r.primary,
@@ -913,73 +1024,28 @@ export async function retrieveAndFormatExamples(
 
 export async function findBestMatchingReferenceSkin(
   userPrompt: string
-): Promise<{ pixelData: string; apparelResult: any } | null> {
+): Promise<{ pixelData: string; apparelResult: any; description: string } | null> {
   try {
     const attributes = extractPromptAttributes(userPrompt);
-    
-    // Build query conditions based on extracted attributes
-    const conditions: string[] = [];
-    const args: any[] = [];
-    
-    // Match by dominant hue if colors are specified
-    if (attributes.colors.length > 0) {
-      const colorConditions = attributes.colors.map(() => "dominant_hue_category = ?").join(" OR ");
-      conditions.push(`(${colorConditions})`);
-      args.push(...attributes.colors);
-    }
-    
-    // Match by brightness
-    if (attributes.brightness) {
-      conditions.push("brightness_category = ?");
-      args.push(attributes.brightness);
-    }
-    
-    // Match by saturation
-    if (attributes.saturation) {
-      conditions.push("saturation_category = ?");
-      args.push(attributes.saturation);
-    }
-    
-    // Match by stencil key if specified
-    if (attributes.explicitParams.stencilKey) {
-      conditions.push("json_extract(apparel_result, '$.stencilKey') = ?");
-      args.push(attributes.explicitParams.stencilKey);
-    }
-    
-    // Must have pixel data
-    conditions.push("pixel_data IS NOT NULL");
-    
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
-    
-    // Query for the best matching skin with pixel data
-    const sql = `
-      SELECT id, filename, pixel_data, apparel_result
-      FROM skin_references
-      ${whereClause}
-      ORDER BY RANDOM()
-      LIMIT 1
-    `;
-    
-    const result = await db.execute({ sql, args });
-    
-    if (result.rows.length === 0) {
-      return null;
-    }
-    
-    const row = result.rows[0] as any;
-    let apparelResult = null;
-    
-    if (row.apparel_result) {
-      try {
-        apparelResult = JSON.parse(row.apparel_result);
-      } catch (e) {
-        console.error("Failed to parse apparel_result:", e);
-      }
-    }
-    
+    const pool = await fetchCandidatePool(attributes);
+    if (pool.length === 0) return null;
+
+    const ranked = rankCandidates(pool, attributes);
+    // Pick randomly among the top few ties so identical prompts don't always
+    // return the exact same skin, while still respecting the ranking.
+    const topTier = ranked.filter((r) => r._score === ranked[0]._score).slice(0, 5);
+    const winner = topTier[Math.floor(Math.random() * topTier.length)];
+
+    const pixelResult = await db.execute({
+      sql: "SELECT pixel_data FROM skin_references WHERE id = ? AND pixel_data IS NOT NULL",
+      args: [winner.id],
+    });
+    if (pixelResult.rows.length === 0) return null;
+
     return {
-      pixelData: row.pixel_data,
-      apparelResult,
+      pixelData: (pixelResult.rows[0] as any).pixel_data,
+      apparelResult: winner._apparel,
+      description: winner.description,
     };
   } catch (error) {
     console.error("Failed to find matching reference skin:", error);

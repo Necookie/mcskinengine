@@ -42,6 +42,16 @@ export function rgbToHsv(r: number, g: number, b: number): [number, number, numb
   return [h, s, v];
 }
 
+/** 0 (opposite) to 1 (identical) similarity between two hex colors, by RGB distance. */
+export function colorSimilarity(hexA: string, hexB: string): number {
+  if (!/^#[0-9a-fA-F]{6}$/.test(hexA) || !/^#[0-9a-fA-F]{6}$/.test(hexB)) return 0;
+  const [r1, g1, b1] = hexToRgb(hexA);
+  const [r2, g2, b2] = hexToRgb(hexB);
+  const dist = Math.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2);
+  const MAX_DIST = Math.sqrt(3 * 255 ** 2);
+  return 1 - dist / MAX_DIST;
+}
+
 /** Nearest named color to a hex value, by squared RGB distance. */
 export function nearestColorName(hex: string): string {
   if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) return "neutral";
@@ -61,7 +71,11 @@ export function nearestColorName(hex: string): string {
 
 export function categorizeHue(hex: string): string {
   const [r, g, b] = hexToRgb(hex);
-  const [h, s] = rgbToHsv(r, g, b);
+  const [h, s, v] = rgbToHsv(r, g, b);
+  // HSV saturation is unstable near black: e.g. #001000 has v≈0.06 but
+  // s=1.0 (a single nonzero channel divided by a tiny max), which would
+  // otherwise read as a "vivid green" instead of the near-black it is.
+  if (v < 0.08) return "neutral";
   // Hue is meaningless for near-grayscale colors (black/white/gray) — without
   // this they'd fall through to "red" (hue defaults to 0), silently polluting
   // every red-clothing match with black and white items.
