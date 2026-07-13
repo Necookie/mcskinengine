@@ -52,6 +52,42 @@ export function applyHueShift(
   return { r: targetR, g: targetG, b: targetB };
 }
 
+function rgbToHex(c: { r: number; g: number; b: number }): string {
+  const toHex = (v: number) => clamp(Math.round(v)).toString(16).padStart(2, '0');
+  return `#${toHex(c.r)}${toHex(c.g)}${toHex(c.b)}`;
+}
+
+export interface ApparelColors {
+  primary: string;
+  secondary: string;
+  trim: string;
+  shirt: string;
+  tie: string;
+  pants: string;
+  shoes?: string;
+}
+
+/**
+ * Collapses an outfit's colors into shades of a single hue derived from
+ * `primary`, the way high-contrast/monochrome popular skins read as one
+ * cohesive silhouette. The single chroma "accent" is left to the eye
+ * color, which this resolver never touches.
+ */
+export function resolveMonoAccentPalette(colors: ApparelColors): ApparelColors {
+  const base = hexToRgb(colors.primary);
+  const shade = (offset: number) => rgbToHex(applyHueShift(base.r, base.g, base.b, offset, false));
+
+  return {
+    ...colors,
+    secondary: shade(-22),
+    trim: shade(38),
+    shirt: shade(-30),
+    tie: shade(-40),
+    pants: shade(-15),
+    shoes: colors.shoes ? shade(-45) : colors.shoes,
+  };
+}
+
 /**
  * Deterministic hash and value-noise primitives used to break up repetitive
  * procedural shading/texture patterns without relying on Math.random().
@@ -131,6 +167,7 @@ export type PatternType =
   | 'corduroy'
   | 'ribbed'
   | 'leather'
+  | 'grunge'
   | 'none';
 
 export const PATTERN_KEYS: PatternType[] = [
@@ -143,6 +180,7 @@ export const PATTERN_KEYS: PatternType[] = [
   'corduroy',
   'ribbed',
   'leather',
+  'grunge',
   'none',
 ];
 
@@ -193,6 +231,12 @@ export function patternOffset(pattern: PatternType, x: number, y: number, seed: 
       const base = valueNoise2(x, y, 3, seed) * 10 - 5;
       const sheen = hash2(x, y, seed + 2) > 0.95 ? 10 : 0;
       return base + sheen;
+    }
+    case 'grunge': {
+      // Irregular mottled/splotchy noise (worn fabric), not a repeating
+      // tile: a handful of dark blotches over an otherwise flat field.
+      const n = valueNoise2(x, y, 3, seed);
+      return n > 0.62 ? -12 : n < 0.28 ? 5 : 0;
     }
     case 'none':
     default: {
@@ -254,6 +298,12 @@ export interface ShadeOptions {
   seed?: number;
   lightDir?: 'top-left' | 'top' | 'top-right';
   aoEdges?: boolean;
+  /**
+   * 'soft' (default) is the dithered multi-band ramp. 'graphic' collapses
+   * non-skin materials to a hard two-tone lit/shadow split with no dither,
+   * matching the cel-shaded look of high-contrast monochrome skins.
+   */
+  mode?: 'soft' | 'graphic';
 }
 
 export function applyVolumeShaderV2(
@@ -289,9 +339,17 @@ export function applyVolumeShaderV2(
   const vertical = (1 - pctY) * 12 - 6;
   const horizontal = Math.sin(sinePhase * Math.PI) * 14 - 7;
 
+  const mode = opts.mode ?? 'soft';
+
   let form: number;
   let pattern_: number;
-  if (isSkin) {
+  if (!isSkin && mode === 'graphic') {
+    // Hard two-tone cel shading: one flat lit mass, one flat shadow mass,
+    // no dither. The light-direction gradient still decides which side
+    // falls in shadow, it's just binarized instead of banded.
+    form = vertical + horizontal < 0 ? -14 : 0;
+    pattern_ = pattern === 'grunge' ? patternOffset(pattern, x, y, seed) : 0;
+  } else if (isSkin) {
     // Clean 3-tone ramp (base / core-shadow / highlight) so faces and bare
     // limbs read as deliberate flat shapes instead of noisy dithered mush.
     const raw = quantizeShade(vertical + horizontal, x, y, 5, false);
