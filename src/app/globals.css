@@ -534,7 +534,7 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus, select:f
 /* Header styles */
 .workspace-header {
   height: 48px;
-  border-bottom: 4px solid var(--color-primary);
+  border-bottom: 1px solid rgba(24, 24, 27, 0.12);
   background-color: var(--color-canvas);
   display: flex;
   justify-content: space-between;
@@ -552,22 +552,23 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus, select:f
 }
 
 .header-logo {
-  background-color: var(--color-block-alex);
+  background-color: var(--color-primary);
   padding: 4px 8px;
-  border: 2px solid var(--color-primary);
-  font-family: var(--font-mono);
+  border: none;
+  font-family: var(--font-sans);
   font-weight: 700;
   font-size: 11px;
-  color: var(--color-primary);
+  color: var(--color-canvas);
   text-transform: uppercase;
+  border-radius: 4px;
 }
 
 .header-title {
-  font-weight: 700;
+  font-weight: 600;
   font-size: 11px;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   color: #555558;
 }
 
