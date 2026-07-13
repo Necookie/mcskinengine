@@ -507,6 +507,13 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus, select:f
   border-color: var(--color-accent-ai) !important;
 }
 
+textarea {
+  vertical-align: top !important;
+  padding: 10px 12px !important;
+  line-height: 1.5 !important;
+  resize: vertical;
+}
+
 /* Tactile button overlays */
 .btn-accent {
   background-color: var(--color-accent-ai) !important;
