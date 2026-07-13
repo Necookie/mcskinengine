@@ -149,7 +149,17 @@ export function generateSkinArray(
   const resolvedEyeStyle = EYE_STYLES[eyeStyle] || EYE_STYLES["cool-highlight"];
   resolvedEyeStyle.draw({
     setPixel: (x, y, r, g, b, a = 255, applyShade = true) => setPixel(x, y, r, g, b, a, undefined, false, 'none', applyShade, 'top', 'eye'),
-    fillRect: (x1, y1, x2, y2, r, g, b, a = 255, isSkin = false) => fillRect(x1, y1, x2, y2, r, g, b, a, isSkin, 'none', 'top', isSkin ? 'skin' : 'eye'),
+    // Eyes are tiny (2-3px) stylized shapes, not lit surfaces: routing them
+    // through the engine's fillRect would apply the cloth dither/volume
+    // shader (isSkin=false) and speckle the iris with noise. Only actual
+    // skin fills (under-eye shadow) get the clean skin shading ramp.
+    fillRect: (x1, y1, x2, y2, r, g, b, a = 255, isSkin = false) => {
+      for (let yy = y1; yy <= y2; yy++) {
+        for (let xx = x1; xx <= x2; xx++) {
+          setPixel(xx, yy, r, g, b, a, undefined, isSkin, 'none', isSkin, 'top', isSkin ? 'skin' : 'eye');
+        }
+      }
+    },
     eyeRgb,
     skinRgb,
   });
