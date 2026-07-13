@@ -401,14 +401,14 @@ export default function DashboardPage() {
               <button
                 onClick={() => setSettingsOpen(false)}
                 className="voxel-btn"
-                style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px", backgroundColor: "#fff" }}
+                style={{ padding: "6px 12px", fontSize: "10px", borderRadius: "6px", borderWidth: "2px", backgroundColor: "#fff" }}
               >
                 Cancel
               </button>
               <button 
                 onClick={handleSaveSettings} 
                 className="voxel-btn btn-primary"
-                style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px" }}
+                style={{ padding: "6px 12px", fontSize: "10px", borderRadius: "6px", borderWidth: "2px" }}
               >
                 Save Key
               </button>
