@@ -394,8 +394,8 @@ export default function AiStudioPage() {
                   <div className="dashboard-avatar-preview-box">
                     <ReactSkinview3d
                       skinUrl=""
-                      height={150}
-                      width={110}
+                      height={220}
+                      width={160}
                       onReady={(viewerInstance: any) => {
                         if (viewerInstance.skinTexture) {
                           viewerInstance.skinTexture.minFilter = 1003;
