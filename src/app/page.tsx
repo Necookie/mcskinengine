@@ -161,7 +161,7 @@ export default function DashboardPage() {
         <main className="dashboard-main-content">
           <div className="dashboard-window">
             {/* Welcome Banner */}
-            <div className="dashboard-welcome-banner" style={{ padding: "32px 24px" }}>
+            <div className="dashboard-welcome-banner">
               <div className="text-grid-tag" style={{ color: "var(--color-primary)", marginBottom: "8px" }}>
                 Active Session
               </div>
@@ -180,7 +180,7 @@ export default function DashboardPage() {
               {/* Column 1: Action Cards */}
               <div className="dashboard-card-column">
                 {/* Launch Editor Card */}
-                <div className="dashboard-action-card steve" style={{ padding: "28px 24px", gap: "16px" }}>
+                <div className="dashboard-action-card steve">
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
                       <span className="text-grid-tag" style={{ color: "var(--color-primary)", display: "block", marginBottom: "6px" }}>
@@ -206,7 +206,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* AI Generator Card */}
-                <div className="dashboard-action-card alex" style={{ padding: "28px 24px", gap: "16px" }}>
+                <div className="dashboard-action-card alex">
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
                       <span className="text-grid-tag" style={{ color: "var(--color-primary)", display: "block", marginBottom: "6px" }}>
@@ -232,7 +232,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Credentials / Keys Card */}
-                <div className="dashboard-action-card" style={{ padding: "28px 24px", gap: "16px" }}>
+                <div className="dashboard-action-card">
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
                       <span className="text-grid-tag" style={{ color: "var(--color-primary)", display: "block", marginBottom: "6px" }}>
@@ -276,12 +276,12 @@ export default function DashboardPage() {
 
               {/* Column 2: 3D Preview Panel */}
               <div className="dashboard-preview-panel">
-                <div className="dashboard-preview-header" style={{ padding: "12px 24px", height: "auto" }}>
+                <div className="dashboard-preview-header">
                   <span className="text-grid-tag" style={{ color: "var(--color-primary)", fontWeight: 700 }}>
                     Active Mannequin
                   </span>
                 </div>
-                <div className="dashboard-preview-body" style={{ padding: "28px 24px" }}>
+                <div className="dashboard-preview-body">
                   {skinArray ? (
                     <div className="dashboard-avatar-preview-box">
                       <ReactSkinview3d
