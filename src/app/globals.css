@@ -34,6 +34,20 @@ body {
 }
 
 /* Typography styles */
+.text-display-xl {
+  font-size: 86px;
+  font-weight: 340;
+  line-height: 1.0;
+  letter-spacing: -1.72px;
+}
+
+.text-display-lg {
+  font-size: 64px;
+  font-weight: 340;
+  line-height: 1.1;
+  letter-spacing: -0.96px;
+}
+
 .text-title {
   font-size: 48px;
   font-weight: 700;
@@ -66,7 +80,7 @@ body {
   font-size: 11px;
   font-weight: 500;
   line-height: 1.0;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.54px;
   text-transform: uppercase;
 }
 
@@ -74,7 +88,7 @@ body {
 .voxel-panel {
   border: 4px solid var(--color-border-flat);
   background-color: var(--color-canvas);
-  border-radius: 0px;
+  border-radius: 16px;
   position: relative;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
@@ -88,7 +102,7 @@ body {
   background-color: var(--color-canvas);
   padding: 8px 16px;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 9999px;
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -311,7 +325,7 @@ body {
 .segmented-control {
   display: flex;
   border: 2px solid var(--color-primary);
-  border-radius: 2px;
+  border-radius: 6px;
   overflow: hidden;
   background-color: var(--color-canvas);
   width: 100%;
@@ -456,8 +470,8 @@ body {
 }
 
 /* Retro flat inputs */
-textarea, input[type="text"], input[type="password"] {
-  border-radius: 2px !important;
+textarea, input[type="text"], input[type="password"], select {
+  border-radius: 6px !important;
   border: 2px solid var(--color-primary) !important;
   background: #ffffff !important;
   box-shadow: none !important;
@@ -467,7 +481,7 @@ textarea, input[type="text"], input[type="password"] {
   font-family: var(--font-sans) !important;
 }
 
-textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
+textarea:focus, input[type="text"]:focus, input[type="password"]:focus, select:focus {
   background-color: #ffffff !important;
   border-color: var(--color-primary) !important;
 }
@@ -1339,55 +1353,144 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
   }
 }
 
-/* Dashboard layout classes - Docked Window layout */
+/* Dashboard layout classes - Bento Window layout */
 .dashboard-container {
   min-height: 100vh;
+  background-color: var(--color-surface-soft);
+}
+
+.dashboard-layout-wrap {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  padding: 12px;
+  gap: 12px;
+  overflow: hidden;
   background-color: var(--color-surface-soft);
   background-image: 
     linear-gradient(rgba(28, 28, 29, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(28, 28, 29, 0.05) 1px, transparent 1px);
   background-size: 16px 16px;
-  display: flex;
-  flex-direction: column;
 }
 
-.dashboard-main-content {
-  flex-grow: 1;
-  padding: 24px;
-  max-width: 1000px;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+@media (max-width: 768px) {
+  .dashboard-layout-wrap {
+    flex-direction: column;
+    overflow-y: auto;
+    height: auto;
+    padding: 8px;
+    gap: 8px;
+  }
 }
 
-.dashboard-window {
+/* Dashboard Sidebar */
+.dashboard-sidebar {
+  width: 220px;
   border: 4px solid var(--color-primary);
+  border-radius: 16px;
   background-color: var(--color-canvas);
   display: flex;
   flex-direction: column;
+  padding: 20px;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .dashboard-sidebar {
+    width: 100%;
+  }
+}
+
+.sidebar-brand {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-grow: 1;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: none;
+  text-decoration: none;
+}
+
+.sidebar-link:hover {
+  background-color: var(--color-surface-soft);
+  border-color: var(--color-primary);
+}
+
+.sidebar-link.active {
+  background-color: var(--color-primary);
+  color: var(--color-canvas);
+  border-color: var(--color-primary);
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 2px solid var(--color-surface-soft);
+  padding-top: 16px;
+}
+
+/* Dashboard main content */
+.dashboard-main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  min-width: 0;
+  padding: 0;
+}
+
+.dashboard-window {
+  border: none;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  box-shadow: none;
+  gap: 12px;
 }
 
 .dashboard-welcome-banner {
-  border: none;
-  border-bottom: 4px solid var(--color-primary);
+  border: 4px solid var(--color-primary);
+  border-radius: 16px;
   background-color: var(--color-block-tweed);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .dashboard-grid-layout {
   display: grid;
   grid-template-columns: 1.8fr 1.2fr;
-  gap: 0;
+  gap: 12px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .dashboard-grid-layout {
     grid-template-columns: 1fr;
   }
@@ -1396,30 +1499,19 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 .dashboard-card-column {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  border-right: 4px solid var(--color-primary);
-}
-
-@media (max-width: 768px) {
-  .dashboard-card-column {
-    border-right: none;
-    border-bottom: 4px solid var(--color-primary);
-  }
+  gap: 12px;
+  border-right: none;
 }
 
 .dashboard-action-card {
-  border: none;
-  border-bottom: 4px solid var(--color-primary);
+  border: 4px solid var(--color-primary);
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   padding: 20px;
   gap: 12px;
   position: relative;
   background-color: var(--color-canvas);
-}
-
-.dashboard-action-card:last-child {
-  border-bottom: none;
 }
 
 .dashboard-action-card.steve {
@@ -1452,10 +1544,12 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 
 /* Dashboard 3D Preview Panel */
 .dashboard-preview-panel {
+  border: 4px solid var(--color-primary);
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   background-color: #f4f4f6;
-  height: 100%;
+  overflow: hidden;
 }
 
 .dashboard-preview-header {
@@ -1488,6 +1582,7 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
   margin: 0 auto;
   background-color: var(--color-canvas);
   border: 4px solid var(--color-primary);
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
