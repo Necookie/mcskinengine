@@ -82,7 +82,7 @@ export default function TraitSelector() {
           <span className="trait-card-title">Institutional Role</span>
           <span className="trait-card-subtitle">Stencil Base</span>
         </div>
-        <div className="segmented-control" role="radiogroup" aria-label="Institutional role">
+        <div className="roles-grid" role="radiogroup" aria-label="Institutional role">
           {ROLES.map((r) => {
             const Icon = r.icon;
             const isActive = role === r.key;
@@ -90,7 +90,7 @@ export default function TraitSelector() {
               <button
                 key={r.key}
                 onClick={() => handleRoleChange(r.key)}
-                className={`segmented-item ${isActive ? "active" : ""}`}
+                className={`role-btn ${isActive ? "active" : ""}`}
                 title={r.label}
                 role="radio"
                 aria-checked={isActive}
