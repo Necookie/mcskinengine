@@ -442,6 +442,16 @@ export function generateSkinArray(
     fillRect(16, 63, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, 'none', 'top', 'shoes');
   }
 
+  // Long hair drapes in front of the torso, so it has to be painted last -
+  // after the base torso layer AND the outfit's overlay regions - or it
+  // would be silently painted over the moment the body/garment finishes.
+  if (resolvedHairStyle.shoulderRects) {
+    for (const rect of resolvedHairStyle.shoulderRects) {
+      const c = rect.shade ? applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, rect.shade, false) : hairRgb;
+      fillRect(rect.x1, rect.y1, rect.x2, rect.y2, c.r, c.g, c.b, 255, false, 'none', 'top', 'hair');
+    }
+  }
+
   applyContourPass(array, materialMap, BASE_FACE_RECTS);
 
   return array;
