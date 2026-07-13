@@ -1495,10 +1495,10 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus, select:f
 
 .dashboard-welcome-banner {
   border: none;
-  border-bottom: 4px solid var(--color-primary);
+  border-bottom: 1px solid rgba(24, 24, 27, 0.12);
   border-radius: 0;
-  background-color: var(--color-block-tweed);
-  padding: 24px 32px;
+  background-color: var(--color-canvas);
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 6px;
