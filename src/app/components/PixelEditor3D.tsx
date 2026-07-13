@@ -361,14 +361,14 @@ export default function PixelEditor3D() {
       {/* 3D CANVAS CONTAINER */}
       <div className="canvas-board-outer">
         <div 
-          className="canvas-board-wrap border-4 border-[#1c1c1d] bg-[#ffffff] relative flex items-center justify-center overflow-hidden w-full h-full" 
-          style={{ maxWidth: "380px", maxHeight: "380px" }}
+          className="canvas-board-wrap border border-zinc-200 bg-[#ffffff] relative flex items-center justify-center overflow-hidden w-full h-full" 
+          style={{ maxWidth: "380px", maxHeight: "380px", borderRadius: "12px" }}
         >
           {skinArray ? (
             <ReactSkinview3d
               skinUrl=""
-              height={280}
-              width={280}
+              height={360}
+              width={360}
               onReady={(viewerInstance: any) => {
                 // NearestFilter for pixel crispness
                 if (viewerInstance.skinTexture) {
@@ -379,6 +379,9 @@ export default function PixelEditor3D() {
 
                 // Set background of 3D editor scene to white
                 viewerInstance.background = 0xffffff;
+
+                // Adjust camera position slightly back to avoid clipping
+                viewerInstance.camera.position.set(0, 2, 20.0);
 
                 // Setup OrbitControls (Left Click on background to Rotate, Left/Right Click to Rotate, Left Click on character to Paint)
                 import("skinview3d").then((sv) => {
