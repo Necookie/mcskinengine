@@ -69,11 +69,72 @@ export default function WorkspacePage() {
 
   const [consoleExpanded, setConsoleExpanded] = useState(false);
   const [showAiSetup, setShowAiSetup] = useState(true);
+  const [hideSidebars, setHideSidebars] = useState(false);
 
   // Initialize Setup Guide state depending on keys
   useEffect(() => {
     setShowAiSetup(!hasGeminiKey && !hasOpenaiKey);
   }, [hasGeminiKey, hasOpenaiKey]);
+
+  // Keyboard Shortcuts Hook
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore shortcuts if the user is typing in a form input
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA" || activeEl.tagName === "SELECT")) {
+        return;
+      }
+
+      const key = e.key.toLowerCase();
+
+      // Tab: Toggle sidebars collapse
+      if (e.key === "Tab") {
+        e.preventDefault();
+        setHideSidebars((prev) => !prev);
+        return;
+      }
+
+      // Ctrl+Z / Ctrl+Y: Undo/Redo
+      if ((e.ctrlKey || e.metaKey) && key === "z") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          if (redoStack.length > 0) redo();
+        } else {
+          if (undoStack.length > 0) undo();
+        }
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && key === "y") {
+        e.preventDefault();
+        if (redoStack.length > 0) redo();
+        return;
+      }
+
+      // B or P: Paintbrush/Draw tool
+      if (key === "b" || key === "p") {
+        e.preventDefault();
+        setActiveTool("brush");
+        return;
+      }
+
+      // E: Eraser tool
+      if (key === "e") {
+        e.preventDefault();
+        setActiveTool("eraser");
+        return;
+      }
+
+      // G: Toggle guides
+      if (key === "g") {
+        e.preventDefault();
+        setShowGuides(!showGuides);
+        return;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [undoStack, redoStack, showGuides, undo, redo, setActiveTool, setShowGuides]);
 
   const toggleSection = (sec: "ai" | "config" | "preview") => {
     setSections(prev => ({ ...prev, [sec]: !prev[sec] }));
@@ -253,7 +314,7 @@ export default function WorkspacePage() {
       {/* WORKSPACE MAIN COLUMNS */}
       <div className="workspace-main">
         {/* COLUMN 1: LEFT SIDEBAR (TOOL DOCK) */}
-        <aside className="tool-dock">
+        <aside className="tool-dock" style={{ display: hideSidebars ? "none" : "flex" }}>
           {/* Drawing Tools */}
           <div className="tool-dock-section">
             <span className="tool-dock-label">Tools</span>
@@ -504,7 +565,7 @@ export default function WorkspacePage() {
         </main>
 
         {/* COLUMN 3: RIGHT SIDEBAR (FLOATING CONTROL CARDS) */}
-        <aside className="right-sidebar-container custom-scrollbar">
+        <aside className="right-sidebar-container custom-scrollbar" style={{ display: hideSidebars ? "none" : "flex" }}>
           {/* Card A: 3D Model Preview (Always Visible at the top) */}
           <div className="workspace-card">
             <div className="card-header" style={{ borderLeft: "2px solid var(--color-primary)", cursor: "default" }}>
