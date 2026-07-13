@@ -1,0 +1,8 @@
+# Reference data - large generated files
+*.json
+*.sql
+*.pkl
+
+# Keep only the scripts and this gitignore
+!*.py
+!.gitignore
