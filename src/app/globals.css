@@ -489,6 +489,8 @@ body {
 
 /* Retro flat inputs */
 textarea, input[type="text"], input[type="password"], select {
+  width: 100% !important;
+  box-sizing: border-box !important;
   border-radius: 8px !important;
   border: 1px solid rgba(24, 24, 27, 0.12) !important;
   background: #ffffff !important;
