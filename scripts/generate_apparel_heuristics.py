@@ -39,21 +39,48 @@ def is_skin_tone(r: int, g: int, b: int) -> bool:
 
 
 def pick_stencil(features: dict, cluster_id: int) -> str:
-    """Pick stencil based on body complexity and cluster diversity."""
+    """Pick stencil based on body complexity, arm coverage, and torso regions."""
     body_var = features['regional']['body']['color_variance']
     n_colors = len([d for d in features['palette']['distribution'] if d > 0.05])
+    
+    # Check arm coverage for sleeve detection
+    right_arm_coverage = features['regional'].get('right_arm', {}).get('coverage', 0)
+    left_arm_coverage = features['regional'].get('left_arm', {}).get('coverage', 0)
+    avg_arm_coverage = (right_arm_coverage + left_arm_coverage) / 2
+    
+    # Check torso regions for clothing layers
+    torso_upper = features['regional'].get('torso_upper', {})
+    torso_lower = features['regional'].get('torso_lower', {})
+    upper_var = torso_upper.get('color_variance', 0)
+    lower_var = torso_lower.get('color_variance', 0)
+    torso_layer_diff = abs(upper_var - lower_var)
     
     # Complexity score
     complexity = (body_var / 1000) + (n_colors / 8)
     
+    # Determine coverage level
+    has_sleeves = avg_arm_coverage > 0.6
+    has_layers = torso_layer_diff > 200
+    
     if complexity > 1.5:
-        options = ['jacket', 'armor_plate', 'blazer']
+        if has_layers:
+            options = ['blazer', 'labcoat', 'bomber']
+        elif has_sleeves:
+            options = ['hoodie', 'bomber', 'blazer']
+        else:
+            options = ['tracksuit', 'hoodie', 'crewneck']
     elif complexity > 1.0:
-        options = ['hoodie', 'robe', 'jacket']
+        if has_sleeves:
+            options = ['hoodie', 'crewneck', 'tracksuit']
+        else:
+            options = ['crewneck', 'summer-dress', 'hoodie']
     elif complexity > 0.5:
-        options = ['tshirt', 'hoodie', 'dress']
+        if has_sleeves:
+            options = ['crewneck', 'hoodie', 'tracksuit']
+        else:
+            options = ['summer-dress', 'skirt-top', 'crewneck']
     else:
-        options = ['dress', 'tshirt', 'tank_top']
+        options = ['summer-dress', 'skirt-top', 'crewneck']
     
     # Use cluster_id for diversity within same complexity
     return options[cluster_id % len(options)]
@@ -63,14 +90,26 @@ def pick_hair_style(features: dict, cluster_id: int) -> str:
     """Pick hair style based on head region characteristics."""
     head_var = features['regional']['head']['color_variance']
     head_coverage = features['regional']['head']['coverage']
+    head_side = features['regional'].get('head_side', {})
+    side_coverage = head_side.get('coverage', 0)
+    side_var = head_side.get('color_variance', 0)
     brightness = features['statistics']['avg_brightness']
     
-    if head_coverage < 0.2:
+    # Combined head coverage (front + side)
+    total_head_coverage = (head_coverage + side_coverage) / 2
+    
+    if total_head_coverage < 0.2:
         # Low coverage = bald or very short hair
         options = ['buzz-cut', 'short-spiky', 'undercut']
-    elif head_var > 500:
+    elif head_var > 500 or side_var > 500:
         # High variance = messy or multi-toned
-        options = ['messy-fringe', 'long-curly', 'spiky']
+        options = ['messy-fringe', 'long-curly', 'short-spiky']
+    elif total_head_coverage > 0.8:
+        # Full coverage = long hair
+        if brightness < 0.3:
+            options = ['long-straight', 'long-curly', 'ponytail']
+        else:
+            options = ['long-curly', 'twin-braids', 'ponytail']
     elif brightness < 0.3:
         # Dark hair
         options = ['long-straight', 'bob', 'ponytail']
@@ -82,18 +121,46 @@ def pick_hair_style(features: dict, cluster_id: int) -> str:
 
 
 def pick_eye_style(features: dict, cluster_id: int) -> str:
-    """Pick eye style based on brightness and saturation."""
+    """Pick eye style based on face_eyes region characteristics."""
     brightness = features['statistics']['avg_brightness']
     saturation = features['statistics']['avg_saturation']
     
-    if brightness < 0.3:
-        options = ['narrow-serious', 'shadow-2x2', 'cool-highlight']
-    elif saturation > 0.6:
-        options = ['anime-glowing', 'cool-highlight', 'long-lashes']
-    elif brightness > 0.7:
-        options = ['soft-round', 'classic-simple', 'long-lashes']
+    # Get eye region features
+    face_eyes = features['regional'].get('face_eyes', {})
+    eye_var = face_eyes.get('color_variance', 0)
+    eye_coverage = face_eyes.get('coverage', 0)
+    eye_diversity = face_eyes.get('color_diversity', 0)
+    
+    # Get mouth region for expression inference
+    face_mouth = features['regional'].get('face_mouth', {})
+    mouth_var = face_mouth.get('color_variance', 0)
+    
+    # Analyze eye characteristics
+    has_detailed_eyes = eye_var > 300 or eye_diversity > 0.3
+    has_simple_eyes = eye_coverage < 0.4 and eye_var < 200
+    
+    if has_detailed_eyes:
+        # High variance/diversity = detailed eye rendering
+        if saturation > 0.6:
+            options = ['anime-glowing', 'cool-highlight', 'long-lashes']
+        else:
+            options = ['cool-highlight', 'shadow-2x2', 'long-lashes']
+    elif has_simple_eyes:
+        # Low coverage/variance = simple eyes
+        if brightness < 0.3:
+            options = ['narrow-serious', 'shadow-2x2', 'classic-simple']
+        else:
+            options = ['classic-simple', 'soft-round', 'shadow-2x2']
     else:
-        options = ['classic-simple', 'soft-round', 'shadow-2x2']
+        # Default based on overall brightness
+        if brightness < 0.3:
+            options = ['narrow-serious', 'shadow-2x2', 'classic-simple']
+        elif saturation > 0.6:
+            options = ['anime-glowing', 'cool-highlight', 'long-lashes']
+        elif brightness > 0.7:
+            options = ['soft-round', 'classic-simple', 'long-lashes']
+        else:
+            options = ['classic-simple', 'soft-round', 'shadow-2x2']
     
     return options[cluster_id % len(options)]
 

@@ -61,14 +61,24 @@ def extract_regional_features(image_path: str) -> dict:
     # Minecraft skin layout (64x64):
     # Head: 0-8 x, 0-8 y (front), 8-16 x, 0-8 y (side)
     # Body: 16-24 x, 16-20 y (front), 24-32 x, 16-20 y (side)
-    # Legs: 0-8 x, 16-20 y (left leg), 8-16 x, 16-20 y (right leg)
-    # Arms: 36-40 x, 48-52 y (left arm), 44-48 x, 48-52 y (right arm)
+    # Right leg: 0-8 x, 16-20 y
+    # Left leg: 8-16 x, 16-20 y
+    # Right arm: 40-48 x, 16-20 y
+    # Left arm: 32-40 x, 48-52 y
     
     regions = {
         "head": pixels[0:8, 0:8],
+        "head_side": pixels[0:8, 8:16],
         "body": pixels[16:20, 16:24],
-        "left_leg": pixels[16:20, 0:8],
-        "right_leg": pixels[16:20, 8:16],
+        "body_side": pixels[16:20, 24:32],
+        "right_leg": pixels[16:20, 0:8],
+        "left_leg": pixels[16:20, 8:16],
+        "right_arm": pixels[16:20, 40:48],
+        "left_arm": pixels[48:52, 32:40],
+        "face_eyes": pixels[2:4, 1:7],  # Eye region
+        "face_mouth": pixels[4:6, 1:7],  # Mouth region
+        "torso_upper": pixels[16:18, 16:24],  # Upper body (shirt/jacket area)
+        "torso_lower": pixels[18:20, 16:24],  # Lower body (pants area)
     }
     
     features = {}
@@ -82,7 +92,8 @@ def extract_regional_features(image_path: str) -> dict:
             features[region_name] = {
                 "avg_color": "#000000",
                 "color_variance": 0,
-                "coverage": 0
+                "coverage": 0,
+                "color_diversity": 0
             }
             continue
         
@@ -97,10 +108,15 @@ def extract_regional_features(image_path: str) -> dict:
         total_pixels = region_pixels.shape[0] * region_pixels.shape[1]
         coverage = len(visible) / total_pixels
         
+        # Color diversity (number of unique colors)
+        unique_colors = len(set(map(tuple, (visible // 16) * 16)))
+        color_diversity = unique_colors / max(len(visible), 1)
+        
         features[region_name] = {
             "avg_color": avg_hex,
             "color_variance": float(variance),
-            "coverage": float(coverage)
+            "coverage": float(coverage),
+            "color_diversity": float(color_diversity)
         }
     
     return features
@@ -210,18 +226,27 @@ def generate_feature_vector(features: dict) -> np.ndarray:
     while len(vector) < 32:
         vector.append(0)
     
-    # Regional features (4 regions × 3 features = 12 values)
-    for region in ["head", "body", "left_leg", "right_leg"]:
-        region_data = features["regional"][region]
-        # Average color
-        avg_color = region_data["avg_color"]
-        r = int(avg_color[1:3], 16) / 255.0
-        g = int(avg_color[3:5], 16) / 255.0
-        b = int(avg_color[5:7], 16) / 255.0
-        vector.extend([r, g, b])
-        # Variance and coverage
-        vector.append(region_data["color_variance"] / 1000.0)  # Normalize
-        vector.append(region_data["coverage"])
+    # Regional features (12 regions × 4 features = 48 values)
+    regions = ["head", "head_side", "body", "body_side", "right_leg", "left_leg", 
+               "right_arm", "left_arm", "face_eyes", "face_mouth", 
+               "torso_upper", "torso_lower"]
+    
+    for region in regions:
+        if region in features["regional"]:
+            region_data = features["regional"][region]
+            # Average color
+            avg_color = region_data["avg_color"]
+            r = int(avg_color[1:3], 16) / 255.0
+            g = int(avg_color[3:5], 16) / 255.0
+            b = int(avg_color[5:7], 16) / 255.0
+            vector.extend([r, g, b])
+            # Variance, coverage, and diversity
+            vector.append(region_data["color_variance"] / 1000.0)  # Normalize
+            vector.append(region_data["coverage"])
+            vector.append(region_data["color_diversity"])
+        else:
+            # Default values if region doesn't exist
+            vector.extend([0, 0, 0, 0, 0, 0])
     
     # Statistics (8 values)
     stats = features["statistics"]

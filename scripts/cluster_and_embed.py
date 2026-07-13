@@ -43,7 +43,7 @@ def cluster_skins(vectors: np.ndarray, n_clusters: int = 500) -> tuple:
     return cluster_labels, kmeans, scaler
 
 
-def reduce_dimensions(vectors: np.ndarray, n_components: int = 50) -> tuple:
+def reduce_dimensions(vectors: np.ndarray, n_components: int = 64) -> tuple:
     """Reduce dimensionality for faster similarity search."""
     # n_components must be <= min(n_samples, n_features)
     max_components = min(vectors.shape[0], vectors.shape[1])
