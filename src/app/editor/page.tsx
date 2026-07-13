@@ -345,7 +345,7 @@ export default function WorkspacePage() {
               >
                 <div className="settings-overlay-header">
                   <div className="settings-overlay-title">
-                    <Key size={13} className="text-yellow-500" style={{ marginRight: "4px" }} />
+                    <Key size={13} strokeWidth={2} className="text-yellow-500" style={{ marginRight: "4px" }} />
                     <span>API Settings</span>
                   </div>
                   <button 
@@ -431,7 +431,7 @@ export default function WorkspacePage() {
           {/* User Feedback Status */}
           {(errorMsg || successMsg) && (
             <div className={`alert-overlay ${errorMsg ? "alert-overlay-error" : "alert-overlay-success"}`}>
-              {errorMsg ? <AlertTriangle size={13} /> : <CheckCircle size={13} />}
+              {errorMsg ? <AlertTriangle size={13} strokeWidth={2} /> : <CheckCircle size={13} strokeWidth={2} />}
               <span style={{ flexGrow: 1 }}>{errorMsg || successMsg}</span>
               <button 
                 onClick={() => { setErrorMsg(""); setSuccessMsg(""); }}
@@ -455,7 +455,7 @@ export default function WorkspacePage() {
               className="console-header text-xs text-[#00ff66] font-mono"
             >
               <div className="flex items-center gap-2">
-                <Terminal size={13} />
+                <Terminal size={13} strokeWidth={2} />
                 <span className="font-bold uppercase tracking-wider">Remote MCP Console</span>
               </div>
               <div className="flex items-center gap-4">
@@ -468,7 +468,7 @@ export default function WorkspacePage() {
                 >
                   refresh
                 </button>
-                {consoleExpanded ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                {consoleExpanded ? <ChevronDown size={14} strokeWidth={2} /> : <ChevronUp size={14} strokeWidth={2} />}
               </div>
             </div>
 
@@ -503,7 +503,7 @@ export default function WorkspacePage() {
           <div className="workspace-card">
             <div className="card-header" style={{ borderLeft: "4px solid var(--color-block-steve)", cursor: "default" }}>
               <div className="flex items-center gap-2">
-                <Maximize size={14} className="text-sky-700" />
+                <Maximize size={14} strokeWidth={2} style={{ color: "var(--color-primary)" }} />
                 <span className="font-bold">3D Model Preview</span>
               </div>
             </div>
@@ -520,10 +520,10 @@ export default function WorkspacePage() {
               style={{ borderLeft: `4px solid var(--color-block-alex)` }}
             >
               <div className="flex items-center gap-2">
-                <User size={14} className="text-amber-700" />
+                <User size={14} strokeWidth={2} style={{ color: "var(--color-primary)" }} />
                 <span className="font-bold">Character Configurator</span>
               </div>
-              {sections.config ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              {sections.config ? <ChevronUp size={14} strokeWidth={2} /> : <ChevronDown size={14} strokeWidth={2} />}
             </div>
 
             {sections.config && (
@@ -546,10 +546,10 @@ export default function WorkspacePage() {
               style={{ borderLeft: `4px solid var(--color-accent-ai)` }}
             >
               <div className="flex items-center gap-2">
-                <Sparkles size={14} className="text-[#ff2a85]" />
+                <Sparkles size={14} strokeWidth={2} style={{ color: "var(--color-accent-ai)" }} />
                 <span className="font-bold">AI Generator</span>
               </div>
-              {sections.ai ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              {sections.ai ? <ChevronUp size={14} strokeWidth={2} /> : <ChevronDown size={14} strokeWidth={2} />}
             </div>
 
             {sections.ai && (
@@ -558,12 +558,12 @@ export default function WorkspacePage() {
                   /* Setup Onboarding view */
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--color-accent-ai)" }}>
-                      <Sparkles size={16} />
-                      <span className="font-mono text-xs font-bold uppercase tracking-wider">AI Studio Setup Guide</span>
+                      <Sparkles size={14} strokeWidth={2} />
+                      <span className="font-mono text-xs font-bold uppercase tracking-wider">AI Setup Guide</span>
                     </div>
                     
                     <p style={{ fontSize: "10px", lineHeight: "1.5", color: "#555558", fontFamily: "var(--font-sans)" }}>
-                      To generate Minecraft skins using Gemini, you need a free API Key. Paste your key below to initialize the AI creator module.
+                      Enter your Gemini API key to enable AI skin generation.
                     </p>
 
                     <a
@@ -577,7 +577,7 @@ export default function WorkspacePage() {
                     </a>
 
                     <div className="form-group" style={{ marginTop: "4px" }}>
-                      <label className="form-group-label">PASTE API KEY HERE</label>
+                      <label className="form-group-label">Gemini API Key</label>
                       <input
                         type="password"
                         value={geminiKeyInput}
@@ -593,38 +593,38 @@ export default function WorkspacePage() {
                       className="voxel-btn btn-accent"
                       style={{ width: "100%", justifyContent: "center", marginTop: "4px" }}
                     >
-                      SAVE AND ACTIVATE AI
+                      Save Key
                     </button>
                   </div>
                 ) : (
                   /* Normal Generator Interface View */
                   <>
                     <p className="ai-section-desc">
-                      Describe uniform features or upload a reference image to procedure-generate details.
+                      Describe apparel features or drop a reference image to generate your skin.
                     </p>
                     <div className="form-group">
-                      <label className="form-group-label">AI Model & Provider</label>
+                      <label className="form-group-label">AI Model</label>
                       <select
                         value={selectedModel}
                         onChange={(e) => setSelectedModel(e.target.value)}
                         className="voxel-input font-mono text-[10px]"
                         style={{ padding: "6px", width: "100%", textTransform: "none" }}
                       >
-                        <option value="gemini-3.5-flash">Gemini 3.5 Flash (~0.150 PHP per generation) [LATEST]</option>
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (~0.006 PHP per generation)</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (~0.095 PHP per generation)</option>
-                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (~0.006 PHP per generation)</option>
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (~0.006 PHP per generation)</option>
-                        <option value="gpt-4o-mini">OpenAI GPT-4o Mini (~0.011 PHP per generation)</option>
-                        <option value="gpt-4o">OpenAI GPT-4o (~0.190 PHP per generation)</option>
+                        <option value="gemini-3.5-flash">Gemini 3.5 Flash (Recommended)</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                        <option value="gpt-4o-mini">GPT-4o Mini</option>
+                        <option value="gpt-4o">GPT-4o</option>
                       </select>
                     </div>
                     <div className="form-group">
-                      <label className="form-group-label">Aesthetic Prompt</label>
+                      <label className="form-group-label">Prompt</label>
                       <textarea
                         value={geminiPrompt}
                         onChange={(e) => setGeminiPrompt(e.target.value)}
-                        placeholder="e.g. A blue school hoodie with neon pink stripes on sleeves, black jeans, white sneakers"
+                        placeholder="e.g. Blue hoodie with pink stripes, black jeans, white sneakers"
                         rows={3}
                         className="voxel-textarea"
                       />
@@ -639,11 +639,11 @@ export default function WorkspacePage() {
                       className="voxel-btn btn-accent"
                       style={{ width: "100%", justifyContent: "center" }}
                     >
-                      {isGenerating ? "GENERATING SKIN..." : "GENERATE SKIN"}
+                      {isGenerating ? "Generating..." : "Generate Skin"}
                     </button>
                     {enhancedPrompt && (
                       <div style={{ marginTop: "12px", padding: "8px", border: "1px dashed var(--color-accent-ai)", backgroundColor: "#fff9fb" }}>
-                        <div className="font-mono text-[9px] font-bold text-[#ff2a85] uppercase tracking-wider mb-1">Optimized Prompt</div>
+                        <div className="font-mono text-[9px] font-bold text-[#ff2a85] uppercase tracking-wider mb-1">AI Prompt</div>
                         <p className="text-[10px] italic leading-relaxed text-[#555558] font-sans">{enhancedPrompt}</p>
                       </div>
                     )}
