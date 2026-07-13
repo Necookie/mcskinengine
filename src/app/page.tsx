@@ -4,150 +4,76 @@ import React, { useEffect, useState } from "react";
 import { useUser, SignOutButton } from "@clerk/nextjs";
 import { useSkinStore } from "@/lib/store";
 import { motion } from "framer-motion";
-import TraitSelector from "./components/TraitSelector";
-import PixelEditor3D from "./components/PixelEditor3D";
-import ModelPreview3D from "./components/ModelPreview3D";
-import ImageDropzone from "./components/ImageDropzone";
 import { LandingPage, LoadingScreen } from "./components/LandingPage";
+import dynamic from "next/dynamic";
 import { 
-  Sparkles, Terminal, Settings, LogOut, CheckCircle, AlertTriangle,
-  Paintbrush, Eraser, Undo, Redo, RotateCcw, Grid3X3, ZoomIn, ZoomOut, Maximize,
-  ChevronUp, ChevronDown, Key, User
+  Sparkles, Settings, LogOut, Maximize, User, Key, Cpu,
+  Paintbrush, Download, ShieldCheck, Database, AlertTriangle, CheckCircle, ArrowRight
 } from "lucide-react";
 
-export default function WorkspacePage() {
+// Dynamically import SkinViewer since it depends on browser canvas APIs (WebGL, ThreeJS)
+const ReactSkinview3d = dynamic(
+  () => import("react-skinview3d"),
+  { ssr: false, loading: () => <div className="text-grid-tag text-[#555558]">Loading mesh...</div> }
+);
+
+export default function DashboardPage() {
   const { isSignedIn, user } = useUser();
   const {
     skinBase64,
-    geminiPrompt,
     hasGeminiKey,
     hasOpenaiKey,
-    isGenerating,
-    mcpLogs,
     role,
     ethnicity,
     modelType,
-    setGeminiPrompt,
-    setIsGenerating,
-    setSkinArray,
-    setRole,
-    setEthnicity,
-    setModelType,
     fetchSkin,
-    fetchLogs,
     fetchSettings,
     saveSettings,
-    saveSkin,
-    skinArray,
-    undoStack,
-    redoStack,
-    activeTool,
-    setActiveTool,
-    showGuides,
-    setShowGuides,
-    zoom2D,
-    setZoom2D,
-    pushUndo,
-    undo,
-    redo
+    skinArray
   } = useSkinStore();
 
-  const [refImage, setRefImage] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [geminiKeyInput, setGeminiKeyInput] = useState("");
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
-  const [selectedModel, setSelectedModel] = useState("gemini-3.5-flash");
-  const [enhancedPrompt, setEnhancedPrompt] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-
-  const [sections, setSections] = useState({
-    ai: true,
-    config: true,
-    preview: true,
-  });
-
-  const [consoleExpanded, setConsoleExpanded] = useState(false);
-
-  const toggleSection = (sec: "ai" | "config" | "preview") => {
-    setSections(prev => ({ ...prev, [sec]: !prev[sec] }));
-  };
+  const [viewer, setViewer] = useState<any>(null);
 
   // Initialize data on sign-in
   useEffect(() => {
     if (isSignedIn) {
       fetchSkin();
       fetchSettings();
-      fetchLogs();
-
-      // Poll MCP logs every 5 seconds
-      const interval = setInterval(() => {
-        fetchLogs();
-      }, 5000);
-      return () => clearInterval(interval);
     }
   }, [isSignedIn]);
 
-  const handleGenerateSkin = async () => {
-    const isOpenAI = selectedModel.startsWith("gpt");
-    const hasKey = isOpenAI ? hasOpenaiKey : hasGeminiKey;
-    if (!hasKey) {
-      setErrorMsg(`Please configure your ${isOpenAI ? "OpenAI" : "Gemini"} API Key in Settings first.`);
-      setSettingsOpen(true);
-      return;
+  // Sync texture changes to the 3D viewer
+  useEffect(() => {
+    if (!viewer || !skinArray) return;
+    const ctx = viewer.skinCanvas.getContext("2d");
+    if (ctx) {
+      const imgData = ctx.createImageData(64, 64);
+      imgData.data.set(skinArray);
+      ctx.putImageData(imgData, 0, 0);
+      viewer.skinTexture.needsUpdate = true;
     }
-    
-    setErrorMsg("");
-    setSuccessMsg("");
-    setIsGenerating(true);
-    pushUndo(skinArray);
+  }, [viewer, skinArray]);
 
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: geminiPrompt,
-          image: refImage,
-          demographic: ethnicity,
-          isAlex: modelType === "alex",
-          provider: isOpenAI ? "openai" : "gemini",
-          model: selectedModel
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Generation failed");
+  // Synchronize model type (Steve vs Alex)
+  useEffect(() => {
+    if (viewer && skinArray) {
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = 64;
+      tempCanvas.height = 64;
+      const ctx = tempCanvas.getContext("2d");
+      if (ctx) {
+        const imgData = ctx.createImageData(64, 64);
+        imgData.data.set(skinArray);
+        ctx.putImageData(imgData, 0, 0);
+        viewer.loadSkin(tempCanvas.toDataURL(), { model: modelType === "alex" ? "slim" : "classic" });
       }
-
-      // Convert generated base64 skin back to array and load it
-      const { base64ToSkin } = await import("@/lib/skinEngine");
-      setSkinArray(base64ToSkin(data.skin));
-      
-      // Update store traits
-      if (data.apparel) {
-        setRole(data.apparel.stencilKey);
-        if (data.apparel.enhancedPrompt) {
-          setEnhancedPrompt(data.apparel.enhancedPrompt);
-        } else {
-          setEnhancedPrompt("");
-        }
-      } else {
-        setEnhancedPrompt("");
-      }
-
-      const phpCost = data.cost !== undefined ? data.cost * 58.5 : 0;
-      const costStr = data.cost !== undefined ? `${phpCost.toFixed(4)} PHP` : "unknown";
-      const usageStr = data.usage ? `${data.usage.promptTokenCount} in, ${data.usage.candidatesTokenCount} out` : "unknown";
-      setSuccessMsg(`Skin generated! Cost: ${costStr} (${usageStr} tokens)`);
-      fetchLogs();
-    } catch (err: any) {
-      setErrorMsg(err.message || "An error occurred during generation");
-    } finally {
-      setIsGenerating(false);
     }
-  };
+  }, [viewer, modelType, skinArray]);
 
   const handleSaveSettings = async () => {
     setErrorMsg("");
@@ -163,18 +89,20 @@ export default function WorkspacePage() {
     setTimeout(() => setSuccessMsg(""), 3000);
   };
 
-  const handleClearCanvas = () => {
-    if (confirm("Are you sure you want to clear the canvas? This will reset all pixels.")) {
-      pushUndo(skinArray);
-      const blank = new Uint8Array(64 * 64 * 4);
-      for (let i = 0; i < blank.length; i += 4) {
-        blank[i] = 255;
-        blank[i + 1] = 255;
-        blank[i + 2] = 255;
-        blank[i + 3] = 255;
-      }
-      setSkinArray(blank);
-      setTimeout(() => saveSkin(), 100);
+  const downloadSkin = () => {
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = 64;
+    tempCanvas.height = 64;
+    const ctx = tempCanvas.getContext("2d");
+    if (ctx) {
+      const imgData = ctx.createImageData(64, 64);
+      imgData.data.set(skinArray);
+      ctx.putImageData(imgData, 0, 0);
+      
+      const link = document.createElement("a");
+      link.download = `skin_${modelType}_${role}.png`;
+      link.href = tempCanvas.toDataURL("image/png");
+      link.click();
     }
   };
 
@@ -186,29 +114,22 @@ export default function WorkspacePage() {
     return <LandingPage />;
   }
 
-
   return (
-    <div className="workspace-container">
-      {/* MONOCHROME TOP BAR NAVBAR (h-14) */}
+    <div className="dashboard-container">
+      {/* NAVBAR */}
       <header className="workspace-header">
         <div className="header-logo-group">
           <div className="header-logo">
             MCSE
           </div>
           <span className="header-title">
-            MCSkinEngine.dev // Voxel Workspace
+            MCSkinEngine.dev // User Dashboard
           </span>
         </div>
 
-        {/* User Actions */}
         <div className="header-actions">
-          {/* Zoom Indicator */}
-          <div className="header-badge-zoom">
-            <span>ZOOM: {Math.round(zoom2D * 100)}%</span>
-          </div>
-
           <button
-            onClick={() => setSettingsOpen(!settingsOpen)}
+            onClick={() => setSettingsOpen(true)}
             className={`voxel-btn ${settingsOpen ? "btn-primary" : ""}`}
             style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px" }}
             title="Settings"
@@ -219,7 +140,6 @@ export default function WorkspacePage() {
           
           <div className="header-divider" />
 
-          {/* User Display & Logout */}
           <div className="header-actions">
             <span className="header-badge-user">
               User: {user?.username || user?.firstName || "Steve"}
@@ -236,416 +156,278 @@ export default function WorkspacePage() {
         </div>
       </header>
 
-      {/* WORKSPACE MAIN COLUMNS */}
-      <div className="workspace-main">
-        {/* COLUMN 1: LEFT SIDEBAR (TOOL DOCK) */}
-        <aside className="tool-dock">
-          {/* Drawing Tools */}
-          <div className="tool-dock-section">
-            <span className="tool-dock-label">Tools</span>
-            <button
-              onClick={() => setActiveTool("brush")}
-              className={`tool-btn ${activeTool === "brush" ? "active" : ""}`}
-              title="Paint Brush"
-            >
-              <Paintbrush size={15} />
-            </button>
-            <button
-              onClick={() => setActiveTool("eraser")}
-              className={`tool-btn ${activeTool === "eraser" ? "active" : ""}`}
-              title="Eraser"
-            >
-              <Eraser size={15} />
-            </button>
-          </div>
+      {/* DASHBOARD CONTENT */}
+      <main className="dashboard-main-content">
+        {/* Welcome Banner */}
+        <div className="dashboard-welcome-banner">
+          <h1 className="text-panel-head" style={{ fontWeight: 700, textTransform: "uppercase" }}>
+            Welcome back, {user?.firstName || user?.username || "Mannequin Master"}!
+          </h1>
+          <span className="text-grid-tag" style={{ color: "#555558" }}>
+            AVATAR CONFIGURATION: {modelType.toUpperCase()} ({modelType === "steve" ? "4PX ARMS" : "3PX ARMS"}) | BASE STENCIL: {role.toUpperCase()} | ETHNICITY PROFILE: {ethnicity.toUpperCase()}
+          </span>
+        </div>
 
-          <div className="tool-dock-divider" />
-
-          {/* Actions: Undo/Redo & Reset */}
-          <div className="tool-dock-section">
-            <span className="tool-dock-label">Edit</span>
-            <button
-              onClick={undo}
-              disabled={undoStack.length === 0}
-              className="tool-btn"
-              title="Undo Last Action"
-            >
-              <Undo size={15} />
-            </button>
-            <button
-              onClick={redo}
-              disabled={redoStack.length === 0}
-              className="tool-btn"
-              title="Redo Next Action"
-            >
-              <Redo size={15} />
-            </button>
-            <button
-              onClick={handleClearCanvas}
-              className="tool-btn hover:text-red-600 hover:border-red-500"
-              title="Reset/Clear Canvas"
-            >
-              <RotateCcw size={15} />
-            </button>
-          </div>
-
-          <div className="tool-dock-divider" />
-
-          {/* Canvas Guides & Zoom */}
-          <div className="tool-dock-section">
-            <span className="tool-dock-label">View</span>
-            <button
-              onClick={() => setShowGuides(!showGuides)}
-              className={`tool-btn ${showGuides ? "active" : ""}`}
-              title="Toggle Symmetry/Grid Guides"
-            >
-              <Grid3X3 size={15} />
-            </button>
-            <button
-              onClick={() => setZoom2D(Math.min(3, zoom2D + 0.25))}
-              className="tool-btn"
-              title="Zoom In"
-            >
-              <ZoomIn size={15} />
-            </button>
-            <button
-              onClick={() => setZoom2D(Math.max(0.5, zoom2D - 0.25))}
-              className="tool-btn"
-              title="Zoom Out"
-            >
-              <ZoomOut size={15} />
-            </button>
-            <button
-              onClick={() => setZoom2D(1)}
-              className="tool-btn"
-              title="Zoom Reset (Fit)"
-            >
-              <Maximize size={15} />
-            </button>
-          </div>
-        </aside>
-
-        {/* COLUMN 2: CENTER CANVAS COLUMN */}
-        <main className="canvas-column">
-          {/* Conditional Settings Panel overlay */}
-          {settingsOpen && (
-            <div className="modal-backdrop">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="settings-overlay"
+        {/* Action Grid */}
+        <div className="dashboard-grid-layout">
+          {/* Column 1: Action Cards */}
+          <div className="dashboard-card-column">
+            {/* Launch Editor Card */}
+            <div className="dashboard-action-card steve">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
+                    3D Skin Canvas Editor
+                  </h2>
+                  <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4" }}>
+                    Draw, repaint, and custom-craft your Minecraft skin directly on a 3D mannequin block model. Supports pixel-perfect grid guides, custom brush sizing, and live feedback updates.
+                  </p>
+                </div>
+                <Paintbrush size={24} className="text-sky-700" style={{ flexShrink: 0 }} />
+              </div>
+              <a
+                href="/editor"
+                className="voxel-btn btn-primary"
+                style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none" }}
               >
-                <div className="settings-overlay-header">
-                  <div className="settings-overlay-title">
-                    <Key size={13} className="text-yellow-500" style={{ marginRight: "4px" }} />
-                    <span>API Settings</span>
-                  </div>
-                  <button 
-                    onClick={() => setSettingsOpen(false)}
-                    className="settings-overlay-close"
-                  >
-                    ✕
-                  </button>
-                </div>
-                
-                <div className="form-group" style={{ marginBottom: "12px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                    <label className="form-group-label" style={{ marginBottom: 0 }}>Gemini Developer API Key</label>
-                    {hasGeminiKey && (
-                      <button 
-                        onClick={async () => {
-                          await saveSettings("", undefined);
-                          setGeminiKeyInput("");
-                          setSuccessMsg("Gemini API key removed.");
-                          setTimeout(() => setSuccessMsg(""), 3000);
-                        }}
-                        style={{ fontSize: "9px", color: "#ff2a85", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    type="password"
-                    value={geminiKeyInput}
-                    onChange={(e) => setGeminiKeyInput(e.target.value)}
-                    placeholder={hasGeminiKey ? "•••••••• (Saved)" : "AIzaSy..."}
-                    className="voxel-input"
-                  />
-                </div>
-                
-                <div className="form-group" style={{ marginBottom: "16px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                    <label className="form-group-label" style={{ marginBottom: 0 }}>OpenAI API Key</label>
-                    {hasOpenaiKey && (
-                      <button 
-                        onClick={async () => {
-                          await saveSettings(undefined, "");
-                          setOpenaiKeyInput("");
-                          setSuccessMsg("OpenAI API key removed.");
-                          setTimeout(() => setSuccessMsg(""), 3000);
-                        }}
-                        style={{ fontSize: "9px", color: "#ff2a85", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    type="password"
-                    value={openaiKeyInput}
-                    onChange={(e) => setOpenaiKeyInput(e.target.value)}
-                    placeholder={hasOpenaiKey ? "•••••••• (Saved)" : "sk-proj-..."}
-                    className="voxel-input"
-                  />
-                </div>
-                
-                <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                  <button
-                    onClick={() => setSettingsOpen(false)}
-                    className="voxel-btn"
-                    style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px", backgroundColor: "#fff" }}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    onClick={handleSaveSettings} 
-                    className="voxel-btn btn-primary"
-                    style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px" }}
-                  >
-                    Save Key
-                  </button>
-                </div>
-              </motion.div>
+                <span>Launch Skin Studio</span>
+                <ArrowRight size={12} />
+              </a>
             </div>
-          )}
 
-          {/* User Feedback Status */}
-          {(errorMsg || successMsg) && (
-            <div className={`alert-overlay ${errorMsg ? "alert-overlay-error" : "alert-overlay-success"}`}>
-              {errorMsg ? <AlertTriangle size={13} /> : <CheckCircle size={13} />}
-              <span style={{ flexGrow: 1 }}>{errorMsg || successMsg}</span>
+            {/* AI Generator Card */}
+            <div className="dashboard-action-card alex">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
+                    AI Generator Studio
+                  </h2>
+                  <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4" }}>
+                    Use the Gemini developer APIs to generate Minecraft clothing designs from textual descriptions and prompts. Import clothing patterns, hats, coats, and streetwear details.
+                  </p>
+                </div>
+                <Sparkles size={24} className="text-amber-700" style={{ flexShrink: 0 }} />
+              </div>
+              <a
+                href="/editor"
+                className="voxel-btn"
+                style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d" }}
+              >
+                <span>Generate with AI</span>
+                <ArrowRight size={12} />
+              </a>
+            </div>
+
+            {/* Credentials / Keys Card */}
+            <div className="dashboard-action-card">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
+                    API Connection Status
+                  </h2>
+                  <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4", marginBottom: "8px" }}>
+                    Ensure your developer key connections are configured to enable procedural AI generated stencils.
+                  </p>
+                  
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: hasGeminiKey ? "var(--color-block-lab)" : "#fce8e6" }}>
+                      <span className="dashboard-stat-label">Gemini Key:</span>
+                      <span className="dashboard-stat-value" style={{ fontSize: "9px", color: hasGeminiKey ? "#15803d" : "#b91c1c" }}>
+                        {hasGeminiKey ? "CONNECTED" : "MISSING"}
+                      </span>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: hasOpenaiKey ? "var(--color-block-lab)" : "#fce8e6" }}>
+                      <span className="dashboard-stat-label">OpenAI Key:</span>
+                      <span className="dashboard-stat-value" style={{ fontSize: "9px", color: hasOpenaiKey ? "#15803d" : "#b91c1c" }}>
+                        {hasOpenaiKey ? "CONNECTED" : "MISSING"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <Key size={24} className="text-gray-500" style={{ flexShrink: 0 }} />
+              </div>
+              
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="voxel-btn"
+                style={{ width: "max-content", marginTop: "4px", fontSize: "10px", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)" }}
+              >
+                Configure Keys
+              </button>
+            </div>
+          </div>
+
+          {/* Column 2: 3D Preview Box */}
+          <div className="dashboard-card-column">
+            <div className="workspace-card" style={{ height: "100%" }}>
+              <div className="card-header" style={{ borderLeft: "4px solid var(--color-block-lab)" }}>
+                <span className="font-bold">Active Avatar</span>
+              </div>
+              <div className="card-body" style={{ backgroundColor: "#f4f4f6", display: "flex", flexDirection: "column", gap: "16px", justifyContent: "center", height: "100%" }}>
+                {skinArray ? (
+                  <div className="dashboard-avatar-preview-box">
+                    <ReactSkinview3d
+                      skinUrl=""
+                      height={150}
+                      width={110}
+                      onReady={(viewerInstance: any) => {
+                        // NearestFilter for retro pixelated look
+                        if (viewerInstance.skinTexture) {
+                          viewerInstance.skinTexture.minFilter = 1003;
+                          viewerInstance.skinTexture.magFilter = 1003;
+                          viewerInstance.skinTexture.needsUpdate = true;
+                        }
+
+                        viewerInstance.background = 0xffffff;
+                        viewerInstance.autoRotate = true;
+                        viewerInstance.autoRotateSpeed = 0.6;
+
+                        // Orbit controls
+                        import("skinview3d").then((sv) => {
+                          viewerInstance.animations.add(sv.IdleAnimation);
+                          sv.createOrbitControls(viewerInstance);
+                        });
+
+                        setViewer(viewerInstance);
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="text-grid-tag text-center">Loading 3D mesh...</div>
+                )}
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <button
+                    onClick={downloadSkin}
+                    className="voxel-btn"
+                    style={{ width: "100%", justifyContent: "center", fontSize: "10px" }}
+                  >
+                    <Download size={13} />
+                    <span>Download PNG</span>
+                  </button>
+
+                  <a
+                    href="/editor"
+                    className="voxel-btn btn-accent"
+                    style={{ width: "100%", justifyContent: "center", fontSize: "10px", textDecoration: "none" }}
+                  >
+                    <Maximize size={12} />
+                    <span>Open in Editor</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Settings Modal Dialog */}
+      {settingsOpen && (
+        <div className="modal-backdrop">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="settings-overlay"
+          >
+            <div className="settings-overlay-header">
+              <div className="settings-overlay-title">
+                <Key size={13} className="text-yellow-500" style={{ marginRight: "4px" }} />
+                <span>API Settings</span>
+              </div>
               <button 
-                onClick={() => { setErrorMsg(""); setSuccessMsg(""); }}
-                style={{ background: "none", border: "none", fontWeight: "bold", cursor: "pointer", fontSize: "12px", color: "inherit" }}
+                onClick={() => setSettingsOpen(false)}
+                className="settings-overlay-close"
               >
                 ✕
               </button>
             </div>
-          )}
-          <div className="editor-container-wrap">
-            <PixelEditor3D />
-          </div>
-
-          {/* Collapsible Bottom console tray locked inside the canvas card container */}
-          <aside 
-            className="console-tray"
-            style={{ height: consoleExpanded ? "220px" : "36px" }}
-          >
-            <div 
-              onClick={() => setConsoleExpanded(!consoleExpanded)}
-              className="console-header text-xs text-[#00ff66] font-mono"
-            >
-              <div className="flex items-center gap-2">
-                <Terminal size={13} />
-                <span className="font-bold uppercase tracking-wider">Remote MCP Console</span>
-              </div>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    fetchLogs();
-                  }}
-                  className="text-[10px] text-[#00ff66] hover:text-white underline"
-                >
-                  refresh
-                </button>
-                {consoleExpanded ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-              </div>
-            </div>
-
-            {consoleExpanded && (
-              <div className="console-content custom-scrollbar">
-                {mcpLogs.length === 0 ? (
-                  <div className="text-gray-600 uppercase text-center py-12">No remote MCP calls logged.</div>
-                ) : (
-                  <div className="flex flex-col gap-3">
-                    {mcpLogs.map((log) => (
-                      <div key={log.id} className="border-b border-[#2c2c2d]/40 pb-2 last:border-b-0">
-                        <div className="flex items-center justify-between text-[10px] text-gray-500">
-                          <span>[{new Date(log.timestamp).toLocaleTimeString()}]</span>
-                          <span className="text-[#00ff66] font-bold">STATUS: {log.status.toUpperCase()}</span>
-                        </div>
-                        <span className="text-yellow-400 font-bold text-[11px]">{log.toolName}</span>
-                        <div className="text-gray-300 text-[10px] pl-2 mt-1 break-all bg-black/30 p-1.5 border border-[#2c2c2d]/40 rounded font-mono">
-                          {JSON.stringify(log.arguments)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+            
+            <div className="form-group" style={{ marginBottom: "12px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                <label className="form-group-label" style={{ marginBottom: 0 }}>Gemini Developer API Key</label>
+                {hasGeminiKey && (
+                  <button 
+                    onClick={async () => {
+                      await saveSettings("", undefined);
+                      setGeminiKeyInput("");
+                      setSuccessMsg("Gemini API key removed.");
+                      setTimeout(() => setSuccessMsg(""), 3000);
+                    }}
+                    style={{ fontSize: "9px", color: "#ff2a85", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}
+                  >
+                    Remove
+                  </button>
                 )}
               </div>
-            )}
-          </aside>
-        </main>
-
-        {/* COLUMN 3: RIGHT SIDEBAR (FLOATING CONTROL CARDS) */}
-        <aside className="right-sidebar-container custom-scrollbar">
-          {/* Card A: 3D Model Preview (Always Visible at the top) */}
-          <div className="workspace-card">
-            <div className="card-header" style={{ borderLeft: "4px solid var(--color-block-steve)", cursor: "default" }}>
-              <div className="flex items-center gap-2">
-                <Maximize size={14} className="text-sky-700" />
-                <span className="font-bold">3D Model Preview</span>
+              <input
+                type="password"
+                value={geminiKeyInput}
+                onChange={(e) => setGeminiKeyInput(e.target.value)}
+                placeholder={hasGeminiKey ? "•••••••• (Saved)" : "AIzaSy..."}
+                className="voxel-input"
+              />
+            </div>
+            
+            <div className="form-group" style={{ marginBottom: "16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                <label className="form-group-label" style={{ marginBottom: 0 }}>OpenAI API Key</label>
+                {hasOpenaiKey && (
+                  <button 
+                    onClick={async () => {
+                      await saveSettings(undefined, "");
+                      setOpenaiKeyInput("");
+                      setSuccessMsg("OpenAI API key removed.");
+                      setTimeout(() => setSuccessMsg(""), 3000);
+                    }}
+                    style={{ fontSize: "9px", color: "#ff2a85", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
+              <input
+                type="password"
+                value={openaiKeyInput}
+                onChange={(e) => setOpenaiKeyInput(e.target.value)}
+                placeholder={hasOpenaiKey ? "•••••••• (Saved)" : "sk-proj-..."}
+                className="voxel-input"
+              />
             </div>
-            <div className="card-body" style={{ backgroundColor: "#f4f4f6" }}>
-              <ModelPreview3D />
-            </div>
-          </div>
-
-          {/* Card B: Character Configurator */}
-          <div className="workspace-card">
-            <div 
-              className="card-header" 
-              onClick={() => toggleSection("config")}
-              style={{ borderLeft: `4px solid var(--color-block-alex)` }}
-            >
-              <div className="flex items-center gap-2">
-                <User size={14} className="text-amber-700" />
-                <span className="font-bold">Character Configurator</span>
-              </div>
-              {sections.config ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            </div>
-
-            {sections.config && (
-              <div 
-                className="card-body" 
-                style={{ 
-                  backgroundColor: role === "blazer" ? "#f1e4d3" : role === "labcoat" ? "#d2ebd9" : modelType === "steve" ? "#b3d7df" : "#ebd3be" 
-                }}
+            
+            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setSettingsOpen(false)}
+                className="voxel-btn"
+                style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px", backgroundColor: "#fff" }}
               >
-                <TraitSelector />
-              </div>
-            )}
-          </div>
-
-          {/* Card C: AI Generator */}
-          <div className="workspace-card">
-            <div 
-              className="card-header" 
-              onClick={() => toggleSection("ai")}
-              style={{ borderLeft: `4px solid var(--color-accent-ai)` }}
-            >
-              <div className="flex items-center gap-2">
-                <Sparkles size={14} className="text-[#ff2a85]" />
-                <span className="font-bold">AI Generator</span>
-              </div>
-              {sections.ai ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveSettings} 
+                className="voxel-btn btn-primary"
+                style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px" }}
+              >
+                Save Key
+              </button>
             </div>
+          </motion.div>
+        </div>
+      )}
 
-            {sections.ai && (
-              <div className="card-body" style={{ backgroundColor: "#ffffff" }}>
-                {!hasGeminiKey && !hasOpenaiKey ? (
-                  /* Setup Onboarding view */
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--color-accent-ai)" }}>
-                      <Sparkles size={16} />
-                      <span className="font-mono text-xs font-bold uppercase tracking-wider">AI Studio Setup Guide</span>
-                    </div>
-                    
-                    <p style={{ fontSize: "10px", lineHeight: "1.5", color: "#555558", fontFamily: "var(--font-sans)" }}>
-                      To generate Minecraft skins using Gemini, you need a free API Key. Paste your key below to initialize the AI creator module.
-                    </p>
-
-                    <a
-                      href="https://aistudio.google.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="voxel-btn text-[10px]"
-                      style={{ padding: "6px 0", fontSize: "10px", borderRadius: 0, borderWidth: "2px", justifyContent: "center", width: "100%", textDecoration: "none", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)" }}
-                    >
-                      Get Gemini API Key (Free) ↗
-                    </a>
-
-                    <div className="form-group" style={{ marginTop: "4px" }}>
-                      <label className="form-group-label">PASTE API KEY HERE</label>
-                      <input
-                        type="password"
-                        value={geminiKeyInput}
-                        onChange={(e) => setGeminiKeyInput(e.target.value)}
-                        placeholder="AIzaSy..."
-                        className="voxel-input"
-                      />
-                    </div>
-
-                    <button
-                      onClick={handleSaveSettings}
-                      disabled={!geminiKeyInput}
-                      className="voxel-btn btn-accent"
-                      style={{ width: "100%", justifyContent: "center", marginTop: "4px" }}
-                    >
-                      SAVE AND ACTIVATE AI
-                    </button>
-                  </div>
-                ) : (
-                  /* Normal Generator Interface View */
-                  <>
-                    <p className="ai-section-desc">
-                      Describe uniform features or upload a reference image to procedure-generate details.
-                    </p>
-                    <div className="form-group">
-                      <label className="form-group-label">AI Model & Provider</label>
-                      <select
-                        value={selectedModel}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className="voxel-input font-mono text-[10px]"
-                        style={{ padding: "6px", width: "100%", textTransform: "none" }}
-                      >
-                        <option value="gemini-3.5-flash">Gemini 3.5 Flash (~0.150 PHP per generation) [LATEST]</option>
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (~0.006 PHP per generation)</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (~0.095 PHP per generation)</option>
-                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (~0.006 PHP per generation)</option>
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (~0.006 PHP per generation)</option>
-                        <option value="gpt-4o-mini">OpenAI GPT-4o Mini (~0.011 PHP per generation)</option>
-                        <option value="gpt-4o">OpenAI GPT-4o (~0.190 PHP per generation)</option>
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label className="form-group-label">Aesthetic Prompt</label>
-                      <textarea
-                        value={geminiPrompt}
-                        onChange={(e) => setGeminiPrompt(e.target.value)}
-                        placeholder="e.g. A blue school hoodie with neon pink stripes on sleeves, black jeans, white sneakers"
-                        rows={3}
-                        className="voxel-textarea"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-group-label">Reference Image (Optional)</label>
-                      <ImageDropzone onImageLoaded={(base64) => setRefImage(base64)} />
-                    </div>
-                    <button
-                      onClick={handleGenerateSkin}
-                      disabled={isGenerating || !geminiPrompt}
-                      className="voxel-btn btn-accent"
-                      style={{ width: "100%", justifyContent: "center" }}
-                    >
-                      {isGenerating ? "GENERATING SKIN..." : "GENERATE SKIN"}
-                    </button>
-                    {enhancedPrompt && (
-                      <div style={{ marginTop: "12px", padding: "8px", border: "1px dashed var(--color-accent-ai)", backgroundColor: "#fff9fb" }}>
-                        <div className="font-mono text-[9px] font-bold text-[#ff2a85] uppercase tracking-wider mb-1">Optimized Prompt</div>
-                        <p className="text-[10px] italic leading-relaxed text-[#555558] font-sans">{enhancedPrompt}</p>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        </aside>
-      </div>
+      {/* User Feedback Status */}
+      {(errorMsg || successMsg) && (
+        <div className={`alert-overlay ${errorMsg ? "alert-overlay-error" : "alert-overlay-success"}`}>
+          {errorMsg ? <AlertTriangle size={13} /> : <CheckCircle size={13} />}
+          <span style={{ flexGrow: 1 }}>{errorMsg || successMsg}</span>
+          <button 
+            onClick={() => { setErrorMsg(""); setSuccessMsg(""); }}
+            style={{ background: "none", border: "none", fontWeight: "bold", cursor: "pointer", fontSize: "12px", color: "inherit" }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }
