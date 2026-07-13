@@ -67,17 +67,24 @@ export const EYE_STYLES: Record<string, EyeStyle> = {
   "long-lashes": {
     name: "Long Lashes",
     vibe: 'feminine',
-    draw: ({ setPixel, fillRect, eyeRgb }) => {
-      fillRect(10, 12, 11, 13, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
+    draw: ({ setPixel, fillRect, eyeRgb, skinRgb }) => {
+      // Iris block per eye, with a dark pupil pixel and a white catchlight
+      // placed INSIDE the block (not on the surrounding skin).
+      fillRect(9, 12, 10, 13, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
       fillRect(13, 12, 14, 13, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
+      setPixel(9, 13, clamp(eyeRgb.r - 60), clamp(eyeRgb.g - 60), clamp(eyeRgb.b - 60), 255, false);
+      setPixel(14, 13, clamp(eyeRgb.r - 60), clamp(eyeRgb.g - 60), clamp(eyeRgb.b - 60), 255, false);
       setPixel(9, 12, 255, 255, 255, 255, false);
-      setPixel(12, 12, 255, 255, 255, 255, false);
+      setPixel(13, 12, 255, 255, 255, 255, false);
+
+      // Lash line above the eyes, plus a soft under-eye shadow for depth.
       setPixel(9, 11, 20, 15, 15, 255, false);
       setPixel(10, 11, 20, 15, 15, 255, false);
       setPixel(13, 11, 20, 15, 15, 255, false);
       setPixel(14, 11, 20, 15, 15, 255, false);
       setPixel(8, 11, 20, 15, 15, 255, false);
       setPixel(15, 11, 20, 15, 15, 255, false);
+      fillRect(9, 14, 14, 14, clamp(skinRgb.r - 15), clamp(skinRgb.g - 20), clamp(skinRgb.b - 20), 255, true);
     },
   },
   "soft-round": {
