@@ -762,7 +762,7 @@ textarea {
 .canvas-board-outer {
   flex-grow: 1;
   width: 100%;
-  max-width: 288px;
+  max-width: 380px;
   aspect-ratio: 1 / 1;
   display: flex;
   flex-direction: column;
@@ -775,8 +775,8 @@ textarea {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  max-width: 280px;
-  max-height: 280px;
+  max-width: 360px;
+  max-height: 360px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -790,7 +790,7 @@ textarea {
   flex-direction: column;
   gap: 10px;
   width: 100%;
-  max-width: 288px;
+  max-width: 380px;
   background-color: var(--color-canvas);
   padding: 10px;
   border: 1px solid rgba(24, 24, 27, 0.12);
