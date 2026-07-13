@@ -1158,10 +1158,12 @@ textarea {
   user-select: none;
 }
 .voxel-dropzone:hover {
-  background-color: #ebd3be;
+  background-color: var(--color-surface-soft);
+  border-color: rgba(24, 24, 27, 0.2);
 }
 .voxel-dropzone-active {
-  background-color: #ebd3be;
+  background-color: var(--color-surface-soft);
+  border-color: rgba(24, 24, 27, 0.2);
 }
 
 .dropzone-preview-wrap {
