@@ -123,7 +123,7 @@ export default function DashboardPage() {
             MCSE
           </div>
           <span className="header-title">
-            MCSkinEngine.dev // User Dashboard
+            MCSkinEngine Dashboard
           </span>
         </div>
 
@@ -134,7 +134,7 @@ export default function DashboardPage() {
             style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px" }}
             title="Settings"
           >
-            <Settings size={12} />
+            <Settings size={12} strokeWidth={2} />
             <span>Settings</span>
           </button>
           
@@ -149,7 +149,7 @@ export default function DashboardPage() {
                 className="voxel-btn"
                 style={{ padding: "6px 10px", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: 0, borderWidth: "2px" }}
               >
-                <LogOut size={12} />
+                <LogOut size={12} strokeWidth={2} />
               </button>
             </SignOutButton>
           </div>
@@ -161,11 +161,13 @@ export default function DashboardPage() {
         {/* Welcome Banner */}
         <div className="dashboard-welcome-banner">
           <h1 className="text-panel-head" style={{ fontWeight: 700, textTransform: "uppercase" }}>
-            Welcome back, {user?.firstName || user?.username || "Mannequin Master"}!
+            Welcome, {user?.firstName || user?.username || "Skin Creator"}
           </h1>
-          <span className="text-grid-tag" style={{ color: "#555558" }}>
-            AVATAR CONFIGURATION: {modelType.toUpperCase()} ({modelType === "steve" ? "4PX ARMS" : "3PX ARMS"}) | BASE STENCIL: {role.toUpperCase()} | ETHNICITY PROFILE: {ethnicity.toUpperCase()}
-          </span>
+          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "2px" }}>
+            <span className="text-grid-tag" style={{ color: "#555558" }}>Model: {modelType === "steve" ? "Steve (4px)" : "Alex (3px)"}</span>
+            <span className="text-grid-tag" style={{ color: "#555558" }}>Base: {role}</span>
+            <span className="text-grid-tag" style={{ color: "#555558" }}>Profile: {ethnicity}</span>
+          </div>
         </div>
 
         {/* Action Grid */}
@@ -177,21 +179,21 @@ export default function DashboardPage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
                   <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
-                    3D Skin Canvas Editor
+                    3D Skin Editor
                   </h2>
                   <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4" }}>
-                    Draw, repaint, and custom-craft your Minecraft skin directly on a 3D mannequin block model. Supports pixel-perfect grid guides, custom brush sizing, and live feedback updates.
+                    Paint directly onto a 3D model. Choose brush sizes, toggle pixel grids, and preview your changes in real time.
                   </p>
                 </div>
-                <Paintbrush size={24} className="text-sky-700" style={{ flexShrink: 0 }} />
+                <Paintbrush size={20} strokeWidth={2} style={{ color: "var(--color-primary)", flexShrink: 0 }} />
               </div>
               <a
                 href="/editor"
                 className="voxel-btn btn-primary"
                 style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none" }}
               >
-                <span>Launch Skin Studio</span>
-                <ArrowRight size={12} />
+                <span>Open Editor</span>
+                <ArrowRight size={12} strokeWidth={2} />
               </a>
             </div>
 
@@ -200,13 +202,13 @@ export default function DashboardPage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
                   <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
-                    AI Generator Studio
+                    AI Skin Generator
                   </h2>
                   <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4" }}>
-                    Use the Gemini developer APIs to generate Minecraft clothing designs from textual descriptions and prompts. Import clothing patterns, hats, coats, and streetwear details.
+                    Generate clothing textures and stencil designs from a text description using Gemini AI.
                   </p>
                 </div>
-                <Sparkles size={24} className="text-amber-700" style={{ flexShrink: 0 }} />
+                <Sparkles size={20} strokeWidth={2} style={{ color: "var(--color-accent-ai)", flexShrink: 0 }} />
               </div>
               <a
                 href="/editor"
@@ -214,7 +216,7 @@ export default function DashboardPage() {
                 style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d" }}
               >
                 <span>Generate with AI</span>
-                <ArrowRight size={12} />
+                <ArrowRight size={12} strokeWidth={2} />
               </a>
             </div>
 
@@ -223,29 +225,29 @@ export default function DashboardPage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
                   <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
-                    API Connection Status
+                    API Settings
                   </h2>
                   <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4", marginBottom: "8px" }}>
-                    Ensure your developer key connections are configured to enable procedural AI generated stencils.
+                    Provide API keys to run Gemini and OpenAI generation features.
                   </p>
                   
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: hasGeminiKey ? "var(--color-block-lab)" : "#fce8e6" }}>
-                      <span className="dashboard-stat-label">Gemini Key:</span>
+                      <span className="dashboard-stat-label">Gemini API Key</span>
                       <span className="dashboard-stat-value" style={{ fontSize: "9px", color: hasGeminiKey ? "#15803d" : "#b91c1c" }}>
                         {hasGeminiKey ? "CONNECTED" : "MISSING"}
                       </span>
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: hasOpenaiKey ? "var(--color-block-lab)" : "#fce8e6" }}>
-                      <span className="dashboard-stat-label">OpenAI Key:</span>
+                      <span className="dashboard-stat-label">OpenAI API Key</span>
                       <span className="dashboard-stat-value" style={{ fontSize: "9px", color: hasOpenaiKey ? "#15803d" : "#b91c1c" }}>
                         {hasOpenaiKey ? "CONNECTED" : "MISSING"}
                       </span>
                     </div>
                   </div>
                 </div>
-                <Key size={24} className="text-gray-500" style={{ flexShrink: 0 }} />
+                <Key size={20} strokeWidth={2} style={{ color: "var(--color-primary)", flexShrink: 0 }} />
               </div>
               
               <button
@@ -253,7 +255,7 @@ export default function DashboardPage() {
                 className="voxel-btn"
                 style={{ width: "max-content", marginTop: "4px", fontSize: "10px", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)" }}
               >
-                Configure Keys
+                API Settings
               </button>
             </div>
           </div>
@@ -303,7 +305,7 @@ export default function DashboardPage() {
                     className="voxel-btn"
                     style={{ width: "100%", justifyContent: "center", fontSize: "10px" }}
                   >
-                    <Download size={13} />
+                    <Download size={13} strokeWidth={2} />
                     <span>Download PNG</span>
                   </button>
 
@@ -312,7 +314,7 @@ export default function DashboardPage() {
                     className="voxel-btn btn-accent"
                     style={{ width: "100%", justifyContent: "center", fontSize: "10px", textDecoration: "none" }}
                   >
-                    <Maximize size={12} />
+                    <Maximize size={12} strokeWidth={2} />
                     <span>Open in Editor</span>
                   </a>
                 </div>
