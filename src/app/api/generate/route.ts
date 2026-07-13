@@ -45,7 +45,7 @@ interface ApparelResult {
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 const VIBE_KEYS = ["masculine", "feminine", "neutral"];
 const SHADING_MODE_KEYS = ["soft", "graphic"];
-const PALETTE_MODE_KEYS = ["full", "mono-accent"];
+const PALETTE_MODE_KEYS = ["full", "monochrome", "complementary", "analogous", "split-complementary", "triadic"];
 
 const PRICING: Record<string, { inRate: number; outRate: number }> = {
   "gemini-3.5-flash": { inRate: 1.50 / 1000000, outRate: 9.00 / 1000000 },
@@ -116,7 +116,14 @@ If the request implies a feminine or masculine presentation (names, pronouns, "g
 Pick a coherent 3-color palette (primary/secondary/trim) with real contrast between the colors; avoid washed-out grays unless specifically requested.
 
 Choose a shadingMode: "graphic" gives hard, flat two-tone lit/shadow shapes with no dithering — pick it for dark, edgy, high-contrast, monochrome, anime-villain, or "cool/aesthetic" requests. "soft" (default) gives a dithered multi-tone gradient — pick it for warm, soft, pastel, or casual requests.
-Choose a paletteMode: "mono-accent" collapses the whole outfit into shades of a single primary hue, leaving eyeColor as the one deliberate spot of chroma — pick it whenever shadingMode is "graphic", or whenever the request calls for a monochrome/all-black/all-white look. "full" (default) keeps independently colorful primary/secondary/trim/shirt/tie/pants.
+Choose a paletteMode using real color theory instead of picking secondary/trim/tie independently. Popular hand-painted skins keep ~80% of the outfit as shades of ONE hue and reserve exactly one deliberate color-wheel accent for a small area — never a scatter of unrelated colors:
+- "monochrome": every garment color is a lightness shade of primary, zero hue variation. Use for graphic/all-black/all-white/high-contrast requests.
+- "complementary": trim becomes primary's hue +180° (opposite on the color wheel) — a bold, high-contrast accent.
+- "analogous": trim becomes a neighboring hue (+35°) — a subtle, harmonious accent.
+- "split-complementary": trim AND tie become the two hues flanking primary's complement — a punchier but still balanced accent pair.
+- "triadic": trim becomes primary's hue +120° — a vivid, evenly-spaced accent.
+- "full" (default, use sparingly): independently colorful primary/secondary/trim/shirt/tie/pants with no enforced hue relationship.
+Whenever shadingMode is "graphic", pair it with "monochrome" or one of the accent schemes above, never "full". When you pick an accent scheme, prefer choosing eyeColor to match or echo the accent hue too (the way a character's eye color often IS the outfit's accent color in good references) rather than picking eyeColor independently.
 
 Available outfit stencils (stencilKey):
 ${stencilList}
@@ -145,7 +152,7 @@ You must return a JSON object with EXACTLY the following keys:
 - detailTexture (must be one of: ${PATTERN_KEYS.map((p) => `"${p}"`).join(", ")})
 - styleVibe (must be "masculine", "feminine", or "neutral")
 - shadingMode (must be "soft" or "graphic")
-- paletteMode (must be "full" or "mono-accent")
+- paletteMode (must be one of: ${PALETTE_MODE_KEYS.map((p) => `"${p}"`).join(", ")})
 - accessories (an array of strings representing active face accessories. Choose only from: ${ACCESSORY_KEYS.map((a) => `"${a}"`).join(", ")})
 - enhancedPrompt (your beautifully expanded version of the user's prompt)
 
@@ -321,7 +328,7 @@ User description: ${prompt}`;
         detailTexture: apparel.detailTexture,
         styleVibe: apparel.styleVibe as 'masculine' | 'feminine' | 'neutral' | undefined,
         shadingMode: apparel.shadingMode as 'soft' | 'graphic' | undefined,
-        paletteMode: apparel.paletteMode as 'full' | 'mono-accent' | undefined,
+        paletteMode: apparel.paletteMode as 'full' | 'monochrome' | 'complementary' | 'analogous' | 'split-complementary' | 'triadic' | undefined,
       }
     );
 
