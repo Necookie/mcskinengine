@@ -910,3 +910,79 @@ export async function retrieveAndFormatExamples(
     return "";
   }
 }
+
+export async function findBestMatchingReferenceSkin(
+  userPrompt: string
+): Promise<{ pixelData: string; apparelResult: any } | null> {
+  try {
+    const attributes = extractPromptAttributes(userPrompt);
+    
+    // Build query conditions based on extracted attributes
+    const conditions: string[] = [];
+    const args: any[] = [];
+    
+    // Match by dominant hue if colors are specified
+    if (attributes.colors.length > 0) {
+      const colorConditions = attributes.colors.map(() => "dominant_hue_category = ?").join(" OR ");
+      conditions.push(`(${colorConditions})`);
+      args.push(...attributes.colors);
+    }
+    
+    // Match by brightness
+    if (attributes.brightness) {
+      conditions.push("brightness_category = ?");
+      args.push(attributes.brightness);
+    }
+    
+    // Match by saturation
+    if (attributes.saturation) {
+      conditions.push("saturation_category = ?");
+      args.push(attributes.saturation);
+    }
+    
+    // Match by stencil key if specified
+    if (attributes.explicitParams.stencilKey) {
+      conditions.push("json_extract(apparel_result, '$.stencilKey') = ?");
+      args.push(attributes.explicitParams.stencilKey);
+    }
+    
+    // Must have pixel data
+    conditions.push("pixel_data IS NOT NULL");
+    
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    
+    // Query for the best matching skin with pixel data
+    const sql = `
+      SELECT id, filename, pixel_data, apparel_result
+      FROM skin_references
+      ${whereClause}
+      ORDER BY RANDOM()
+      LIMIT 1
+    `;
+    
+    const result = await db.execute({ sql, args });
+    
+    if (result.rows.length === 0) {
+      return null;
+    }
+    
+    const row = result.rows[0] as any;
+    let apparelResult = null;
+    
+    if (row.apparel_result) {
+      try {
+        apparelResult = JSON.parse(row.apparel_result);
+      } catch (e) {
+        console.error("Failed to parse apparel_result:", e);
+      }
+    }
+    
+    return {
+      pixelData: row.pixel_data,
+      apparelResult,
+    };
+  } catch (error) {
+    console.error("Failed to find matching reference skin:", error);
+    return null;
+  }
+}

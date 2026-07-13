@@ -8,7 +8,7 @@ import { HAIR_STYLES, HAIR_STYLE_KEYS } from "@/lib/hairStyles";
 import { EYE_STYLES, EYE_STYLE_KEYS } from "@/lib/eyeStyles";
 import { PATTERN_KEYS } from "@/lib/shading";
 import { ACCESSORY_KEYS } from "@/lib/accessories";
-import { retrieveAndFormatExamples, extractPromptAttributes } from "@/lib/skinRetrieval";
+import { retrieveAndFormatExamples, extractPromptAttributes, findBestMatchingReferenceSkin } from "@/lib/skinRetrieval";
 
 export const runtime = "edge";
 
@@ -321,34 +321,50 @@ User description: ${prompt}`;
       }
     }
 
-    const skinArray = generateSkinArray(
-      demographic || "East Asian",
-      apparel.stencilKey,
-      {
-        primary: apparel.primary,
-        secondary: apparel.secondary,
-        trim: apparel.trim,
-        shirt: apparel.shirt,
-        tie: apparel.tie,
-        pants: apparel.pants,
-        shoes: apparel.shoes,
-      },
-      !!isAlex,
-      apparel.accessories || [],
-      {
-        skinColor: apparel.skinColor,
-        hairColor: apparel.hairColor,
-        eyeColor: apparel.eyeColor,
-        hairStyle: apparel.hairStyle,
-        eyeStyle: apparel.eyeStyle,
-        detailTexture: apparel.detailTexture,
-        styleVibe: apparel.styleVibe as 'masculine' | 'feminine' | 'neutral' | undefined,
-        shadingMode: apparel.shadingMode as 'soft' | 'graphic' | undefined,
-        paletteMode: apparel.paletteMode as 'full' | 'monochrome' | 'complementary' | 'analogous' | 'split-complementary' | 'triadic' | undefined,
+    // Try to find a matching reference skin from the dataset
+    const referenceSkin = await findBestMatchingReferenceSkin(prompt);
+    
+    let base64Skin: string;
+    
+    if (referenceSkin && referenceSkin.pixelData) {
+      // Use the reference skin's pixel data directly
+      base64Skin = referenceSkin.pixelData;
+      
+      // If the reference skin has apparel_result, use it to override AI choices
+      if (referenceSkin.apparelResult) {
+        apparel = { ...apparel, ...referenceSkin.apparelResult };
       }
-    );
+    } else {
+      // Fall back to procedural generation
+      const skinArray = generateSkinArray(
+        demographic || "East Asian",
+        apparel.stencilKey,
+        {
+          primary: apparel.primary,
+          secondary: apparel.secondary,
+          trim: apparel.trim,
+          shirt: apparel.shirt,
+          tie: apparel.tie,
+          pants: apparel.pants,
+          shoes: apparel.shoes,
+        },
+        !!isAlex,
+        apparel.accessories || [],
+        {
+          skinColor: apparel.skinColor,
+          hairColor: apparel.hairColor,
+          eyeColor: apparel.eyeColor,
+          hairStyle: apparel.hairStyle,
+          eyeStyle: apparel.eyeStyle,
+          detailTexture: apparel.detailTexture,
+          styleVibe: apparel.styleVibe as 'masculine' | 'feminine' | 'neutral' | undefined,
+          shadingMode: apparel.shadingMode as 'soft' | 'graphic' | undefined,
+          paletteMode: apparel.paletteMode as 'full' | 'monochrome' | 'complementary' | 'analogous' | 'split-complementary' | 'triadic' | undefined,
+        }
+      );
 
-    const base64Skin = skinToBase64(skinArray);
+      base64Skin = skinToBase64(skinArray);
+    }
 
     await db.execute({
       sql: `INSERT INTO avatar_registry (user_id, skin_array, role, ethnicity, model_type)
