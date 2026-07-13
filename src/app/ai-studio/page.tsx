@@ -239,12 +239,17 @@ export default function AiStudioPage() {
         <main className="dashboard-main-content">
           {/* Welcome/Header Banner */}
           <div className="dashboard-welcome-banner">
-            <h1 className="text-panel-head" style={{ fontWeight: 700, textTransform: "uppercase" }}>
-              AI Studio Generator
+            <div className="text-grid-tag" style={{ color: "var(--color-primary)", marginBottom: "8px" }}>
+              Cognitive Studio
+            </div>
+            <h1 className="text-display-lg" style={{ textTransform: "uppercase", margin: 0, lineHeight: 1.0 }}>
+              AI Skin Generator
             </h1>
-            <span className="text-grid-tag" style={{ color: "#555558" }}>
-              Model: {modelType} | Arm Size: {modelType === "steve" ? "4px" : "3px"} | Base: {role}
-            </span>
+            <div style={{ marginTop: "8px" }}>
+              <span className="text-grid-tag" style={{ color: "#555558" }}>
+                Active Mesh: {modelType} | Arm Size: {modelType === "steve" ? "4px" : "3px"} | Stencil Base: {role}
+              </span>
+            </div>
           </div>
 
           {/* Bento Columns */}
