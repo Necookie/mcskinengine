@@ -108,26 +108,15 @@ export async function POST(req: NextRequest) {
     const hairList = HAIR_STYLE_KEYS.map((k) => `- "${k}": ${HAIR_STYLES[k].name} (${HAIR_STYLES[k].vibe})`).join("\n");
     const eyeList = EYE_STYLE_KEYS.map((k) => `- "${k}": ${EYE_STYLES[k].name} (${EYE_STYLES[k].vibe})`).join("\n");
 
-    const promptText = `You are an expert designer analyzing a Minecraft skin request and image to generate styling attributes.
-Your goal is to make sure the output skin looks highly-detailed, textured, and fashionable.
-If the user's prompt is generic, simple, or plain (e.g., "cs student with glasses" or "casual hoodie"), you MUST expand it mentally into a descriptive, high-quality, professional skin design concept with rich textures, color coordination, and accessories (e.g. "a sleek dark-charcoal hoodie with soft fabric shading, thin-rimmed academic spectacles, and dark blue jeans").
-Write this beautifully expanded description in the "enhancedPrompt" key.
+    const promptText = `You are an expert Minecraft skin designer. You MUST follow the user's specific requests exactly.
 
-Do NOT default to "hoodie", "messy-fringe", or "cool-highlight" unless the user's request specifically calls for them. Choose the stencil, hair, eyes, and texture that best express the user's description; when the description is ambiguous, prefer a distinctive combination over a safe one. Every generation should look meaningfully different from a generic default.
+${fewShotExamples}
 
-If the request implies a feminine or masculine presentation (names, pronouns, "girl", "guy", "dress", "beard", etc.), set styleVibe accordingly and prefer hair/eye/outfit options tagged with that vibe below; otherwise use "neutral". Any vibe may be combined with any outfit — these are style choices, not hard rules.
-
-Pick a coherent 3-color palette (primary/secondary/trim) with real contrast between the colors; avoid washed-out grays unless specifically requested.
-
-Choose a shadingMode: "graphic" gives hard, flat two-tone lit/shadow shapes with no dithering — pick it for dark, edgy, high-contrast, monochrome, anime-villain, or "cool/aesthetic" requests. "soft" (default) gives a dithered multi-tone gradient — pick it for warm, soft, pastel, or casual requests.
-Choose a paletteMode using real color theory instead of picking secondary/trim/tie independently. Popular hand-painted skins keep ~80% of the outfit as shades of ONE hue and reserve exactly one deliberate color-wheel accent for a small area — never a scatter of unrelated colors:
-- "monochrome": every garment color is a lightness shade of primary, zero hue variation. Use for graphic/all-black/all-white/high-contrast requests.
-- "complementary": trim becomes primary's hue +180° (opposite on the color wheel) — a bold, high-contrast accent.
-- "analogous": trim becomes a neighboring hue (+35°) — a subtle, harmonious accent.
-- "split-complementary": trim AND tie become the two hues flanking primary's complement — a punchier but still balanced accent pair.
-- "triadic": trim becomes primary's hue +120° — a vivid, evenly-spaced accent.
-- "full" (default, use sparingly): independently colorful primary/secondary/trim/shirt/tie/pants with no enforced hue relationship.
-Whenever shadingMode is "graphic", pair it with "monochrome" or one of the accent schemes above, never "full". When you pick an accent scheme, prefer choosing eyeColor to match or echo the accent hue too (the way a character's eye color often IS the outfit's accent color in good references) rather than picking eyeColor independently.
+CRITICAL: The user has specified exact items. You MUST include ALL of them in your output:
+- If they say "white dress", you MUST use stencilKey: "summer-dress" and primary: "#ffffff"
+- If they say "red tie", you MUST include "tie" in accessories and set tie: "#cc0000"
+- If they say "black pants", you MUST set pants: "#1a1a1a"
+- If they say "emo", you MUST use dark colors and emo-appropriate hair/eyes
 
 Available outfit stencils (stencilKey):
 ${stencilList}
@@ -138,28 +127,13 @@ ${hairList}
 Available eye styles (eyeStyle):
 ${eyeList}
 
-Determine the stencil, colors, skin/hair traits, styles, and face accessories.
-You must return a JSON object with EXACTLY the following keys:
-- stencilKey (one of the stencil keys listed above)
-- primary (hex color string like "#ffffff")
-- secondary (hex color string)
-- trim (hex color string)
-- shirt (hex color string)
-- tie (hex color string)
-- pants (hex color string)
-- shoes (hex color string for shoes/footwear)
-- skinColor (hex color string for skin tone, matching demographic/origin, e.g. #c68d5f for Filipino/Hispanic, #ebd3be for East Asian, #59361a for African)
-- hairColor (hex color string for hair)
-- eyeColor (hex color string for eyes)
-- hairStyle (one of the hairstyle keys listed above)
-- eyeStyle (one of the eye style keys listed above)
-- detailTexture (must be one of: ${PATTERN_KEYS.map((p) => `"${p}"`).join(", ")})
-- styleVibe (must be "masculine", "feminine", or "neutral")
-- shadingMode (must be "soft" or "graphic")
-- paletteMode (must be one of: ${PALETTE_MODE_KEYS.map((p) => `"${p}"`).join(", ")})
-- accessories (an array of strings representing active face accessories. Choose only from: ${ACCESSORY_KEYS.map((a) => `"${a}"`).join(", ")})
-- enhancedPrompt (your beautifully expanded version of the user's prompt)
-${fewShotExamples}
+Return a JSON object with EXACTLY these keys:
+- stencilKey, primary, secondary, trim, shirt, tie, pants, shoes
+- skinColor, hairColor, eyeColor
+- hairStyle, eyeStyle, detailTexture
+- styleVibe, shadingMode, paletteMode
+- accessories (array), enhancedPrompt
+
 User description: ${prompt}`;
 
     let apparel: ApparelResult;
@@ -308,6 +282,44 @@ User description: ${prompt}`;
     if (!VIBE_KEYS.includes(apparel.styleVibe || "")) apparel.styleVibe = "neutral";
     if (!SHADING_MODE_KEYS.includes(apparel.shadingMode || "")) apparel.shadingMode = "soft";
     if (!PALETTE_MODE_KEYS.includes(apparel.paletteMode || "")) apparel.paletteMode = "full";
+
+    // POST-PROCESSING: Override with explicitly extracted parameters
+    if (promptAttributes.explicitParams.stencilKey && STENCIL_KEYS.includes(promptAttributes.explicitParams.stencilKey)) {
+      apparel.stencilKey = promptAttributes.explicitParams.stencilKey;
+    }
+    if (promptAttributes.explicitParams.primary && HEX_COLOR_RE.test(promptAttributes.explicitParams.primary)) {
+      apparel.primary = promptAttributes.explicitParams.primary;
+    }
+    if (promptAttributes.explicitParams.secondary && HEX_COLOR_RE.test(promptAttributes.explicitParams.secondary)) {
+      apparel.secondary = promptAttributes.explicitParams.secondary;
+    }
+    if (promptAttributes.explicitParams.trim && HEX_COLOR_RE.test(promptAttributes.explicitParams.trim)) {
+      apparel.trim = promptAttributes.explicitParams.trim;
+    }
+    if (promptAttributes.explicitParams.pants && HEX_COLOR_RE.test(promptAttributes.explicitParams.pants)) {
+      apparel.pants = promptAttributes.explicitParams.pants;
+    }
+    if (promptAttributes.explicitParams.tie && HEX_COLOR_RE.test(promptAttributes.explicitParams.tie)) {
+      apparel.tie = promptAttributes.explicitParams.tie;
+    }
+    if (promptAttributes.explicitParams.shirt && HEX_COLOR_RE.test(promptAttributes.explicitParams.shirt)) {
+      apparel.shirt = promptAttributes.explicitParams.shirt;
+    }
+    if (promptAttributes.explicitParams.accessories && Array.isArray(promptAttributes.explicitParams.accessories)) {
+      apparel.accessories = promptAttributes.explicitParams.accessories.filter((a: string) => ACCESSORY_KEYS.includes(a as any));
+    }
+    if (promptAttributes.explicitParams.preferredHairStyles && Array.isArray(promptAttributes.explicitParams.preferredHairStyles)) {
+      const validHairStyles = promptAttributes.explicitParams.preferredHairStyles.filter((h: string) => HAIR_STYLE_KEYS.includes(h));
+      if (validHairStyles.length > 0) {
+        apparel.hairStyle = validHairStyles[0];
+      }
+    }
+    if (promptAttributes.explicitParams.preferredEyeStyles && Array.isArray(promptAttributes.explicitParams.preferredEyeStyles)) {
+      const validEyeStyles = promptAttributes.explicitParams.preferredEyeStyles.filter((e: string) => EYE_STYLE_KEYS.includes(e));
+      if (validEyeStyles.length > 0) {
+        apparel.eyeStyle = validEyeStyles[0];
+      }
+    }
 
     const skinArray = generateSkinArray(
       demographic || "East Asian",
