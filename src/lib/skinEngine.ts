@@ -15,6 +15,7 @@ import {
   BASE_FACE_RECTS,
   resolvePaletteByScheme,
   ColorScheme,
+  ensureValueContrast,
 } from "./shading";
 import { HAIR_BASE, HAIR_STYLES } from "./hairStyles";
 import { EYE_STYLES } from "./eyeStyles";
@@ -73,7 +74,7 @@ export function generateSkinArray(
 
   const demo = DEMOGRAPHICS[demographicKey] || DEMOGRAPHICS["East Asian"];
   const skinRgb = hexToRgb(traits?.skinColor || demo.skinColor);
-  const hairRgb = hexToRgb(traits?.hairColor || demo.hairColor);
+  let hairRgb = hexToRgb(traits?.hairColor || demo.hairColor);
   const eyeRgb = hexToRgb(traits?.eyeColor || demo.eyeColor);
   const styleVibe = traits?.styleVibe || "neutral";
   const vibeHairDefault = styleVibe === 'feminine' ? "long-straight" : styleVibe === 'masculine' ? "short-spiky" : "messy-fringe";
@@ -87,6 +88,12 @@ export function generateSkinArray(
   if (paletteMode !== "full") {
     apparelColors = resolvePaletteByScheme(apparelColors, paletteMode);
   }
+
+  // The AI often picks hairColor equal (or nearly equal) to the outfit
+  // primary; when both hue and lightness coincide the head melts into the
+  // torso as one slab. Push the hair's lightness apart so it reads as its
+  // own shape against the garment.
+  hairRgb = ensureValueContrast(hexToRgb(apparelColors.primary), hairRgb);
 
   const seedBase = `${stencilKey}|${hairStyle}|${apparelColors.primary}`;
   const resolvedSeed =
@@ -126,15 +133,32 @@ export function generateSkinArray(
   // Head Base: x in [0, 31], y in [0, 15]
   fillRect(0, 0, 31, 15, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, 'none', 'top', 'skin');
 
+  // Every reference skin renders hair as vertical multi-tone STRANDS, not
+  // a flat fill: adjacent 1px columns alternate between 3-4 shades of the
+  // hair color, running continuously down the head so they read as
+  // individual locks. Keyed on x alone (not y) so a strand stays one shade
+  // across stacked rects, and deterministic from the seed.
+  const hairStreak = (x: number): number => {
+    const n = hash2(x, 0, resolvedSeed + 11);
+    return n < 0.28 ? -16 : n < 0.52 ? 0 : n < 0.78 ? -7 : 12;
+  };
+  const fillHairRect = (x1: number, y1: number, x2: number, y2: number, baseShade: number = 0) => {
+    for (let x = x1; x <= x2; x++) {
+      const c = applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, baseShade + hairStreak(x), false);
+      for (let y = y1; y <= y2; y++) {
+        setPixel(x, y, c.r, c.g, c.b, 255, { x1, y1, x2, y2 }, false, 'none', true, 'top', 'hair');
+      }
+    }
+  };
+
   // Hair - Draw base helmet, then the chosen style's overlay rects
   for (const rect of HAIR_BASE) {
-    fillRect(rect.x1, rect.y1, rect.x2, rect.y2, hairRgb.r, hairRgb.g, hairRgb.b, 255, false, 'none', 'top', 'hair');
+    fillHairRect(rect.x1, rect.y1, rect.x2, rect.y2);
   }
 
   const resolvedHairStyle = HAIR_STYLES[hairStyle] || HAIR_STYLES["messy-fringe"];
   for (const rect of resolvedHairStyle.rects) {
-    const c = rect.shade ? applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, rect.shade, false) : hairRgb;
-    fillRect(rect.x1, rect.y1, rect.x2, rect.y2, c.r, c.g, c.b, 255, false, 'none', 'top', 'hair');
+    fillHairRect(rect.x1, rect.y1, rect.x2, rect.y2, rect.shade ?? 0);
   }
 
   // Hat-layer hair strands (poke over the forehead/sides for extra depth).
@@ -143,17 +167,16 @@ export function generateSkinArray(
   const stencilUsesHatLayer = stencilForHat.regions.some((r) => r.x1 >= 32 && r.y2 <= 15);
   if (!stencilUsesHatLayer && resolvedHairStyle.hatRects) {
     for (const rect of resolvedHairStyle.hatRects) {
-      const c = rect.shade ? applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, rect.shade, false) : hairRgb;
-      fillRect(rect.x1, rect.y1, rect.x2, rect.y2, c.r, c.g, c.b, 255, false, 'none', 'top', 'hair');
+      fillHairRect(rect.x1, rect.y1, rect.x2, rect.y2, rect.shade ?? 0);
     }
   }
 
-  // Hair Highlight Halo around y = 10 (adds shine and volume to the hair)
-  const hairHighlight = applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, 18, false);
-  fillRect(9, 10, 14, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, 'none', 'top', 'hair');
-  fillRect(1, 10, 6, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, 'none', 'top', 'hair');
-  fillRect(17, 10, 22, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, 'none', 'top', 'hair');
-  fillRect(25, 10, 30, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, 'none', 'top', 'hair');
+  // Hair shine band around y = 10; drawn per-column so the streaks stay
+  // visible through the highlight instead of being flattened by it.
+  fillHairRect(9, 10, 14, 10, 18);
+  fillHairRect(1, 10, 6, 10, 18);
+  fillHairRect(17, 10, 22, 10, 18);
+  fillHairRect(25, 10, 30, 10, 18);
 
   // Eyes on Head Front: (8, 8) to (15, 15)
   const resolvedEyeStyle = EYE_STYLES[eyeStyle] || EYE_STYLES["cool-highlight"];
@@ -229,8 +252,13 @@ export function generateSkinArray(
     }
 
     if (accessories.includes("eyebrows")) {
-      fillRect(9, 11, 11, 11, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
-      fillRect(12, 11, 14, 11, darkColor.r, darkColor.g, darkColor.b, 255, false, 'none', 'top', 'accessory');
+      // Short 2px dash above EACH eye (eyes are vertical columns at x=10
+      // and x=13 starting at y=11): drawn at y=10 in a hair-derived tone.
+      // The old version was two 3px near-black bars ON the eye row itself,
+      // meeting at the nose bridge - which read as a glasses frame.
+      const browRgb = applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, -25, false);
+      fillRect(9, 10, 10, 10, browRgb.r, browRgb.g, browRgb.b, 255, false, 'none', 'top', 'accessory');
+      fillRect(13, 10, 14, 10, browRgb.r, browRgb.g, browRgb.b, 255, false, 'none', 'top', 'accessory');
     }
 
     if (accessories.includes("freckles")) {
@@ -448,8 +476,13 @@ export function generateSkinArray(
   // would be silently painted over the moment the body/garment finishes.
   if (resolvedHairStyle.shoulderRects) {
     for (const rect of resolvedHairStyle.shoulderRects) {
-      const c = rect.shade ? applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, rect.shade, false) : hairRgb;
-      fillRect(rect.x1, rect.y1, rect.x2, rect.y2, c.r, c.g, c.b, 255, false, 'none', 'top', 'hair');
+      fillHairRect(rect.x1, rect.y1, rect.x2, rect.y2, rect.shade ?? 0);
+      // Also paint the torso OVERLAY UV (base front + 16 rows down): any
+      // stencil that dresses the torso overlay would otherwise composite
+      // its garment over the drape and swallow the hair entirely. On the
+      // overlay the strands also render on the inflated shell, floating
+      // slightly off the chest the way draped hair should.
+      fillHairRect(rect.x1, rect.y1 + 16, rect.x2, rect.y2 + 16, rect.shade ?? 0);
     }
   }
 
