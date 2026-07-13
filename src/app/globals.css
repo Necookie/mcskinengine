@@ -699,7 +699,7 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 .canvas-board-outer {
   flex-grow: 1;
   width: 100%;
-  max-width: 340px;
+  max-width: 288px;
   aspect-ratio: 1 / 1;
   display: flex;
   flex-direction: column;
@@ -727,9 +727,9 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
   flex-direction: column;
   gap: 10px;
   width: 100%;
-  max-width: 340px;
+  max-width: 288px;
   background-color: var(--color-canvas);
-  padding: 16px;
+  padding: 10px;
   border: 4px solid var(--color-primary);
   border-radius: 0;
 }
@@ -851,17 +851,17 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 .trait-selector-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
 }
 
 .trait-section-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
   border: 2px solid var(--color-primary);
-  padding: 12px;
+  padding: 8px;
   background-color: #ffffff;
 }
 
@@ -870,8 +870,8 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
   justify-content: space-between;
   align-items: center;
   border-bottom: 2px solid rgba(28, 28, 29, 0.1);
-  padding-bottom: 6px;
-  margin-bottom: 4px;
+  padding-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .trait-card-title {
@@ -897,9 +897,9 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 
 .ethnicity-btn {
   text-align: center;
-  padding: 6px 0;
+  padding: 4px 0;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
   border: 2px solid var(--color-primary);
@@ -918,18 +918,66 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: none;
 }
 
+/* Institutional Roles Grid Layout */
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.role-btn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 2px solid var(--color-primary);
+  background-color: var(--color-canvas);
+  color: var(--color-primary);
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  box-shadow: 0 2px 0 0 var(--color-primary);
+  transform: translateY(-2px);
+  transition: none;
+}
+
+.role-btn:hover {
+  background-color: var(--color-surface-soft);
+}
+
+.role-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.role-btn.active {
+  background-color: var(--color-primary);
+  color: var(--color-canvas);
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.role-btn.active:hover {
+  background-color: #2e2e30;
+}
+
 /* 3D Model Preview */
 .preview-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
 }
 
 .preview-3d-box {
   position: relative;
-  width: 100%;
-  aspect-ratio: 3 / 4;
+  width: 170px;
+  height: 220px;
+  margin: 0 auto;
   background-color: var(--color-canvas);
   border: 4px solid var(--color-primary);
   display: flex;
@@ -968,11 +1016,11 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 .pose-buttons-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
 
 .pose-btn {
-  padding: 6px 0;
+  padding: 4px 0;
   font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 700;
@@ -1011,7 +1059,7 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .form-group-label {
@@ -1025,7 +1073,7 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
 /* Image Dropzone styles */
 .voxel-dropzone {
   border: 4px dashed var(--color-primary);
-  padding: 16px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1034,7 +1082,7 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
   cursor: pointer;
   background-color: var(--color-surface-soft);
   color: var(--color-primary);
-  min-height: 130px;
+  min-height: 90px;
   user-select: none;
 }
 .voxel-dropzone:hover {
