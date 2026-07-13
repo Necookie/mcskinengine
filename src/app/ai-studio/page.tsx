@@ -398,7 +398,7 @@ export default function AiStudioPage() {
                 <span className="font-bold">Active Avatar</span>
               </div>
               <div className="dashboard-preview-body">
-                <div className="dashboard-avatar-preview-box" key={modelType}>
+                <div className="dashboard-avatar-preview-box">
                   <ReactSkinview3d
                     skinUrl=""
                     height={220}

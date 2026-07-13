@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useUser, SignOutButton } from "@clerk/nextjs";
 import { useSkinStore } from "@/lib/store";
 import { motion } from "framer-motion";
-import TraitSelector from "../components/TraitSelector";
 import PixelEditor3D from "../components/PixelEditor3D";
 import ModelPreview3D from "../components/ModelPreview3D";
 import ImageDropzone from "../components/ImageDropzone";
@@ -12,7 +11,7 @@ import { LandingPage, LoadingScreen } from "../components/LandingPage";
 import { 
   Sparkles, Terminal, Settings, LogOut, CheckCircle, AlertTriangle,
   Paintbrush, Eraser, Undo, Redo, RotateCcw, Grid3X3, ZoomIn, ZoomOut, Maximize,
-  ChevronUp, ChevronDown, Key, User
+  ChevronUp, ChevronDown, Key
 } from "lucide-react";
 
 export default function WorkspacePage() {
@@ -60,12 +59,6 @@ export default function WorkspacePage() {
   const [enhancedPrompt, setEnhancedPrompt] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-
-  const [sections, setSections] = useState({
-    ai: true,
-    config: true,
-    preview: true,
-  });
 
   const [consoleExpanded, setConsoleExpanded] = useState(false);
   const [showAiSetup, setShowAiSetup] = useState(true);
@@ -135,10 +128,6 @@ export default function WorkspacePage() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [undoStack, redoStack, showGuides, undo, redo, setActiveTool, setShowGuides]);
-
-  const toggleSection = (sec: "ai" | "config" | "preview") => {
-    setSections(prev => ({ ...prev, [sec]: !prev[sec] }));
-  };
 
   // Initialize data on sign-in
   useEffect(() => {
@@ -574,32 +563,6 @@ export default function WorkspacePage() {
             <div className="card-body" style={{ backgroundColor: "#f4f4f6" }}>
               <ModelPreview3D />
             </div>
-          </div>
-
-          {/* Card B: Character Configurator */}
-          <div className="workspace-card">
-            <div 
-              className="card-header" 
-              onClick={() => toggleSection("config")}
-              style={{ borderLeft: "1px solid rgba(24, 24, 27, 0.12)" }}
-            >
-              <div className="flex items-center gap-2">
-                <User size={14} strokeWidth={2} style={{ color: "var(--color-primary)" }} />
-                <span className="font-bold">Character Configurator</span>
-              </div>
-              {sections.config ? <ChevronUp size={14} strokeWidth={2} /> : <ChevronDown size={14} strokeWidth={2} />}
-            </div>
-
-            {sections.config && (
-              <div 
-                className="card-body" 
-                style={{ 
-                  backgroundColor: "#ffffff" 
-                }}
-              >
-                <TraitSelector />
-              </div>
-            )}
           </div>
         </aside>
       </div>
