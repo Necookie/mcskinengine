@@ -21,8 +21,13 @@ interface SkinEmbedding {
   features: any;
 }
 
+interface SkinApparel {
+  filename: string;
+  apparel_result: any;
+}
+
 async function populateSkinReferences() {
-  console.log("Populating skin_references table...");
+  console.log("Populating skin_references table with apparel results...");
 
   console.log("Creating table if not exists...");
   await db.execute({
@@ -37,25 +42,43 @@ async function populateSkinReferences() {
       dominant_hue_category TEXT,
       embedding BLOB,
       features_json TEXT,
+      apparel_result TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
     args: [],
   });
 
+  try { await db.execute({ sql: "ALTER TABLE skin_references ADD COLUMN apparel_result TEXT", args: [] }); } catch {}
+
   await db.execute({ sql: "CREATE INDEX IF NOT EXISTS idx_cluster_id ON skin_references(cluster_id)", args: [] });
   await db.execute({ sql: "CREATE INDEX IF NOT EXISTS idx_hue ON skin_references(dominant_hue_category)", args: [] });
   await db.execute({ sql: "CREATE INDEX IF NOT EXISTS idx_brightness ON skin_references(brightness_category)", args: [] });
+  await db.execute({ sql: "CREATE INDEX IF NOT EXISTS idx_shading ON skin_references(json_extract(apparel_result, '$.shadingMode'))", args: [] });
+  await db.execute({ sql: "CREATE INDEX IF NOT EXISTS idx_stencil ON skin_references(json_extract(apparel_result, '$.stencilKey'))", args: [] });
   console.log("Table ready.");
 
   const embeddingsPath = path.join(process.cwd(), "reference_data", "skin_embeddings.json");
+  const apparelPath = path.join(process.cwd(), "reference_data", "skin_apparel.json");
   
   if (!fs.existsSync(embeddingsPath)) {
     console.error("skin_embeddings.json not found. Run the Python pipeline first.");
     return;
   }
 
+  if (!fs.existsSync(apparelPath)) {
+    console.error("skin_apparel.json not found. Run generate_apparel_heuristics.py first.");
+    return;
+  }
+
   const data: SkinEmbedding[] = JSON.parse(fs.readFileSync(embeddingsPath, "utf-8"));
-  console.log(`Found ${data.length} skin embeddings to insert`);
+  const apparelData: SkinApparel[] = JSON.parse(fs.readFileSync(apparelPath, "utf-8"));
+  
+  const apparelMap = new Map<string, any>();
+  for (const item of apparelData) {
+    apparelMap.set(item.filename, item.apparel_result);
+  }
+  
+  console.log(`Found ${data.length} skin embeddings and ${apparelData.length} apparel results`);
 
   let inserted = 0;
   let errors = 0;
@@ -67,9 +90,11 @@ async function populateSkinReferences() {
       const features = item.features;
       const stats = features?.statistics || {};
       const palette = features?.palette || {};
+      const apparelResult = apparelMap.get(item.filename);
       
       const dominantColors = JSON.stringify((palette.colors || []).slice(0, 5));
       const featuresJson = JSON.stringify(features);
+      const apparelJson = apparelResult ? JSON.stringify(apparelResult) : null;
       
       const id = item.filename.replace(/\.(jpg|png)$/i, "");
       
@@ -77,8 +102,8 @@ async function populateSkinReferences() {
         sql: `INSERT OR REPLACE INTO skin_references (
           id, filename, cluster_id, description, dominant_colors,
           brightness_category, saturation_category, dominant_hue_category,
-          features_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          features_json, apparel_result
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           id,
           item.filename,
@@ -89,6 +114,7 @@ async function populateSkinReferences() {
           stats.saturation_category || "moderate",
           stats.dominant_hue_category || "neutral",
           featuresJson,
+          apparelJson,
         ],
       });
       
