@@ -162,16 +162,16 @@ export default function DashboardPage() {
           <div className="dashboard-window">
             {/* Welcome Banner */}
             <div className="dashboard-welcome-banner">
-              <div className="text-grid-tag" style={{ color: "var(--color-primary)", marginBottom: "8px" }}>
-                Active Session
+              <div className="text-grid-tag" style={{ color: "var(--color-primary)", marginBottom: "4px" }}>
+                Workspace Overview
               </div>
-              <h1 className="text-display-lg" style={{ textTransform: "uppercase", margin: 0, lineHeight: 1.0 }}>
-                Welcome, {user?.firstName || user?.username || "Creator"}.
+              <h1 className="text-display-lg" style={{ margin: 0, lineHeight: 1.1 }}>
+                Creator Dashboard
               </h1>
-              <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "16px" }}>
-                <span className="text-grid-tag" style={{ color: "#555558" }}>Mesh: {modelType === "steve" ? "Steve (4px)" : "Alex (3px)"}</span>
-                <span className="text-grid-tag" style={{ color: "#555558" }}>Active Base: {role}</span>
-                <span className="text-grid-tag" style={{ color: "#555558" }}>Demographic: {ethnicity}</span>
+              <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "8px" }}>
+                <span className="text-grid-tag" style={{ color: "#555558", textTransform: "none" }}>Account: {user?.firstName || user?.username || "Creator"}</span>
+                <span className="text-grid-tag" style={{ color: "#555558", textTransform: "none" }}>Mesh: {modelType === "steve" ? "Steve (4px)" : "Alex (3px)"}</span>
+                <span className="text-grid-tag" style={{ color: "#555558", textTransform: "none" }}>Active Base: {role}</span>
               </div>
             </div>
 
