@@ -565,7 +565,7 @@ export default function WorkspacePage() {
         <aside className="right-sidebar-container custom-scrollbar" style={{ display: hideSidebars ? "none" : "flex" }}>
           {/* Card A: 3D Model Preview (Always Visible at the top) */}
           <div className="workspace-card">
-            <div className="card-header" style={{ borderLeft: "2px solid var(--color-primary)", cursor: "default" }}>
+            <div className="card-header" style={{ borderLeft: "1px solid rgba(24, 24, 27, 0.12)", cursor: "default" }}>
               <div className="flex items-center gap-2">
                 <Maximize size={14} strokeWidth={2} style={{ color: "var(--color-primary)" }} />
                 <span className="font-bold">3D Model Preview</span>
@@ -581,7 +581,7 @@ export default function WorkspacePage() {
             <div 
               className="card-header" 
               onClick={() => toggleSection("config")}
-              style={{ borderLeft: "2px solid var(--color-primary)" }}
+              style={{ borderLeft: "1px solid rgba(24, 24, 27, 0.12)" }}
             >
               <div className="flex items-center gap-2">
                 <User size={14} strokeWidth={2} style={{ color: "var(--color-primary)" }} />
