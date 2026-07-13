@@ -302,7 +302,7 @@ export default function WorkspacePage() {
             <SignOutButton>
               <button
                 className="voxel-btn"
-                style={{ padding: "6px 10px", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: "9999px", borderWidth: "2px" }}
+                style={{ padding: "6px 10px", backgroundColor: "#f4f4f5", color: "#555558", borderRadius: "6px", borderWidth: "1px" }}
               >
                 <LogOut size={12} strokeWidth={2} />
               </button>

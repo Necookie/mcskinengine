@@ -148,7 +148,7 @@ export default function DashboardPage() {
             <SignOutButton>
               <button
                 className="voxel-btn"
-                style={{ width: "100%", padding: "8px 0", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: "9999px" }}
+                style={{ width: "100%", padding: "8px 0", backgroundColor: "#f4f4f5", color: "#555558", borderRadius: "6px", borderWidth: "1px" }}
               >
                 <LogOut size={12} strokeWidth={2} />
                 <span>Log Out</span>
