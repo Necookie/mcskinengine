@@ -19,6 +19,14 @@ export interface HairStyle {
    * layer (e.g. a hoodie hood).
    */
   hatRects?: HairRect[];
+  /**
+   * Long strands that drape down over the front of the torso/shoulders.
+   * Drawn dead last, after the outfit's base layer AND overlay garment
+   * regions, so hair actually appears in front of the clothing instead
+   * of being silently painted over by the torso fill that runs right
+   * after the early hair pass.
+   */
+  shoulderRects?: HairRect[];
 }
 
 // Base "helmet" fill shared by every style: back, left, right, and top of the head.
@@ -65,14 +73,18 @@ export const HAIR_STYLES: Record<string, HairStyle> = {
       { x1: 8, y1: 8, x2: 15, y2: 9 },
       { x1: 8, y1: 10, x2: 8, y2: 12 },
       { x1: 15, y1: 10, x2: 15, y2: 12 },
-      { x1: 20, y1: 16, x2: 21, y2: 19 },
-      { x1: 26, y1: 16, x2: 27, y2: 19 },
     ],
     hatRects: [
       { x1: 40, y1: 8, x2: 47, y2: 9 },
       { x1: 48, y1: 8, x2: 49, y2: 12 },
       { x1: 38, y1: 8, x2: 39, y2: 12 },
       { x1: 56, y1: 8, x2: 63, y2: 11 },
+    ],
+    shoulderRects: [
+      // Front torso face is x20-27,y20-31; the old y16-19 coordinates were
+      // the barely-visible shoulder-TOP surface, not the chest front.
+      { x1: 20, y1: 20, x2: 21, y2: 25, shade: -8 },
+      { x1: 26, y1: 20, x2: 27, y2: 25, shade: 8 },
     ],
   },
   "parted-curtains": {
@@ -131,15 +143,28 @@ export const HAIR_STYLES: Record<string, HairStyle> = {
     vibe: 'feminine',
     rects: [
       { x1: 24, y1: 8, x2: 31, y2: 15 },
-      { x1: 7, y1: 10, x2: 7, y2: 15 },
-      { x1: 16, y1: 10, x2: 16, y2: 15 },
-      { x1: 20, y1: 16, x2: 21, y2: 21 },
-      { x1: 26, y1: 16, x2: 27, y2: 21 },
+      // Soft center-parted bang wisps framing the forehead corners
+      // (leaves a center part open instead of a flat, bald-looking crown).
+      { x1: 8, y1: 8, x2: 9, y2: 8, shade: 14 },
+      { x1: 14, y1: 8, x2: 15, y2: 8, shade: 14 },
+      // Side strands framing the cheeks, thicker than a single hairline
+      // pixel and hue-shifted apart for strand separation/volume.
+      { x1: 7, y1: 9, x2: 7, y2: 15, shade: -6 },
+      { x1: 8, y1: 10, x2: 8, y2: 12, shade: -10 },
+      { x1: 16, y1: 9, x2: 16, y2: 15, shade: 6 },
+      { x1: 15, y1: 10, x2: 15, y2: 12, shade: 10 },
     ],
     hatRects: [
       { x1: 48, y1: 8, x2: 48, y2: 15 },
       { x1: 39, y1: 8, x2: 39, y2: 15 },
       { x1: 56, y1: 8, x2: 63, y2: 13, shade: -8 },
+      { x1: 40, y1: 8, x2: 47, y2: 8, shade: 12 },
+    ],
+    shoulderRects: [
+      // Front torso face is x20-27,y20-31; draped down to mid-chest with
+      // the two sides hue-shifted apart so the strands read as separate.
+      { x1: 20, y1: 20, x2: 21, y2: 27, shade: -8 },
+      { x1: 26, y1: 20, x2: 27, y2: 27, shade: 8 },
     ],
   },
   bob: {
