@@ -143,16 +143,23 @@ export const HAIR_STYLES: Record<string, HairStyle> = {
     vibe: 'feminine',
     rects: [
       { x1: 24, y1: 8, x2: 31, y2: 15 },
-      // Soft center-parted bang wisps framing the forehead corners
-      // (leaves a center part open instead of a flat, bald-looking crown).
-      { x1: 8, y1: 8, x2: 9, y2: 8, shade: 14 },
-      { x1: 14, y1: 8, x2: 15, y2: 8, shade: 14 },
-      // Side strands framing the cheeks, thicker than a single hairline
-      // pixel and hue-shifted apart for strand separation/volume.
+      // Full uneven fringe: every forehead column gets hair, with varied
+      // lengths (deepest at the outer edges, shortest at the center part)
+      // so the hairline reads as individual locks instead of a bald
+      // forehead with two corner wisps. Ends at y=10; eyes start at y=11.
+      { x1: 8, y1: 8, x2: 8, y2: 10, shade: -6 },
+      { x1: 9, y1: 8, x2: 9, y2: 9 },
+      { x1: 10, y1: 8, x2: 10, y2: 10, shade: -10 },
+      { x1: 11, y1: 8, x2: 11, y2: 8, shade: 8 },
+      { x1: 12, y1: 8, x2: 12, y2: 9 },
+      { x1: 13, y1: 8, x2: 13, y2: 8, shade: 8 },
+      { x1: 14, y1: 8, x2: 14, y2: 10, shade: -6 },
+      { x1: 15, y1: 8, x2: 15, y2: 9 },
+      // Side strands framing the cheeks down to the jaw.
       { x1: 7, y1: 9, x2: 7, y2: 15, shade: -6 },
-      { x1: 8, y1: 10, x2: 8, y2: 12, shade: -10 },
+      { x1: 8, y1: 11, x2: 8, y2: 13, shade: -10 },
       { x1: 16, y1: 9, x2: 16, y2: 15, shade: 6 },
-      { x1: 15, y1: 10, x2: 15, y2: 12, shade: 10 },
+      { x1: 15, y1: 11, x2: 15, y2: 13, shade: 10 },
     ],
     hatRects: [
       { x1: 48, y1: 8, x2: 48, y2: 15 },
