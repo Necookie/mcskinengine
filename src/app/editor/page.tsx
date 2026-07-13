@@ -68,6 +68,12 @@ export default function WorkspacePage() {
   });
 
   const [consoleExpanded, setConsoleExpanded] = useState(false);
+  const [showAiSetup, setShowAiSetup] = useState(true);
+
+  // Initialize Setup Guide state depending on keys
+  useEffect(() => {
+    setShowAiSetup(!hasGeminiKey && !hasOpenaiKey);
+  }, [hasGeminiKey, hasOpenaiKey]);
 
   const toggleSection = (sec: "ai" | "config" | "preview") => {
     setSections(prev => ({ ...prev, [sec]: !prev[sec] }));
@@ -554,7 +560,7 @@ export default function WorkspacePage() {
 
             {sections.ai && (
               <div className="card-body" style={{ backgroundColor: "#ffffff" }}>
-                {!hasGeminiKey && !hasOpenaiKey ? (
+                {showAiSetup ? (
                   /* Setup Onboarding view */
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--color-accent-ai)" }}>
@@ -595,13 +601,40 @@ export default function WorkspacePage() {
                     >
                       Save Key
                     </button>
+
+                    <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
+                      <button
+                        onClick={() => setShowAiSetup(false)}
+                        className="voxel-btn"
+                        style={{ flex: 1, padding: "6px 0", fontSize: "10px", borderRadius: 0, borderWidth: "2px", justifyContent: "center", backgroundColor: "#fff", color: "#1c1c1d" }}
+                      >
+                        ← Skip
+                      </button>
+                      <a
+                        href="/"
+                        className="voxel-btn"
+                        style={{ flex: 1, padding: "6px 0", fontSize: "10px", borderRadius: 0, borderWidth: "2px", justifyContent: "center", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d" }}
+                      >
+                        ← Exit
+                      </a>
+                    </div>
                   </div>
                 ) : (
                   /* Normal Generator Interface View */
                   <>
-                    <p className="ai-section-desc">
-                      Describe apparel features or drop a reference image to generate your skin.
-                    </p>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <p className="ai-section-desc" style={{ marginBottom: 0 }}>
+                        Describe apparel features to generate your skin.
+                      </p>
+                      <button
+                        onClick={() => setShowAiSetup(true)}
+                        className="text-[9px] text-[#ff2a85] hover:underline font-mono uppercase font-bold"
+                        style={{ background: "none", border: "none", cursor: "pointer" }}
+                      >
+                        Keys
+                      </button>
+                    </div>
+
                     <div className="form-group">
                       <label className="form-group-label">AI Model</label>
                       <select
