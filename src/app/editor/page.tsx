@@ -507,7 +507,7 @@ export default function WorkspacePage() {
         <aside className="right-sidebar-container custom-scrollbar">
           {/* Card A: 3D Model Preview (Always Visible at the top) */}
           <div className="workspace-card">
-            <div className="card-header" style={{ borderLeft: "4px solid var(--color-block-steve)", cursor: "default" }}>
+            <div className="card-header" style={{ borderLeft: "2px solid var(--color-primary)", cursor: "default" }}>
               <div className="flex items-center gap-2">
                 <Maximize size={14} strokeWidth={2} style={{ color: "var(--color-primary)" }} />
                 <span className="font-bold">3D Model Preview</span>
@@ -523,7 +523,7 @@ export default function WorkspacePage() {
             <div 
               className="card-header" 
               onClick={() => toggleSection("config")}
-              style={{ borderLeft: `4px solid var(--color-block-alex)` }}
+              style={{ borderLeft: "2px solid var(--color-primary)" }}
             >
               <div className="flex items-center gap-2">
                 <User size={14} strokeWidth={2} style={{ color: "var(--color-primary)" }} />
@@ -536,7 +536,7 @@ export default function WorkspacePage() {
               <div 
                 className="card-body" 
                 style={{ 
-                  backgroundColor: role === "blazer" ? "#f1e4d3" : role === "labcoat" ? "#d2ebd9" : modelType === "steve" ? "#b3d7df" : "#ebd3be" 
+                  backgroundColor: "#ffffff" 
                 }}
               >
                 <TraitSelector />
