@@ -36,12 +36,16 @@ interface ApparelResult {
   eyeStyle: string;
   detailTexture: string;
   styleVibe?: string;
+  shadingMode?: string;
+  paletteMode?: string;
   accessories?: string[];
   enhancedPrompt?: string;
 }
 
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 const VIBE_KEYS = ["masculine", "feminine", "neutral"];
+const SHADING_MODE_KEYS = ["soft", "graphic"];
+const PALETTE_MODE_KEYS = ["full", "mono-accent"];
 
 const PRICING: Record<string, { inRate: number; outRate: number }> = {
   "gemini-3.5-flash": { inRate: 1.50 / 1000000, outRate: 9.00 / 1000000 },
@@ -111,6 +115,9 @@ If the request implies a feminine or masculine presentation (names, pronouns, "g
 
 Pick a coherent 3-color palette (primary/secondary/trim) with real contrast between the colors; avoid washed-out grays unless specifically requested.
 
+Choose a shadingMode: "graphic" gives hard, flat two-tone lit/shadow shapes with no dithering — pick it for dark, edgy, high-contrast, monochrome, anime-villain, or "cool/aesthetic" requests. "soft" (default) gives a dithered multi-tone gradient — pick it for warm, soft, pastel, or casual requests.
+Choose a paletteMode: "mono-accent" collapses the whole outfit into shades of a single primary hue, leaving eyeColor as the one deliberate spot of chroma — pick it whenever shadingMode is "graphic", or whenever the request calls for a monochrome/all-black/all-white look. "full" (default) keeps independently colorful primary/secondary/trim/shirt/tie/pants.
+
 Available outfit stencils (stencilKey):
 ${stencilList}
 
@@ -137,6 +144,8 @@ You must return a JSON object with EXACTLY the following keys:
 - eyeStyle (one of the eye style keys listed above)
 - detailTexture (must be one of: ${PATTERN_KEYS.map((p) => `"${p}"`).join(", ")})
 - styleVibe (must be "masculine", "feminine", or "neutral")
+- shadingMode (must be "soft" or "graphic")
+- paletteMode (must be "full" or "mono-accent")
 - accessories (an array of strings representing active face accessories. Choose only from: ${ACCESSORY_KEYS.map((a) => `"${a}"`).join(", ")})
 - enhancedPrompt (your beautifully expanded version of the user's prompt)
 
@@ -239,6 +248,8 @@ User description: ${prompt}`;
                 eyeStyle: { type: "STRING", enum: EYE_STYLE_KEYS },
                 detailTexture: { type: "STRING", enum: PATTERN_KEYS },
                 styleVibe: { type: "STRING", enum: VIBE_KEYS },
+                shadingMode: { type: "STRING", enum: SHADING_MODE_KEYS },
+                paletteMode: { type: "STRING", enum: PALETTE_MODE_KEYS },
                 accessories: {
                   type: "ARRAY",
                   items: { type: "STRING", enum: ACCESSORY_KEYS },
@@ -246,7 +257,7 @@ User description: ${prompt}`;
                 },
                 enhancedPrompt: { type: "STRING", description: "An enhanced, detailed version of the user's prompt" }
               },
-              required: ["stencilKey", "primary", "secondary", "trim", "shirt", "tie", "pants", "shoes", "skinColor", "hairColor", "eyeColor", "hairStyle", "eyeStyle", "detailTexture", "styleVibe", "accessories", "enhancedPrompt"],
+              required: ["stencilKey", "primary", "secondary", "trim", "shirt", "tie", "pants", "shoes", "skinColor", "hairColor", "eyeColor", "hairStyle", "eyeStyle", "detailTexture", "styleVibe", "shadingMode", "paletteMode", "accessories", "enhancedPrompt"],
             },
           },
         }),
@@ -284,6 +295,8 @@ User description: ${prompt}`;
     if (!EYE_STYLE_KEYS.includes(apparel.eyeStyle)) apparel.eyeStyle = "cool-highlight";
     if (!PATTERN_KEYS.includes(apparel.detailTexture as any)) apparel.detailTexture = "none";
     if (!VIBE_KEYS.includes(apparel.styleVibe || "")) apparel.styleVibe = "neutral";
+    if (!SHADING_MODE_KEYS.includes(apparel.shadingMode || "")) apparel.shadingMode = "soft";
+    if (!PALETTE_MODE_KEYS.includes(apparel.paletteMode || "")) apparel.paletteMode = "full";
 
     const skinArray = generateSkinArray(
       demographic || "East Asian",
@@ -307,6 +320,8 @@ User description: ${prompt}`;
         eyeStyle: apparel.eyeStyle,
         detailTexture: apparel.detailTexture,
         styleVibe: apparel.styleVibe as 'masculine' | 'feminine' | 'neutral' | undefined,
+        shadingMode: apparel.shadingMode as 'soft' | 'graphic' | undefined,
+        paletteMode: apparel.paletteMode as 'full' | 'mono-accent' | undefined,
       }
     );
 
