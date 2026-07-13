@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-13T20:10:00Z",
+  "generatedAt": "2026-07-13T20:14:00Z",
   "title": "Design System: MCSkinEngine",
   "extensions": {
     "colorMeta": {
@@ -9,7 +9,8 @@
       "accent-ai": { "role": "secondary", "displayName": "AI Accent Magenta", "canonical": "#ff2a85", "tonalRamp": ["#8b003a", "#c00057", "#e00e70", "#ff2a85", "#ff5c9f", "#ff8eb9", "#ffc0d4", "#fff0f5"] }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Main workspace titles" }
+      "display-xl": { "displayName": "Display XL", "purpose": "Hero headlines" },
+      "display-lg": { "displayName": "Display LG", "purpose": "Dashboard titles" }
     },
     "shadows": [],
     "motion": [
@@ -24,32 +25,34 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Thick bordered mechanical action button.",
+      "description": "Pill-shaped mechanical action button.",
       "html": "<button class=\"ds-btn-primary\">Open Editor</button>",
-      "css": ".ds-btn-primary { background: #1c1c1d; color: #ffffff; padding: 8px 16px; font-family: sans-serif; font-weight: 700; border: 4px solid #1c1c1d; border-radius: 6px; box-shadow: 0 2px 0 0 #1c1c1d; transform: translateY(-2px); transition: none; cursor: pointer; } .ds-btn-primary:active { transform: translateY(0px); box-shadow: 0 0px 0 0 #1c1c1d; }"
+      "css": ".ds-btn-primary { background: #1c1c1d; color: #ffffff; padding: 10px 20px; font-family: sans-serif; font-weight: 700; border: 4px solid #1c1c1d; border-radius: 9999px; box-shadow: 0 2px 0 0 #1c1c1d; transform: translateY(-2px); transition: none; cursor: pointer; } .ds-btn-primary:active { transform: translateY(0px); box-shadow: 0 0px 0 0 #1c1c1d; }"
     }
   ],
   "narrative": {
     "northStar": "The Voxel Sandbox Studio",
     "overview": "MCSkinEngine.dev's design system is a high-contrast voxel studio built on architectural contrast: monochrome chrome serves technical precision while saturated flat pastel block-forms organize parameter inputs.",
     "keyCharacteristics": [
-      "Monochrome core chrome ensuring editing utility focus.",
-      "Saturated flat pastel color blocks clearly separating input sections.",
-      "Strict pixelation constraints for rendering canvases.",
-      "High tactility simulated via vertical button click offsets."
+      "Monochrome utility core ensuring precision.",
+      "Saturated flat pastel color blocks clearly separating layout sections.",
+      "Pill buttons for all text CTAs, and circular icon buttons.",
+      "Negative-tracked display sans for a strong editorial visual hierarchy.",
+      "Spaced bento blocks separated by white margins to let layouts breathe."
     ],
     "rules": [
-      { "name": "The Pastel-Block Rule", "body": "Layout color blocks represent explicit parameters; they are flat, solid, and never use gradients.", "section": "colors" },
+      { "name": "The Color-Block Rhythm Rule", "body": "All color blocks are separated by segments of white canvas (#ffffff) to avoid color overload and create breathing room.", "section": "colors" },
       { "name": "The Flat & Tactile Rule", "body": "Elements sit flat on the surface at rest. Actionable elements offset downward by 2px on click rather than showing depth shadows.", "section": "elevation" }
     ],
     "dos": [
-      "Do align panels flush into clean bento grids with 12px gaps.",
-      "Do use 10px rounded corners on bento panels to ensure a structured, non-sharp feel.",
-      "Do offset buttons downward by 2px on active state."
+      "Do wrap every text CTA button in a pill-shaped outline (rounded.pill).",
+      "Do separate color blocks with a white margin to ensure pacing.",
+      "Do use negative letter-spacing on display type sizes to add editorial weight."
     ],
     "donts": [
-      "Don't use smooth curves, circular gradients, or blurred drop-shadow elements.",
-      "Don't use floating island card layouts with empty margins."
+      "Don't use square or sharp corners on buttons.",
+      "Don't use drop-shadows or gradients on color blocks.",
+      "Don't introduce mid-gray text values; let weights differentiate hierarchy."
     ]
   }
 }

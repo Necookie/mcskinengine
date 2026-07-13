@@ -57,6 +57,35 @@ export async function initializeDatabase() {
         status TEXT
       );
     `);
+
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS skin_references (
+        id TEXT PRIMARY KEY,
+        filename TEXT NOT NULL,
+        cluster_id INTEGER NOT NULL,
+        description TEXT,
+        dominant_colors TEXT,
+        brightness_category TEXT,
+        saturation_category TEXT,
+        dominant_hue_category TEXT,
+        embedding BLOB,
+        features_json TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_cluster_id ON skin_references(cluster_id);
+    `);
+
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_hue ON skin_references(dominant_hue_category);
+    `);
+
+    await db.execute(`
+      CREATE INDEX IF NOT EXISTS idx_brightness ON skin_references(brightness_category);
+    `);
+
     console.log("Database initialized successfully.");
   } catch (error) {
     console.error("Database initialization failed:", error);
