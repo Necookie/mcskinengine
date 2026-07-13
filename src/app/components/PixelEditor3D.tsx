@@ -38,17 +38,64 @@ export default function PixelEditor3D() {
   const isDrawingRef = useRef(false);
   const controlsRef = useRef<any>(null);
 
+  // Helper to update the WebGL texture with optional pixel grid overlay
+  const updateTexture = useCallback((arr: Uint8Array, showGrid: boolean) => {
+    if (!viewer) return;
+    const canvas = viewer.skinCanvas;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    if (showGrid) {
+      // Resize texture canvas to 512x512 for sub-pixel clean grid lines
+      canvas.width = 512;
+      canvas.height = 512;
+      ctx.clearRect(0, 0, 512, 512);
+
+      // Draw original 64x64 skin scaled up to 512x512
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = 64;
+      tempCanvas.height = 64;
+      const tempCtx = tempCanvas.getContext("2d");
+      if (tempCtx) {
+        const imgData = tempCtx.createImageData(64, 64);
+        imgData.data.set(arr);
+        tempCtx.putImageData(imgData, 0, 0);
+
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(tempCanvas, 0, 0, 512, 512);
+      }
+
+      // Draw clean semi-transparent grid lines at 8px increments
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let i = 8; i < 512; i += 8) {
+        // Vertical line
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, 512);
+        // Horizontal line
+        ctx.moveTo(0, i);
+        ctx.lineTo(512, i);
+      }
+      ctx.stroke();
+    } else {
+      // Revert canvas size to 64x64 for raw rendering
+      canvas.width = 64;
+      canvas.height = 64;
+      const imgData = ctx.createImageData(64, 64);
+      imgData.data.set(arr);
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    viewer.skinTexture.needsUpdate = true;
+  }, [viewer]);
+
   // Synchronize skinArray changes (e.g. from Undo/Redo/AI Generation) to the 3D viewer texture
   useEffect(() => {
-    if (!viewer || !skinArray) return;
-    const ctx = viewer.skinCanvas.getContext("2d");
-    if (ctx) {
-      const imgData = ctx.createImageData(64, 64);
-      imgData.data.set(skinArray);
-      ctx.putImageData(imgData, 0, 0);
-      viewer.skinTexture.needsUpdate = true;
+    if (viewer && skinArray) {
+      updateTexture(skinArray, showGuides);
     }
-  }, [viewer, skinArray]);
+  }, [viewer, skinArray, showGuides, updateTexture]);
 
   // Synchronize model type (Steve vs Alex)
   useEffect(() => {
@@ -61,10 +108,13 @@ export default function PixelEditor3D() {
         const imgData = ctx.createImageData(64, 64);
         imgData.data.set(skinArray);
         ctx.putImageData(imgData, 0, 0);
-        viewer.loadSkin(tempCanvas.toDataURL(), { model: modelType === "alex" ? "slim" : "classic" });
+        viewer.loadSkin(tempCanvas.toDataURL(), { model: modelType === "alex" ? "slim" : "classic" })
+          .then(() => {
+            updateTexture(skinArray, showGuides);
+          });
       }
     }
-  }, [viewer, modelType]);
+  }, [viewer, modelType, updateTexture, showGuides, skinArray]);
 
   // Sync zoom level (reusing zoom2D store property)
   useEffect(() => {
