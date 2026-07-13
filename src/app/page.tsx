@@ -8,7 +8,7 @@ import { LandingPage, LoadingScreen } from "./components/LandingPage";
 import dynamic from "next/dynamic";
 import { 
   Sparkles, Settings, LogOut, Maximize, User, Key, Cpu,
-  Paintbrush, Download, ShieldCheck, Database, AlertTriangle, CheckCircle, ArrowRight
+  Paintbrush, Download, ShieldCheck, Database, AlertTriangle, CheckCircle, ArrowRight, Home
 } from "lucide-react";
 
 // Dynamically import SkinViewer since it depends on browser canvas APIs (WebGL, ThreeJS)
@@ -116,213 +116,213 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard-container">
-      {/* NAVBAR */}
-      <header className="workspace-header">
-        <div className="header-logo-group">
-          <div className="header-logo">
-            MCSE
+      <div className="dashboard-layout-wrap">
+        {/* SIDEBAR */}
+        <aside className="dashboard-sidebar">
+          <div>
+            <div className="sidebar-brand">MCSE</div>
+            <span className="text-grid-tag" style={{ color: "#555558", fontSize: "9px" }}>
+              Dashboard
+            </span>
           </div>
-          <span className="header-title">
-            MCSkinEngine Dashboard
-          </span>
-        </div>
 
-        <div className="header-actions">
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className={`voxel-btn ${settingsOpen ? "btn-primary" : ""}`}
-            style={{ padding: "6px 12px", fontSize: "10px", borderRadius: 0, borderWidth: "2px" }}
-            title="Settings"
-          >
-            <Settings size={12} strokeWidth={2} />
-            <span>Settings</span>
-          </button>
-          
-          <div className="header-divider" />
+          <nav className="sidebar-nav">
+            <a href="/" className="sidebar-link active">
+              <Home size={14} strokeWidth={2} />
+              <span>Dashboard</span>
+            </a>
+            <a href="/editor" className="sidebar-link">
+              <Paintbrush size={14} strokeWidth={2} />
+              <span>3D Editor</span>
+            </a>
+            <a href="/ai-studio" className="sidebar-link">
+              <Sparkles size={14} strokeWidth={2} />
+              <span>AI Studio</span>
+            </a>
+          </nav>
 
-          <div className="header-actions">
-            <span className="header-badge-user">
+          <div className="sidebar-footer">
+            <span className="text-grid-tag" style={{ fontSize: "9px", color: "#555558" }}>
               User: {user?.username || user?.firstName || "Steve"}
             </span>
             <SignOutButton>
               <button
                 className="voxel-btn"
-                style={{ padding: "6px 10px", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: 0, borderWidth: "2px" }}
+                style={{ width: "100%", padding: "8px 0", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: "6px" }}
               >
                 <LogOut size={12} strokeWidth={2} />
+                <span>Log Out</span>
               </button>
             </SignOutButton>
           </div>
-        </div>
-      </header>
+        </aside>
 
-      {/* DASHBOARD CONTENT */}
-      <main className="dashboard-main-content">
-        <div className="dashboard-window">
-          {/* Welcome Banner */}
-          <div className="dashboard-welcome-banner">
-            <h1 className="text-panel-head" style={{ fontWeight: 700, textTransform: "uppercase" }}>
-              Welcome, {user?.firstName || user?.username || "Skin Creator"}
-            </h1>
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "2px" }}>
-              <span className="text-grid-tag" style={{ color: "#555558" }}>Model: {modelType === "steve" ? "Steve (4px)" : "Alex (3px)"}</span>
-              <span className="text-grid-tag" style={{ color: "#555558" }}>Base: {role}</span>
-              <span className="text-grid-tag" style={{ color: "#555558" }}>Profile: {ethnicity}</span>
+        {/* MAIN BODY AREA */}
+        <main className="dashboard-main-content">
+          <div className="dashboard-window">
+            {/* Welcome Banner */}
+            <div className="dashboard-welcome-banner">
+              <h1 className="text-panel-head" style={{ fontWeight: 700, textTransform: "uppercase" }}>
+                Welcome, {user?.firstName || user?.username || "Skin Creator"}
+              </h1>
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "2px" }}>
+                <span className="text-grid-tag" style={{ color: "#555558" }}>Model: {modelType === "steve" ? "Steve (4px)" : "Alex (3px)"}</span>
+                <span className="text-grid-tag" style={{ color: "#555558" }}>Base: {role}</span>
+                <span className="text-grid-tag" style={{ color: "#555558" }}>Profile: {ethnicity}</span>
+              </div>
             </div>
-          </div>
 
-          {/* Action Grid */}
-          <div className="dashboard-grid-layout">
-            {/* Column 1: Action Cards */}
-            <div className="dashboard-card-column">
-              {/* Launch Editor Card */}
-              <div className="dashboard-action-card steve">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div>
-                    <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
-                      3D Skin Editor
-                    </h2>
-                    <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4" }}>
-                      Paint directly onto a 3D model. Choose brush sizes, toggle pixel grids, and preview your changes in real time.
-                    </p>
-                  </div>
-                  <Paintbrush size={20} strokeWidth={2} style={{ color: "var(--color-primary)", flexShrink: 0 }} />
-                </div>
-                <a
-                  href="/editor"
-                  className="voxel-btn btn-primary"
-                  style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none" }}
-                >
-                  <span>Open Editor</span>
-                  <ArrowRight size={12} strokeWidth={2} />
-                </a>
-              </div>
-
-              {/* AI Generator Card */}
-              <div className="dashboard-action-card alex">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div>
-                    <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
-                      AI Skin Generator
-                    </h2>
-                    <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4" }}>
-                      Generate clothing textures and stencil designs from a text description using Gemini AI.
-                    </p>
-                  </div>
-                  <Sparkles size={20} strokeWidth={2} style={{ color: "var(--color-accent-ai)", flexShrink: 0 }} />
-                </div>
-                <a
-                  href="/editor"
-                  className="voxel-btn"
-                  style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d" }}
-                >
-                  <span>Generate with AI</span>
-                  <ArrowRight size={12} strokeWidth={2} />
-                </a>
-              </div>
-
-              {/* Credentials / Keys Card */}
-              <div className="dashboard-action-card">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div>
-                    <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
-                      API Settings
-                    </h2>
-                    <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4", marginBottom: "8px" }}>
-                      Provide API keys to run Gemini and OpenAI generation features.
-                    </p>
-                    
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: hasGeminiKey ? "var(--color-block-lab)" : "#fce8e6" }}>
-                        <span className="dashboard-stat-label">Gemini API Key</span>
-                        <span className="dashboard-stat-value" style={{ fontSize: "9px", color: hasGeminiKey ? "#15803d" : "#b91c1c" }}>
-                          {hasGeminiKey ? "CONNECTED" : "MISSING"}
-                        </span>
-                      </div>
-
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: hasOpenaiKey ? "var(--color-block-lab)" : "#fce8e6" }}>
-                        <span className="dashboard-stat-label">OpenAI API Key</span>
-                        <span className="dashboard-stat-value" style={{ fontSize: "9px", color: hasOpenaiKey ? "#15803d" : "#b91c1c" }}>
-                          {hasOpenaiKey ? "CONNECTED" : "MISSING"}
-                        </span>
-                      </div>
+            {/* Action Grid */}
+            <div className="dashboard-grid-layout">
+              {/* Column 1: Action Cards */}
+              <div className="dashboard-card-column">
+                {/* Launch Editor Card */}
+                <div className="dashboard-action-card steve">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
+                        3D Skin Editor
+                      </h2>
+                      <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4" }}>
+                        Paint directly onto a 3D model. Choose brush sizes, toggle pixel grids, and preview your changes in real time.
+                      </p>
                     </div>
+                    <Paintbrush size={20} strokeWidth={2} style={{ color: "var(--color-primary)", flexShrink: 0 }} />
                   </div>
-                  <Key size={20} strokeWidth={2} style={{ color: "var(--color-primary)", flexShrink: 0 }} />
-                </div>
-                
-                <button
-                  onClick={() => setSettingsOpen(true)}
-                  className="voxel-btn"
-                  style={{ width: "max-content", marginTop: "4px", fontSize: "10px", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)" }}
-                >
-                  API Settings
-                </button>
-              </div>
-            </div>
-
-            {/* Column 2: 3D Preview Panel */}
-            <div className="dashboard-preview-panel">
-              <div className="dashboard-preview-header">
-                <span className="font-bold">Active Avatar</span>
-              </div>
-              <div className="dashboard-preview-body">
-                {skinArray ? (
-                  <div className="dashboard-avatar-preview-box">
-                    <ReactSkinview3d
-                      skinUrl=""
-                      height={150}
-                      width={110}
-                      onReady={(viewerInstance: any) => {
-                        // NearestFilter for retro pixelated look
-                        if (viewerInstance.skinTexture) {
-                          viewerInstance.skinTexture.minFilter = 1003;
-                          viewerInstance.skinTexture.magFilter = 1003;
-                          viewerInstance.skinTexture.needsUpdate = true;
-                        }
-
-                        viewerInstance.background = 0xffffff;
-                        viewerInstance.autoRotate = true;
-                        viewerInstance.autoRotateSpeed = 0.6;
-
-                        // Orbit controls
-                        import("skinview3d").then((sv) => {
-                          viewerInstance.animations.add(sv.IdleAnimation);
-                          sv.createOrbitControls(viewerInstance);
-                        });
-
-                        setViewer(viewerInstance);
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="text-grid-tag text-center">Loading 3D mesh...</div>
-                )}
-
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
-                  <button
-                    onClick={downloadSkin}
-                    className="voxel-btn"
-                    style={{ width: "100%", justifyContent: "center", fontSize: "10px" }}
-                  >
-                    <Download size={13} strokeWidth={2} />
-                    <span>Download PNG</span>
-                  </button>
-
                   <a
                     href="/editor"
-                    className="voxel-btn btn-accent"
-                    style={{ width: "100%", justifyContent: "center", fontSize: "10px", textDecoration: "none" }}
+                    className="voxel-btn btn-primary"
+                    style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none", borderRadius: "6px" }}
                   >
-                    <Maximize size={12} strokeWidth={2} />
-                    <span>Open in Editor</span>
+                    <span>Open Editor</span>
+                    <ArrowRight size={12} strokeWidth={2} />
                   </a>
+                </div>
+
+                {/* AI Generator Card */}
+                <div className="dashboard-action-card alex">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
+                        AI Skin Generator
+                      </h2>
+                      <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4" }}>
+                        Generate clothing textures and stencil designs from a text description using Gemini AI.
+                      </p>
+                    </div>
+                    <Sparkles size={20} strokeWidth={2} style={{ color: "var(--color-accent-ai)", flexShrink: 0 }} />
+                  </div>
+                  <a
+                    href="/ai-studio"
+                    className="voxel-btn"
+                    style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d", borderRadius: "6px" }}
+                  >
+                    <span>Generate with AI</span>
+                    <ArrowRight size={12} strokeWidth={2} />
+                  </a>
+                </div>
+
+                {/* Credentials / Keys Card */}
+                <div className="dashboard-action-card">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <h2 className="text-panel-head" style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
+                        API Settings
+                      </h2>
+                      <p className="text-body-ui" style={{ fontSize: "11px", color: "#374151", lineHeight: "1.4", marginBottom: "8px" }}>
+                        Provide API keys to run Gemini and OpenAI generation features.
+                      </p>
+                      
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: hasGeminiKey ? "var(--color-block-lab)" : "#fce8e6", borderRadius: "6px" }}>
+                          <span className="dashboard-stat-label">Gemini API Key</span>
+                          <span className="dashboard-stat-value" style={{ fontSize: "9px", color: hasGeminiKey ? "#15803d" : "#b91c1c" }}>
+                            {hasGeminiKey ? "CONNECTED" : "MISSING"}
+                          </span>
+                        </div>
+
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: hasOpenaiKey ? "var(--color-block-lab)" : "#fce8e6", borderRadius: "6px" }}>
+                          <span className="dashboard-stat-label">OpenAI API Key</span>
+                          <span className="dashboard-stat-value" style={{ fontSize: "9px", color: hasOpenaiKey ? "#15803d" : "#b91c1c" }}>
+                            {hasOpenaiKey ? "CONNECTED" : "MISSING"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <Key size={20} strokeWidth={2} style={{ color: "var(--color-primary)", flexShrink: 0 }} />
+                  </div>
+                  
+                  <button
+                    onClick={() => setSettingsOpen(true)}
+                    className="voxel-btn"
+                    style={{ width: "max-content", marginTop: "4px", fontSize: "10px", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)", borderRadius: "6px" }}
+                  >
+                    API Settings
+                  </button>
+                </div>
+              </div>
+
+              {/* Column 2: 3D Preview Panel */}
+              <div className="dashboard-preview-panel">
+                <div className="dashboard-preview-header">
+                  <span className="font-bold">Active Avatar</span>
+                </div>
+                <div className="dashboard-preview-body">
+                  {skinArray ? (
+                    <div className="dashboard-avatar-preview-box">
+                      <ReactSkinview3d
+                        skinUrl=""
+                        height={150}
+                        width={110}
+                        onReady={(viewerInstance: any) => {
+                          if (viewerInstance.skinTexture) {
+                            viewerInstance.skinTexture.minFilter = 1003;
+                            viewerInstance.skinTexture.magFilter = 1003;
+                            viewerInstance.skinTexture.needsUpdate = true;
+                          }
+
+                          viewerInstance.background = 0xffffff;
+                          viewerInstance.autoRotate = true;
+                          viewerInstance.autoRotateSpeed = 0.6;
+
+                          import("skinview3d").then((sv) => {
+                            viewerInstance.animations.add(sv.IdleAnimation);
+                            sv.createOrbitControls(viewerInstance);
+                          });
+
+                          setViewer(viewerInstance);
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-grid-tag text-center">Loading 3D mesh...</div>
+                  )}
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
+                    <button
+                      onClick={downloadSkin}
+                      className="voxel-btn"
+                      style={{ width: "100%", justifyContent: "center", fontSize: "10px", borderRadius: "6px" }}
+                    >
+                      <Download size={13} strokeWidth={2} />
+                      <span>Download PNG</span>
+                    </button>
+
+                    <a
+                      href="/editor"
+                      className="voxel-btn btn-accent"
+                      style={{ width: "100%", justifyContent: "center", fontSize: "10px", textDecoration: "none", borderRadius: "6px" }}
+                    >
+                      <Maximize size={12} strokeWidth={2} />
+                      <span>Open in Editor</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
 
       {/* Settings Modal Dialog */}
       {settingsOpen && (
