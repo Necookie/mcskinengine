@@ -148,7 +148,7 @@ export default function DashboardPage() {
             <SignOutButton>
               <button
                 className="voxel-btn"
-                style={{ width: "100%", padding: "8px 0", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: "6px" }}
+                style={{ width: "100%", padding: "8px 0", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: "9999px" }}
               >
                 <LogOut size={12} strokeWidth={2} />
                 <span>Log Out</span>
@@ -192,7 +192,7 @@ export default function DashboardPage() {
                   <a
                     href="/editor"
                     className="voxel-btn btn-primary"
-                    style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none", borderRadius: "6px" }}
+                    style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none", borderRadius: "9999px" }}
                   >
                     <span>Open Editor</span>
                     <ArrowRight size={12} strokeWidth={2} />
@@ -215,7 +215,7 @@ export default function DashboardPage() {
                   <a
                     href="/ai-studio"
                     className="voxel-btn"
-                    style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d", borderRadius: "6px" }}
+                    style={{ width: "max-content", marginTop: "4px", fontSize: "10px", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d", borderRadius: "9999px" }}
                   >
                     <span>Generate with AI</span>
                     <ArrowRight size={12} strokeWidth={2} />
@@ -234,14 +234,14 @@ export default function DashboardPage() {
                       </p>
                       
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: hasGeminiKey ? "var(--color-block-lab)" : "#fce8e6", borderRadius: "6px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: hasGeminiKey ? "var(--color-block-lab)" : "#fce8e6", borderRadius: "8px" }}>
                           <span className="dashboard-stat-label">Gemini API Key</span>
                           <span className="dashboard-stat-value" style={{ fontSize: "9px", color: hasGeminiKey ? "#15803d" : "#b91c1c" }}>
                             {hasGeminiKey ? "CONNECTED" : "MISSING"}
                           </span>
                         </div>
 
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: hasOpenaiKey ? "var(--color-block-lab)" : "#fce8e6", borderRadius: "6px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: hasOpenaiKey ? "var(--color-block-lab)" : "#fce8e6", borderRadius: "8px" }}>
                           <span className="dashboard-stat-label">OpenAI API Key</span>
                           <span className="dashboard-stat-value" style={{ fontSize: "9px", color: hasOpenaiKey ? "#15803d" : "#b91c1c" }}>
                             {hasOpenaiKey ? "CONNECTED" : "MISSING"}
@@ -255,7 +255,7 @@ export default function DashboardPage() {
                   <button
                     onClick={() => setSettingsOpen(true)}
                     className="voxel-btn"
-                    style={{ width: "max-content", marginTop: "4px", fontSize: "10px", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)", borderRadius: "6px" }}
+                    style={{ width: "max-content", marginTop: "4px", fontSize: "10px", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)", borderRadius: "9999px" }}
                   >
                     API Settings
                   </button>
@@ -302,7 +302,7 @@ export default function DashboardPage() {
                     <button
                       onClick={downloadSkin}
                       className="voxel-btn"
-                      style={{ width: "100%", justifyContent: "center", fontSize: "10px", borderRadius: "6px" }}
+                      style={{ width: "100%", justifyContent: "center", fontSize: "10px", borderRadius: "9999px" }}
                     >
                       <Download size={13} strokeWidth={2} />
                       <span>Download PNG</span>
@@ -311,7 +311,7 @@ export default function DashboardPage() {
                     <a
                       href="/editor"
                       className="voxel-btn btn-accent"
-                      style={{ width: "100%", justifyContent: "center", fontSize: "10px", textDecoration: "none", borderRadius: "6px" }}
+                      style={{ width: "100%", justifyContent: "center", fontSize: "10px", textDecoration: "none", borderRadius: "9999px" }}
                     >
                       <Maximize size={12} strokeWidth={2} />
                       <span>Open in Editor</span>

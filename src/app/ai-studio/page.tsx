@@ -226,7 +226,7 @@ export default function AiStudioPage() {
             <SignOutButton>
               <button
                 className="voxel-btn"
-                style={{ width: "100%", padding: "8px 0", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: "6px" }}
+                style={{ width: "100%", padding: "8px 0", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: "9999px" }}
               >
                 <LogOut size={12} strokeWidth={2} />
                 <span>Log Out</span>
@@ -268,7 +268,7 @@ export default function AiStudioPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="voxel-btn text-[10px]"
-                    style={{ padding: "6px 0", fontSize: "10px", borderRadius: "6px", borderWidth: "2px", justifyContent: "center", width: "100%", textDecoration: "none", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)" }}
+                    style={{ padding: "6px 0", fontSize: "10px", borderRadius: "9999px", borderWidth: "2px", justifyContent: "center", width: "100%", textDecoration: "none", backgroundColor: "var(--color-surface-soft)", color: "var(--color-primary)" }}
                   >
                     Get Gemini API Key (Free) ↗
                   </a>
@@ -288,7 +288,7 @@ export default function AiStudioPage() {
                     onClick={handleSaveSettings}
                     disabled={!geminiKeyInput}
                     className="voxel-btn btn-accent"
-                    style={{ width: "100%", justifyContent: "center", marginTop: "4px", borderRadius: "6px" }}
+                    style={{ width: "100%", justifyContent: "center", marginTop: "4px", borderRadius: "9999px" }}
                   >
                     Save Key
                   </button>
@@ -297,14 +297,14 @@ export default function AiStudioPage() {
                     <button
                       onClick={() => setShowAiSetup(false)}
                       className="voxel-btn"
-                      style={{ flex: 1, padding: "6px 0", fontSize: "10px", borderRadius: "6px", borderWidth: "2px", justifyContent: "center", backgroundColor: "#fff", color: "#1c1c1d" }}
+                      style={{ flex: 1, padding: "6px 0", fontSize: "10px", borderRadius: "9999px", borderWidth: "2px", justifyContent: "center", backgroundColor: "#fff", color: "#1c1c1d" }}
                     >
                       ← Skip
                     </button>
                     <a
                       href="/"
                       className="voxel-btn"
-                      style={{ flex: 1, padding: "6px 0", fontSize: "10px", borderRadius: "6px", borderWidth: "2px", justifyContent: "center", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d" }}
+                      style={{ flex: 1, padding: "6px 0", fontSize: "10px", borderRadius: "9999px", borderWidth: "2px", justifyContent: "center", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d" }}
                     >
                       ← Exit
                     </a>
@@ -332,7 +332,7 @@ export default function AiStudioPage() {
                       value={selectedModel}
                       onChange={(e) => setSelectedModel(e.target.value)}
                       className="voxel-input font-mono text-[10px]"
-                      style={{ padding: "6px", width: "100%", textTransform: "none", borderRadius: "6px" }}
+                      style={{ padding: "6px", width: "100%", textTransform: "none", borderRadius: "8px" }}
                     >
                       <option value="gemini-3.5-flash">Gemini 3.5 Flash (Recommended)</option>
                       <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
@@ -364,13 +364,13 @@ export default function AiStudioPage() {
                     onClick={handleGenerateSkin}
                     disabled={isGenerating || !geminiPrompt}
                     className="voxel-btn btn-accent"
-                    style={{ width: "100%", justifyContent: "center", borderRadius: "6px" }}
+                    style={{ width: "100%", justifyContent: "center", borderRadius: "9999px" }}
                   >
                     {isGenerating ? "Generating..." : "Generate Skin"}
                   </button>
 
                   {enhancedPrompt && (
-                    <div style={{ marginTop: "12px", padding: "8px", border: "1px dashed var(--color-accent-ai)", backgroundColor: "#fff9fb", borderRadius: "6px" }}>
+                    <div style={{ marginTop: "12px", padding: "8px", border: "1px dashed var(--color-accent-ai)", backgroundColor: "#fff9fb", borderRadius: "8px" }}>
                       <div className="font-mono text-[9px] font-bold text-[#ff2a85] uppercase tracking-wider mb-1">AI Prompt</div>
                       <p className="text-[10px] italic leading-relaxed text-[#555558] font-sans">{enhancedPrompt}</p>
                     </div>
@@ -419,7 +419,7 @@ export default function AiStudioPage() {
                   <button
                     onClick={downloadSkin}
                     className="voxel-btn"
-                    style={{ width: "100%", justifyContent: "center", fontSize: "10px", borderRadius: "6px" }}
+                    style={{ width: "100%", justifyContent: "center", fontSize: "10px", borderRadius: "9999px" }}
                   >
                     <Download size={13} strokeWidth={2} />
                     <span>Download PNG</span>
@@ -428,7 +428,7 @@ export default function AiStudioPage() {
                   <a
                     href="/editor"
                     className="voxel-btn btn-accent"
-                    style={{ width: "100%", justifyContent: "center", fontSize: "10px", textDecoration: "none", borderRadius: "6px" }}
+                    style={{ width: "100%", justifyContent: "center", fontSize: "10px", textDecoration: "none", borderRadius: "9999px" }}
                   >
                     <Maximize size={12} strokeWidth={2} />
                     <span>Open in Editor</span>

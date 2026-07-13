@@ -211,7 +211,7 @@ export default function WorkspacePage() {
           <a
             href="/"
             className="voxel-btn"
-            style={{ padding: "6px 12px", fontSize: "10px", borderRadius: "6px", borderWidth: "2px", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d" }}
+            style={{ padding: "6px 12px", fontSize: "10px", borderRadius: "9999px", borderWidth: "2px", textDecoration: "none", backgroundColor: "#fff", color: "#1c1c1d" }}
           >
             ← Dashboard
           </a>
@@ -224,7 +224,7 @@ export default function WorkspacePage() {
           <button
             onClick={() => setSettingsOpen(!settingsOpen)}
             className={`voxel-btn ${settingsOpen ? "btn-primary" : ""}`}
-            style={{ padding: "6px 12px", fontSize: "10px", borderRadius: "6px", borderWidth: "2px" }}
+            style={{ padding: "6px 12px", fontSize: "10px", borderRadius: "9999px", borderWidth: "2px" }}
             title="Settings"
           >
             <Settings size={12} strokeWidth={2} />
@@ -241,7 +241,7 @@ export default function WorkspacePage() {
             <SignOutButton>
               <button
                 className="voxel-btn"
-                style={{ padding: "6px 10px", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: "6px", borderWidth: "2px" }}
+                style={{ padding: "6px 10px", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: "9999px", borderWidth: "2px" }}
               >
                 <LogOut size={12} strokeWidth={2} />
               </button>
@@ -418,14 +418,14 @@ export default function WorkspacePage() {
                   <button
                     onClick={() => setSettingsOpen(false)}
                     className="voxel-btn"
-                    style={{ padding: "6px 12px", fontSize: "10px", borderRadius: "6px", borderWidth: "2px", backgroundColor: "#fff" }}
+                    style={{ padding: "6px 12px", fontSize: "10px", borderRadius: "9999px", borderWidth: "2px", backgroundColor: "#fff" }}
                   >
                     Cancel
                   </button>
                   <button 
                     onClick={handleSaveSettings} 
                     className="voxel-btn btn-primary"
-                    style={{ padding: "6px 12px", fontSize: "10px", borderRadius: "6px", borderWidth: "2px" }}
+                    style={{ padding: "6px 12px", fontSize: "10px", borderRadius: "9999px", borderWidth: "2px" }}
                   >
                     Save Key
                   </button>
