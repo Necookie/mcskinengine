@@ -16,26 +16,27 @@ export default function RootLayout({
     <ClerkProvider 
       appearance={{
         variables: {
-          colorPrimary: "#1c1c1d",
+          colorPrimary: "#18181b",
           colorBackground: "#ffffff",
-          borderRadius: "0px",
+          colorText: "#18181b",
+          borderRadius: "8px",
           fontFamily: "var(--font-sans)",
         },
         elements: {
-          card: "border-4 border-black rounded-none shadow-none",
-          headerTitle: "font-mono font-bold uppercase text-lg tracking-tight",
-          headerSubtitle: "font-mono text-xs uppercase text-gray-500",
-          formFieldLabel: "font-mono text-[10px] uppercase font-bold text-gray-500",
-          formFieldInput: "border-2 border-black rounded-none outline-none focus:border-black font-sans text-xs p-2 bg-white",
-          formButtonPrimary: "voxel-btn btn-primary font-sans text-xs uppercase py-2 border-2 border-black shadow-[0_3px_0_0_#1c1c1d] transform translateY(-3px) active:translate-y-0 active:shadow-none",
-          footerActionText: "font-mono text-xs text-gray-500",
-          footerActionLink: "font-mono text-xs text-black font-bold underline hover:text-gray-700",
-          identityPreviewText: "font-mono text-xs",
-          identityPreviewEditButtonIcon: "text-black",
-          dividerText: "font-mono text-[10px] uppercase text-gray-400 font-bold",
-          dividerLine: "bg-neutral-200",
-          formResendCodeLink: "font-mono text-xs text-black font-bold underline",
-          alternativeMethodsCard: "border-2 border-black rounded-none bg-[#f4f4f6] shadow-none",
+          card: "border border-zinc-200 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] bg-white p-8",
+          headerTitle: "font-sans font-bold text-xl tracking-tight text-[#18181b]",
+          headerSubtitle: "font-sans text-sm text-zinc-500",
+          formFieldLabel: "font-mono text-[10px] uppercase tracking-[0.54px] font-bold text-zinc-500 mb-1",
+          formFieldInput: "border border-zinc-200 rounded-lg outline-none focus:border-zinc-800 focus:ring-1 focus:ring-zinc-800 font-sans text-sm p-2.5 bg-white transition-all",
+          formButtonPrimary: "font-sans text-sm py-2.5 px-4 rounded-full bg-zinc-900 text-white hover:bg-zinc-800 transition-all font-semibold shadow-none border-none cursor-pointer",
+          footerActionText: "font-sans text-xs text-zinc-500",
+          footerActionLink: "font-sans text-xs text-zinc-900 font-semibold hover:underline",
+          identityPreviewText: "font-mono text-xs text-zinc-700",
+          identityPreviewEditButtonIcon: "text-zinc-500",
+          dividerText: "font-mono text-[10px] uppercase text-zinc-400 font-bold",
+          dividerLine: "bg-zinc-100",
+          formResendCodeLink: "font-sans text-xs text-zinc-900 font-semibold hover:underline",
+          alternativeMethodsCard: "border border-zinc-200 rounded-lg bg-zinc-50 shadow-none",
         }
       }}
     >
