@@ -276,10 +276,12 @@ export default function DashboardPage() {
 
               {/* Column 2: 3D Preview Panel */}
               <div className="dashboard-preview-panel">
-                <div className="dashboard-preview-header">
-                  <span className="font-bold">Active Avatar</span>
+                <div className="dashboard-preview-header" style={{ padding: "12px 24px", height: "auto" }}>
+                  <span className="text-grid-tag" style={{ color: "var(--color-primary)", fontWeight: 700 }}>
+                    Active Mannequin
+                  </span>
                 </div>
-                <div className="dashboard-preview-body">
+                <div className="dashboard-preview-body" style={{ padding: "28px 24px" }}>
                   {skinArray ? (
                     <div className="dashboard-avatar-preview-box">
                       <ReactSkinview3d
@@ -314,7 +316,7 @@ export default function DashboardPage() {
                     <button
                       onClick={downloadSkin}
                       className="voxel-btn"
-                      style={{ width: "100%", justifyContent: "center", fontSize: "10px", borderRadius: "9999px" }}
+                      style={{ width: "100%", padding: "10px 0", justifyContent: "center", fontSize: "10px", backgroundColor: "#fff", color: "#1c1c1d", borderRadius: "9999px" }}
                     >
                       <Download size={13} strokeWidth={2} />
                       <span>Download PNG</span>
@@ -323,7 +325,7 @@ export default function DashboardPage() {
                     <a
                       href="/editor"
                       className="voxel-btn btn-accent"
-                      style={{ width: "100%", justifyContent: "center", fontSize: "10px", textDecoration: "none", borderRadius: "9999px" }}
+                      style={{ width: "100%", padding: "10px 0", justifyContent: "center", fontSize: "10px", textDecoration: "none", borderRadius: "9999px" }}
                     >
                       <Maximize size={12} strokeWidth={2} />
                       <span>Open in Editor</span>
