@@ -128,9 +128,14 @@ const SCHEME_ACCENT_HUE_OFFSETS: Record<ColorScheme, number[]> = {
 };
 
 function accentColor(baseHsl: { h: number; s: number; l: number }, hueOffset: number): { r: number; g: number; b: number } {
-  // Accents stay vivid and mid-lightness regardless of how dark/light the
-  // base is, so they read as a deliberate color-wheel "pop", not a tint.
-  return hslToRgb(baseHsl.h + hueOffset, Math.max(baseHsl.s, 0.55), 0.55);
+  // The accent is a deliberate color-wheel "pop", but it must live in the
+  // same value world as the base: a fixed mid-lightness/high-saturation
+  // accent on a pastel outfit rendered as a safety-orange stripe. Pastel
+  // bases keep soft pastel accents; dark/mid bases get the vivid pop.
+  const pastel = baseHsl.l > 0.7;
+  const l = pastel ? 0.74 : 0.55;
+  const s = pastel ? 0.6 : Math.max(baseHsl.s, 0.55);
+  return hslToRgb(baseHsl.h + hueOffset, s, l);
 }
 
 /**
@@ -151,19 +156,23 @@ export function resolvePaletteByScheme(colors: ApparelColors, scheme: ColorSchem
   const at = (l: number, sScale = 1) =>
     rgbToHex(hslToRgb(baseHsl.h, Math.min(1, baseHsl.s * sScale), Math.max(0.05, Math.min(0.95, l))));
   const L = baseHsl.l;
+  // Pastels (very light bases) keep full HSL saturation on paper, so a
+  // "darker shade of pastel pink" at s=1 renders as blood red. Deep slots
+  // (pants/shoes/tie) desaturate toward dusty tones on pastel outfits.
+  const deepS = L > 0.7 ? 0.4 : 1;
 
   return {
     ...colors,
     // One visible step below primary, for hems/cuffs/pockets.
-    secondary: at(L * 0.65),
+    secondary: at(L * 0.65, L > 0.7 ? 0.7 : 1),
     // The light pop: near-white on dark outfits, near-black on light ones.
     trim: offsets[0] !== undefined ? rgbToHex(accentColor(baseHsl, offsets[0])) : at(L < 0.5 ? 0.85 : 0.15, 0.5),
     // Inner layer clearly separated from the outer garment.
     shirt: at(L < 0.5 ? Math.min(0.9, L + 0.35) : Math.max(0.1, L - 0.35), 0.8),
-    tie: offsets[1] !== undefined ? rgbToHex(accentColor(baseHsl, offsets[1])) : at(Math.max(0.08, L * 0.4)),
+    tie: offsets[1] !== undefined ? rgbToHex(accentColor(baseHsl, offsets[1])) : at(Math.max(0.08, L * 0.4), deepS),
     // Legs anchor the silhouette: always distinctly darker than the torso.
-    pants: at(Math.max(0.12, L * 0.5)),
-    shoes: colors.shoes ? at(Math.max(0.06, L * 0.35)) : colors.shoes,
+    pants: at(Math.max(0.12, L * 0.5), deepS),
+    shoes: colors.shoes ? at(Math.max(0.06, L * 0.35), deepS) : colors.shoes,
   };
 }
 
