@@ -65,7 +65,7 @@ export default function ModelPreview3D() {
         const imgData = ctx.createImageData(64, 64);
         imgData.data.set(skinArray);
         ctx.putImageData(imgData, 0, 0);
-        viewer.loadSkin(tempCanvas.toDataURL(), { model: modelType === "alex" ? "slim" : "classic" });
+        viewer.loadSkin(tempCanvas.toDataURL(), modelType === "alex" ? "slim" : "classic");
       }
     }
   }, [viewer, modelType]);
@@ -144,8 +144,8 @@ export default function ModelPreview3D() {
                 viewerInstance.skinTexture.needsUpdate = true;
               }
 
-              // Set background to white
-              viewerInstance.background = 0xffffff;
+              // Set background to null (transparent)
+              viewerInstance.background = null;
 
               // Enable drag to rotate / orbit controls
               import("skinview3d").then((sv) => {

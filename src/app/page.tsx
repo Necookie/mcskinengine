@@ -70,7 +70,7 @@ export default function DashboardPage() {
         const imgData = ctx.createImageData(64, 64);
         imgData.data.set(skinArray);
         ctx.putImageData(imgData, 0, 0);
-        viewer.loadSkin(tempCanvas.toDataURL(), { model: modelType === "alex" ? "slim" : "classic" });
+        viewer.loadSkin(tempCanvas.toDataURL(), modelType === "alex" ? "slim" : "classic");
       }
     }
   }, [viewer, modelType, skinArray]);
@@ -295,7 +295,7 @@ export default function DashboardPage() {
                             viewerInstance.skinTexture.needsUpdate = true;
                           }
 
-                          viewerInstance.background = 0xffffff;
+                          viewerInstance.background = null;
                           viewerInstance.autoRotate = true;
                           viewerInstance.autoRotateSpeed = 0.6;
 

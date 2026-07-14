@@ -128,7 +128,7 @@ export default function PixelEditor3D() {
         const imgData = ctx.createImageData(64, 64);
         imgData.data.set(skinArray);
         ctx.putImageData(imgData, 0, 0);
-        viewer.loadSkin(tempCanvas.toDataURL(), { model: modelType === "alex" ? "slim" : "classic" })
+        viewer.loadSkin(tempCanvas.toDataURL(), modelType === "alex" ? "slim" : "classic")
           .then(() => {
             updateTexture(skinArray, showGuides, hoverCoords);
           });
