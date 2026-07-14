@@ -1,7 +1,5 @@
 import { db } from "./db";
 import { colorSimilarity } from "./colorNaming";
-import { decodePngToRawRgba64 } from "./pngDecode";
-import { skinToBase64 } from "./skinEngine";
 
 interface SkinReference {
   id: string;
@@ -793,9 +791,10 @@ function buildConditions(attributes: PromptAttributes): { clause: string; args: 
 }
 
 /**
- * Fetches a broad, relevant candidate pool (no pixel_data — that's fetched
- * separately only for the final winner). Runs a strict AND query first so
- * rows matching *every* extracted attribute (e.g. hue=blue AND stencil=hoodie)
+ * Fetches a broad, relevant candidate pool of dataset rows to use as
+ * few-shot reference material for the AI (never as final output pixels —
+ * see retrieveAndFormatExamples). Runs a strict AND query first so rows
+ * matching *every* extracted attribute (e.g. hue=blue AND stencil=hoodie)
  * are guaranteed to be in the pool instead of relying on a random OR'd
  * sample to happen to include them, then tops up with a looser OR'd pool
  * for scoring diversity and as a fallback when nothing matches everything.
@@ -1024,51 +1023,3 @@ export async function retrieveAndFormatExamples(
   }
 }
 
-export async function findBestMatchingReferenceSkin(
-  userPrompt: string
-): Promise<{ pixelData: string; apparelResult: any; description: string } | null> {
-  try {
-    const attributes = extractPromptAttributes(userPrompt);
-    const pool = await fetchCandidatePool(attributes);
-    if (pool.length === 0) return null;
-
-    const ranked = rankCandidates(pool, attributes);
-    const topScore = ranked[0]._score;
-    const topTier = ranked.filter((r) => r._score === topScore);
-    // Randomize within the top-scoring tier so identical prompts don't
-    // always return the exact same skin, then fall through the rest of the
-    // ranking — pixel_data is stored as a real PNG file (see
-    // scripts/ingest-skin-pixels.ts), so one malformed/non-64x64 file
-    // shouldn't sacrifice the whole reference-skin match for the prompt.
-    const shuffledTop = [...topTier].sort(() => Math.random() - 0.5).slice(0, 5);
-    const rest = ranked.filter((r) => r._score !== topScore);
-    const candidates = [...shuffledTop, ...rest];
-
-    for (const candidate of candidates) {
-      const pixelResult = await db.execute({
-        sql: "SELECT pixel_data FROM skin_references WHERE id = ? AND pixel_data IS NOT NULL",
-        args: [candidate.id],
-      });
-      if (pixelResult.rows.length === 0) continue;
-
-      // pixel_data holds the dataset's original PNG file bytes, but the
-      // rest of the app (skinToBase64/base64ToSkin, the 3D viewer) works in
-      // raw RGBA bytes — returning the PNG bytes as-is here previously made
-      // the frontend decode compressed PNG data as if it were an
-      // uncompressed pixel buffer, producing the scrambled noise texture.
-      const rawRgba = decodePngToRawRgba64((pixelResult.rows[0] as any).pixel_data);
-      if (!rawRgba) continue;
-
-      return {
-        pixelData: skinToBase64(rawRgba),
-        apparelResult: candidate._apparel,
-        description: candidate.description,
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.error("Failed to find matching reference skin:", error);
-    return null;
-  }
-}
