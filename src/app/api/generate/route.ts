@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
     const hairList = HAIR_STYLE_KEYS.map((k) => `- "${k}": ${HAIR_STYLES[k].name} (${HAIR_STYLES[k].vibe})`).join("\n");
     const eyeList = EYE_STYLE_KEYS.map((k) => `- "${k}": ${EYE_STYLES[k].name} (${EYE_STYLES[k].vibe})`).join("\n");
 
-    const promptText = `You are an expert Minecraft skin designer. You MUST follow the user's specific requests exactly.
+    const promptText = `You are an expert Minecraft skin designer. Design a unique, original skin driven entirely by the user's description below — never reproduce an existing skin. You MUST follow the user's specific requests exactly.
 
 ${fewShotExamples}
 

@@ -976,9 +976,9 @@ ${JSON.stringify({
     instructions += `✗ AVOID: ${attributes.negations.join(", ")}\n`;
   }
   
-  instructions += `\n=== REFERENCE EXAMPLES ===\n`;
-  instructions += `Study these examples that match the requested style:\n\n${formatted}\n`;
-  
+  instructions += `\n=== STYLE INSPIRATION (NOT A TEMPLATE) ===\n`;
+  instructions += `These are existing dataset skins with a similar vibe to the request, shown ONLY to calibrate what a plausible combination of stencil/colors/hair/eyes looks like. Do not copy one verbatim and do not let them override anything the user actually asked for above — where a reference conflicts with the user's request, the user's request wins:\n\n${formatted}\n`;
+
   return instructions;
 }
 
