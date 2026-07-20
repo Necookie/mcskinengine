@@ -1,0 +1,1136 @@
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/lib/skinEngine.ts
+var skinEngine_exports = {};
+__export(skinEngine_exports, {
+  applyHueShift: () => applyHueShift,
+  applyVolumeShader: () => applyVolumeShader,
+  base64ToSkin: () => base64ToSkin,
+  clamp: () => clamp,
+  generateSkinArray: () => generateSkinArray,
+  hexToRgb: () => hexToRgb,
+  skinToBase64: () => skinToBase64
+});
+module.exports = __toCommonJS(skinEngine_exports);
+
+// src/lib/stencils.ts
+var STUDENT_HOODIE_STENCIL = {
+  name: "Casual Student Hoodie",
+  baseTorso: "primary",
+  baseSleeve: "primary",
+  sleeveLength: "long",
+  legStyle: "pants",
+  defaultPattern: "knit",
+  vibe: "neutral",
+  shoeStyle: "sneakers",
+  regions: [
+    // Hoodie Hood (Hat Overlay) - split to keep the face open
+    { name: "Hood Top", x1: 40, y1: 0, x2: 47, y2: 7, colorType: "primary", overlay: true },
+    { name: "Hood Bottom", x1: 48, y1: 0, x2: 55, y2: 7, colorType: "primary", overlay: true },
+    { name: "Hood Right Side", x1: 32, y1: 8, x2: 39, y2: 15, colorType: "primary", overlay: true },
+    { name: "Hood Left Side", x1: 48, y1: 8, x2: 55, y2: 15, colorType: "primary", overlay: true },
+    { name: "Hood Back", x1: 56, y1: 8, x2: 63, y2: 15, colorType: "primary", overlay: true },
+    { name: "Hood Front Rim Top", x1: 40, y1: 8, x2: 47, y2: 8, colorType: "primary", overlay: true },
+    { name: "Hood Front Rim Left", x1: 40, y1: 9, x2: 40, y2: 15, colorType: "primary", overlay: true },
+    { name: "Hood Front Rim Right", x1: 47, y1: 9, x2: 47, y2: 15, colorType: "primary", overlay: true },
+    // Hoodie Torso Overlay
+    { name: "Hoodie Torso", x1: 16, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
+    // Hoodie Pocket (Secondary Accent on Torso front)
+    { name: "Hoodie Pocket", x1: 22, y1: 42, x2: 25, y2: 45, colorType: "secondary", overlay: true },
+    // Hoodie Drawstrings (Trim)
+    { name: "Drawstring Left", x1: 21, y1: 36, x2: 21, y2: 38, colorType: "trim", overlay: true },
+    { name: "Drawstring Right", x1: 26, y1: 36, x2: 26, y2: 38, colorType: "trim", overlay: true },
+    // Sleeves (Sleeve Overlays)
+    { name: "Right Sleeve", x1: 40, y1: 32, x2: 55, y2: 47, colorType: "primary", overlay: true },
+    { name: "Left Sleeve", x1: 48, y1: 48, x2: 63, y2: 63, colorType: "primary", overlay: true },
+    // Sleeve cuffs (Secondary)
+    { name: "Right Cuff", x1: 40, y1: 46, x2: 55, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Left Cuff", x1: 48, y1: 62, x2: 63, y2: 63, colorType: "secondary", overlay: true },
+    // Pants (Pants overlays)
+    { name: "Right Pants", x1: 0, y1: 32, x2: 15, y2: 47, colorType: "pants", overlay: true },
+    { name: "Left Pants", x1: 0, y1: 48, x2: 15, y2: 63, colorType: "pants", overlay: true }
+  ]
+};
+var TWEED_BLAZER_STENCIL = {
+  name: "Professor Tweed Blazer",
+  baseTorso: "shirt",
+  baseSleeve: "shirt",
+  sleeveLength: "long",
+  legStyle: "pants",
+  defaultPattern: "tweed",
+  vibe: "masculine",
+  shoeStyle: "boots",
+  baseTie: true,
+  regions: [
+    // Blazer Jacket on Torso Overlay (Tweed color)
+    { name: "Blazer Torso", x1: 16, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
+    // Shirt Collar & V-Neck cut (Shirt color)
+    { name: "Shirt Collar Front", x1: 23, y1: 34, x2: 24, y2: 36, colorType: "shirt", overlay: true },
+    { name: "Shirt Collar Front Wide", x1: 22, y1: 32, x2: 25, y2: 33, colorType: "shirt", overlay: true },
+    // Neck Tie (Tie color)
+    { name: "Tie Knot", x1: 23, y1: 33, x2: 24, y2: 33, colorType: "tie", overlay: true },
+    { name: "Tie Tail", x1: 23, y1: 34, x2: 23, y2: 38, colorType: "tie", overlay: true },
+    // Blazer Sleeves (Primary tweed color) - MUST come before elbow patches
+    { name: "Right Sleeve Blazer", x1: 40, y1: 32, x2: 55, y2: 47, colorType: "primary", overlay: true },
+    { name: "Left Sleeve Blazer", x1: 48, y1: 48, x2: 63, y2: 63, colorType: "primary", overlay: true },
+    // Elbow patches on sleeves (Trim color) - drawn AFTER sleeves so they're visible
+    { name: "Right Elbow Patch", x1: 41, y1: 38, x2: 42, y2: 40, colorType: "trim", overlay: true },
+    { name: "Left Elbow Patch", x1: 49, y1: 54, x2: 50, y2: 56, colorType: "trim", overlay: true },
+    // Blazer Buttons (Gold/Secondary)
+    { name: "Button Top", x1: 22, y1: 38, x2: 22, y2: 38, colorType: "secondary", overlay: true },
+    { name: "Button Bottom", x1: 22, y1: 41, x2: 22, y2: 41, colorType: "secondary", overlay: true },
+    // Pants (Pants color - dark brown/black)
+    { name: "Right Pants", x1: 0, y1: 32, x2: 15, y2: 47, colorType: "pants", overlay: true },
+    { name: "Left Pants", x1: 0, y1: 48, x2: 15, y2: 63, colorType: "pants", overlay: true }
+  ]
+};
+var LAB_COAT_STENCIL = {
+  name: "STEM Lab Coat",
+  baseTorso: "shirt",
+  baseSleeve: "shirt",
+  sleeveLength: "long",
+  legStyle: "pants",
+  defaultPattern: "none",
+  vibe: "neutral",
+  shoeStyle: "flats",
+  regions: [
+    // Lab Coat Torso Overlay (White)
+    { name: "Lab Coat Torso", x1: 16, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
+    // Shirt underneath (Secondary/Blue)
+    { name: "Shirt V-Neck", x1: 23, y1: 33, x2: 24, y2: 36, colorType: "shirt", overlay: true },
+    // Pocket with Pens (Pocket is primary, pens are trim)
+    { name: "Pocket Base", x1: 21, y1: 38, x2: 23, y2: 40, colorType: "primary", overlay: true },
+    { name: "Pocket Pen Red", x1: 21, y1: 37, x2: 21, y2: 37, colorType: "trim", overlay: true },
+    { name: "Pocket Pen Blue", x1: 22, y1: 37, x2: 22, y2: 37, colorType: "secondary", overlay: true },
+    // Lab Coat Sleeves (White)
+    { name: "Right Sleeve Coat", x1: 40, y1: 32, x2: 55, y2: 47, colorType: "primary", overlay: true },
+    { name: "Left Sleeve Coat", x1: 48, y1: 48, x2: 63, y2: 63, colorType: "primary", overlay: true },
+    // Wrist cuffs (Trim/Grey)
+    { name: "Right Coat Cuff", x1: 40, y1: 46, x2: 55, y2: 47, colorType: "trim", overlay: true },
+    { name: "Left Coat Cuff", x1: 48, y1: 62, x2: 63, y2: 63, colorType: "trim", overlay: true },
+    // Pants (Pants color - dark grey/black)
+    { name: "Right Pants", x1: 0, y1: 32, x2: 15, y2: 47, colorType: "pants", overlay: true },
+    { name: "Left Pants", x1: 0, y1: 48, x2: 15, y2: 63, colorType: "pants", overlay: true }
+  ]
+};
+var CREWNECK_SWEATER_STENCIL = {
+  name: "Crewneck Sweater",
+  baseTorso: "primary",
+  baseSleeve: "primary",
+  sleeveLength: "long",
+  legStyle: "pants",
+  defaultPattern: "ribbed",
+  vibe: "neutral",
+  shoeStyle: "sneakers",
+  regions: [
+    { name: "Sweater Torso", x1: 16, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
+    // Crew collar band
+    { name: "Collar Band", x1: 21, y1: 32, x2: 26, y2: 32, colorType: "trim", overlay: true },
+    { name: "Sweater Right Sleeve", x1: 40, y1: 32, x2: 55, y2: 47, colorType: "primary", overlay: true },
+    { name: "Sweater Left Sleeve", x1: 48, y1: 48, x2: 63, y2: 63, colorType: "primary", overlay: true },
+    // Ribbed hem and cuffs (secondary)
+    { name: "Hem", x1: 16, y1: 46, x2: 39, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Right Cuff", x1: 40, y1: 46, x2: 55, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Left Cuff", x1: 48, y1: 62, x2: 63, y2: 63, colorType: "secondary", overlay: true },
+    { name: "Right Pants", x1: 0, y1: 32, x2: 15, y2: 47, colorType: "pants", overlay: true },
+    { name: "Left Pants", x1: 0, y1: 48, x2: 15, y2: 63, colorType: "pants", overlay: true }
+  ]
+};
+var TRACKSUIT_STENCIL = {
+  name: "Athletic Tracksuit",
+  baseTorso: "primary",
+  baseSleeve: "primary",
+  sleeveLength: "long",
+  legStyle: "pants",
+  defaultPattern: "none",
+  vibe: "neutral",
+  shoeStyle: "sneakers",
+  regions: [
+    { name: "Tracksuit Torso", x1: 16, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
+    { name: "Side Stripe Left", x1: 16, y1: 32, x2: 17, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Side Stripe Right", x1: 38, y1: 32, x2: 39, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Zipper Line", x1: 27, y1: 32, x2: 28, y2: 47, colorType: "trim", overlay: true },
+    { name: "Tracksuit Right Sleeve", x1: 40, y1: 32, x2: 55, y2: 47, colorType: "primary", overlay: true },
+    { name: "Tracksuit Left Sleeve", x1: 48, y1: 48, x2: 63, y2: 63, colorType: "primary", overlay: true },
+    { name: "Right Sleeve Stripe", x1: 40, y1: 32, x2: 55, y2: 33, colorType: "secondary", overlay: true },
+    { name: "Left Sleeve Stripe", x1: 48, y1: 48, x2: 63, y2: 49, colorType: "secondary", overlay: true },
+    { name: "Track Pants Right", x1: 0, y1: 32, x2: 15, y2: 47, colorType: "primary", overlay: true },
+    { name: "Track Pants Left", x1: 0, y1: 48, x2: 15, y2: 63, colorType: "primary", overlay: true },
+    { name: "Track Pants Right Stripe", x1: 0, y1: 32, x2: 1, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Track Pants Left Stripe", x1: 0, y1: 48, x2: 1, y2: 63, colorType: "secondary", overlay: true }
+  ]
+};
+var BOMBER_STREETWEAR_STENCIL = {
+  name: "Streetwear Bomber & Tee",
+  baseTorso: "shirt",
+  baseSleeve: "primary",
+  sleeveLength: "long",
+  legStyle: "pants",
+  defaultPattern: "leather",
+  vibe: "masculine",
+  shoeStyle: "sneakers",
+  regions: [
+    // Open jacket: sides only, center front left transparent to show the tee base
+    { name: "Bomber Torso Left", x1: 16, y1: 32, x2: 20, y2: 47, colorType: "primary", overlay: true },
+    { name: "Bomber Torso Right", x1: 34, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
+    { name: "Bomber Collar", x1: 21, y1: 32, x2: 33, y2: 32, colorType: "secondary", overlay: true },
+    { name: "Bomber Right Sleeve", x1: 40, y1: 32, x2: 55, y2: 47, colorType: "primary", overlay: true },
+    { name: "Bomber Left Sleeve", x1: 48, y1: 48, x2: 63, y2: 63, colorType: "primary", overlay: true },
+    { name: "Right Ribbed Cuff", x1: 40, y1: 46, x2: 55, y2: 47, colorType: "secondary", overlay: true },
+    { name: "Left Ribbed Cuff", x1: 48, y1: 62, x2: 63, y2: 63, colorType: "secondary", overlay: true },
+    { name: "Right Pants", x1: 0, y1: 32, x2: 15, y2: 47, colorType: "pants", overlay: true },
+    { name: "Left Pants", x1: 0, y1: 48, x2: 15, y2: 63, colorType: "pants", overlay: true }
+  ]
+};
+var SUMMER_DRESS_STENCIL = {
+  name: "Summer Dress",
+  baseTorso: "primary",
+  baseSleeve: "skin",
+  sleeveLength: "none",
+  legStyle: "skirt",
+  defaultPattern: "none",
+  vibe: "feminine",
+  shoeStyle: "flats",
+  regions: [
+    { name: "Dress Torso", x1: 16, y1: 32, x2: 39, y2: 47, colorType: "primary", overlay: true },
+    { name: "Shoulder Strap Left", x1: 21, y1: 32, x2: 22, y2: 32, colorType: "primary", overlay: true },
+    { name: "Shoulder Strap Right", x1: 25, y1: 32, x2: 26, y2: 32, colorType: "primary", overlay: true },
+    { name: "Waist Sash", x1: 16, y1: 40, x2: 39, y2: 40, colorType: "secondary", overlay: true },
+    { name: "Skirt Right", x1: 0, y1: 32, x2: 15, y2: 38, colorType: "primary", overlay: true },
+    { name: "Skirt Left", x1: 0, y1: 48, x2: 15, y2: 54, colorType: "primary", overlay: true },
+    { name: "Skirt Hem Right", x1: 0, y1: 37, x2: 15, y2: 38, colorType: "trim", overlay: true },
+    { name: "Skirt Hem Left", x1: 0, y1: 53, x2: 15, y2: 54, colorType: "trim", overlay: true }
+  ]
+};
+var SKIRT_TOP_STENCIL = {
+  name: "Skirt & Fitted Top",
+  baseTorso: "skin",
+  baseSleeve: "skin",
+  sleeveLength: "short",
+  legStyle: "skirt",
+  defaultPattern: "ribbed",
+  vibe: "feminine",
+  shoeStyle: "flats",
+  regions: [
+    // Fitted crop top: leaves a scoop neckline and crop hem open to skin
+    { name: "Top Torso", x1: 16, y1: 32, x2: 39, y2: 42, colorType: "primary", overlay: true },
+    { name: "Top Neckline", x1: 22, y1: 32, x2: 25, y2: 33, colorType: "skin", overlay: true },
+    { name: "Top Right Sleeve", x1: 40, y1: 32, x2: 55, y2: 37, colorType: "primary", overlay: true },
+    { name: "Top Left Sleeve", x1: 48, y1: 48, x2: 63, y2: 53, colorType: "primary", overlay: true },
+    { name: "Skirt Right", x1: 0, y1: 32, x2: 15, y2: 37, colorType: "secondary", overlay: true },
+    { name: "Skirt Left", x1: 0, y1: 48, x2: 15, y2: 53, colorType: "secondary", overlay: true },
+    { name: "Skirt Hem Right", x1: 0, y1: 36, x2: 15, y2: 37, colorType: "trim", overlay: true },
+    { name: "Skirt Hem Left", x1: 0, y1: 52, x2: 15, y2: 53, colorType: "trim", overlay: true }
+  ]
+};
+var STENCILS = {
+  hoodie: STUDENT_HOODIE_STENCIL,
+  blazer: TWEED_BLAZER_STENCIL,
+  labcoat: LAB_COAT_STENCIL,
+  crewneck: CREWNECK_SWEATER_STENCIL,
+  tracksuit: TRACKSUIT_STENCIL,
+  bomber: BOMBER_STREETWEAR_STENCIL,
+  "summer-dress": SUMMER_DRESS_STENCIL,
+  "skirt-top": SKIRT_TOP_STENCIL
+};
+var STENCIL_KEYS = Object.keys(STENCILS);
+var DEMOGRAPHICS = {
+  "East Asian": {
+    skinColor: "#fce3c6",
+    hairColor: "#1c120c",
+    eyeColor: "#3a2412"
+  },
+  "South Asian": {
+    skinColor: "#d09c74",
+    hairColor: "#0c0c0c",
+    eyeColor: "#261608"
+  },
+  "Caucasian": {
+    skinColor: "#f3d0bc",
+    hairColor: "#ebd382",
+    // Blonde
+    eyeColor: "#426bf2"
+    // Blue
+  },
+  "Black": {
+    skinColor: "#704732",
+    hairColor: "#111111",
+    eyeColor: "#2e1b0b"
+  }
+};
+
+// src/lib/shading.ts
+function hexToRgb(hex) {
+  const cleanHex = hex.replace("#", "");
+  const num = parseInt(cleanHex, 16);
+  return {
+    r: num >> 16 & 255,
+    g: num >> 8 & 255,
+    b: num & 255
+  };
+}
+function clamp(val) {
+  return Math.max(0, Math.min(255, val));
+}
+function applyHueShift(r, g, b, offset, isSkin) {
+  if (offset === 0) return { r, g, b };
+  let targetR = r;
+  let targetG = g;
+  let targetB = b;
+  if (isSkin) {
+    if (offset > 0) {
+      targetR = clamp(r + offset * 1.2);
+      targetG = clamp(g + offset * 1);
+      targetB = clamp(b + offset * 0.6);
+    } else {
+      targetR = clamp(r + offset * 0.8);
+      targetG = clamp(g + offset * 1.2);
+      targetB = clamp(b + offset * 1.3);
+    }
+  } else {
+    if (offset > 0) {
+      targetR = clamp(r + offset * 1.1);
+      targetG = clamp(g + offset * 1.1);
+      targetB = clamp(b + offset * 0.9);
+    } else {
+      targetR = clamp(r + offset * 1.3);
+      targetG = clamp(g + offset * 1.1);
+      targetB = clamp(b + offset * 0.7);
+    }
+  }
+  return { r: targetR, g: targetG, b: targetB };
+}
+function hash2(x, y, seed) {
+  let h = x * 374761393 + y * 668265263 + seed * 1274126177;
+  h = (h ^ h >> 13) * 1274126177;
+  h = h ^ h >> 16;
+  return (h >>> 0) / 4294967296;
+}
+function smoothstep(t) {
+  return t * t * (3 - 2 * t);
+}
+function valueNoise2(x, y, scale, seed) {
+  const sx = x / scale;
+  const sy = y / scale;
+  const x0 = Math.floor(sx);
+  const y0 = Math.floor(sy);
+  const x1 = x0 + 1;
+  const y1 = y0 + 1;
+  const fx = smoothstep(sx - x0);
+  const fy = smoothstep(sy - y0);
+  const v00 = hash2(x0, y0, seed);
+  const v10 = hash2(x1, y0, seed);
+  const v01 = hash2(x0, y1, seed);
+  const v11 = hash2(x1, y1, seed);
+  const top = v00 + (v10 - v00) * fx;
+  const bottom = v01 + (v11 - v01) * fx;
+  return top + (bottom - top) * fy;
+}
+var BAYER_4X4 = [
+  [0, 8, 2, 10],
+  [12, 4, 14, 6],
+  [3, 11, 1, 9],
+  [15, 7, 13, 5]
+];
+function bayerThreshold(x, y) {
+  const row = (y % 4 + 4) % 4;
+  const col = (x % 4 + 4) % 4;
+  return (BAYER_4X4[row][col] + 0.5) / 16;
+}
+function quantizeShade(offset, x, y, bandSize = 8, dither = true) {
+  const band = offset / bandSize;
+  const flooredBand = Math.floor(band);
+  const frac = band - flooredBand;
+  const threshold = dither ? bayerThreshold(x, y) : 0.5;
+  const steppedBand = frac > threshold ? flooredBand + 1 : flooredBand;
+  return steppedBand * bandSize;
+}
+var PATTERN_KEYS = [
+  "knit",
+  "tweed",
+  "pinstripe",
+  "denim",
+  "flannel",
+  "plaid",
+  "corduroy",
+  "ribbed",
+  "leather",
+  "none"
+];
+function patternOffset(pattern, x, y, seed) {
+  switch (pattern) {
+    case "knit": {
+      const noise = valueNoise2(x, y, 4, seed);
+      const checker = (x + y) % 2 === 0 ? 3 : -3;
+      return checker * (0.5 + noise) + (noise - 0.5) * 6;
+    }
+    case "tweed": {
+      const base = valueNoise2(x, y, 2, seed) * 14 - 7;
+      const fleck = hash2(x, y, seed + 1) > 0.92 ? 8 : 0;
+      return base + fleck;
+    }
+    case "pinstripe": {
+      const stripe = x % 4 === 0 ? 6 : 0;
+      const jitter = hash2(0, y, seed) * 2;
+      const grain = (valueNoise2(x, y, 5, seed) - 0.5) * 4;
+      return stripe + jitter + grain;
+    }
+    case "denim": {
+      const twill = (x + y) % 3 === 0 ? -4 : 2;
+      const wear = (valueNoise2(x, y, 3, seed) - 0.5) * 8;
+      return twill + wear;
+    }
+    case "flannel": {
+      const a = x % 5 < 2 ? -5 : 0;
+      const b = y % 5 < 2 ? -5 : 0;
+      const noise = (valueNoise2(x, y, 4, seed) - 0.5) * 6;
+      return a + b + noise;
+    }
+    case "plaid": {
+      const a = x % 6 < 2 ? -6 : 0;
+      const b = y % 6 < 2 ? -6 : 0;
+      const noise = (valueNoise2(x, y, 4, seed) - 0.5) * 6;
+      return a + b + noise;
+    }
+    case "corduroy": {
+      const rib = x % 2 === 0 ? 4 : -4;
+      return rib * (0.7 + valueNoise2(x, y, 6, seed) * 0.6);
+    }
+    case "ribbed": {
+      const rib = y % 2 === 0 ? 4 : -4;
+      return rib * (0.7 + valueNoise2(x, y, 6, seed) * 0.6);
+    }
+    case "leather": {
+      const base = valueNoise2(x, y, 3, seed) * 10 - 5;
+      const sheen = hash2(x, y, seed + 2) > 0.95 ? 10 : 0;
+      return base + sheen;
+    }
+    case "none":
+    default: {
+      return (valueNoise2(x, y, 4, seed) - 0.5) * 4;
+    }
+  }
+}
+var MATERIAL_INDEX = {
+  none: 0,
+  skin: 1,
+  hair: 2,
+  eye: 3,
+  "garment-primary": 4,
+  "garment-secondary": 5,
+  "garment-trim": 6,
+  "garment-shirt": 7,
+  "garment-tie": 8,
+  pants: 9,
+  shoes: 10,
+  accessory: 11
+};
+var MATERIAL_BY_INDEX = Object.keys(MATERIAL_INDEX);
+function applyVolumeShaderV2(x, y, r, g, b, bounds, opts = {}) {
+  const seed = opts.seed ?? 0;
+  const isSkin = opts.isSkin ?? false;
+  const pattern = opts.pattern ?? "none";
+  if (!bounds) {
+    const offset = patternOffset(pattern, x, y, seed) * 2;
+    return applyHueShift(r, g, b, Math.round(offset), isSkin);
+  }
+  const { x1, y1, x2, y2 } = bounds;
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const pctX = dx > 0 ? (x - x1) / dx : 0.5;
+  const pctY = dy > 0 ? (y - y1) / dy : 0.5;
+  const lightDir = opts.lightDir ?? "top";
+  let sinePhase = pctX;
+  if (lightDir === "top-left") sinePhase = pctX * 0.85;
+  else if (lightDir === "top-right") sinePhase = 0.15 + pctX * 0.85;
+  const vertical = (1 - pctY) * 12 - 6;
+  const horizontal = Math.sin(sinePhase * Math.PI) * 14 - 7;
+  let form;
+  let pattern_;
+  if (isSkin) {
+    const raw = quantizeShade(vertical + horizontal, x, y, 5, false);
+    form = Math.max(-5, Math.min(5, raw));
+    pattern_ = 0;
+  } else {
+    form = quantizeShade(vertical + horizontal, x, y, 8);
+    pattern_ = patternOffset(pattern, x, y, seed) * 0.75;
+  }
+  const aoEdges = opts.aoEdges ?? !isSkin;
+  let ao = 0;
+  if (aoEdges) {
+    if (y === y2) ao -= isSkin ? 4 : 8;
+    else if (y === y2 - 1 && !isSkin) ao -= 4;
+    if (!isSkin && (x === x1 || x === x2)) ao -= 5;
+    if (!isSkin && y === y1) ao -= 4;
+  }
+  const total = Math.round(form + ao + pattern_);
+  return applyHueShift(r, g, b, total, isSkin);
+}
+var CONTOUR_PRECEDENCE = [
+  "accessory",
+  "hair",
+  "eye",
+  "garment-trim",
+  "garment-secondary",
+  "garment-tie",
+  "garment-primary",
+  "garment-shirt",
+  "shoes",
+  "pants",
+  "skin"
+];
+function contourRank(m) {
+  const i = CONTOUR_PRECEDENCE.indexOf(m);
+  return i === -1 ? CONTOUR_PRECEDENCE.length : i;
+}
+function applyContourPass(rgba, materialMap, faceRects) {
+  const materialAt = (x, y) => MATERIAL_BY_INDEX[materialMap[y * 64 + x]] ?? "none";
+  for (const rect of faceRects) {
+    for (let y = rect.y1; y <= rect.y2; y++) {
+      for (let x = rect.x1; x <= rect.x2; x++) {
+        const idx = (y * 64 + x) * 4;
+        if (rgba[idx + 3] === 0) continue;
+        const myMat = materialAt(x, y);
+        if (myMat === "none" || myMat === "eye") continue;
+        const myRank = contourRank(myMat);
+        const neighbors = [
+          [x, y - 1],
+          [x - 1, y],
+          [x + 1, y]
+        ];
+        let shouldDarken = false;
+        for (const [nx, ny] of neighbors) {
+          if (nx < rect.x1 || nx > rect.x2 || ny < rect.y1 || ny > rect.y2) continue;
+          const nMat = materialAt(nx, ny);
+          if (nMat === "none" || nMat === myMat || nMat === "eye") continue;
+          if (contourRank(nMat) < myRank) shouldDarken = true;
+        }
+        if (shouldDarken) {
+          const isHairline = myMat === "skin";
+          const strength = isHairline ? 22 : 18;
+          const shaded = applyHueShift(rgba[idx], rgba[idx + 1], rgba[idx + 2], -strength, myMat === "skin");
+          rgba[idx] = shaded.r;
+          rgba[idx + 1] = shaded.g;
+          rgba[idx + 2] = shaded.b;
+        }
+      }
+    }
+  }
+}
+var BASE_FACE_RECTS = [
+  // Head
+  { x1: 8, y1: 8, x2: 15, y2: 15 },
+  { x1: 0, y1: 8, x2: 7, y2: 15 },
+  { x1: 16, y1: 8, x2: 23, y2: 15 },
+  { x1: 24, y1: 8, x2: 31, y2: 15 },
+  { x1: 8, y1: 0, x2: 15, y2: 7 },
+  { x1: 16, y1: 0, x2: 23, y2: 7 },
+  // Torso
+  { x1: 20, y1: 20, x2: 27, y2: 31 },
+  { x1: 32, y1: 20, x2: 39, y2: 31 },
+  { x1: 16, y1: 20, x2: 19, y2: 31 },
+  { x1: 28, y1: 20, x2: 31, y2: 31 },
+  { x1: 20, y1: 16, x2: 27, y2: 19 },
+  // Right arm (Steve bounds; Alex's extra column is transparent and skipped)
+  { x1: 44, y1: 20, x2: 47, y2: 31 },
+  { x1: 40, y1: 20, x2: 43, y2: 31 },
+  { x1: 48, y1: 20, x2: 51, y2: 31 },
+  { x1: 52, y1: 20, x2: 55, y2: 31 },
+  { x1: 44, y1: 16, x2: 47, y2: 19 },
+  // Left arm
+  { x1: 36, y1: 52, x2: 39, y2: 63 },
+  { x1: 32, y1: 52, x2: 35, y2: 63 },
+  { x1: 40, y1: 52, x2: 43, y2: 63 },
+  { x1: 44, y1: 52, x2: 47, y2: 63 },
+  { x1: 36, y1: 48, x2: 39, y2: 51 },
+  // Right leg
+  { x1: 4, y1: 20, x2: 7, y2: 31 },
+  { x1: 0, y1: 20, x2: 3, y2: 31 },
+  { x1: 8, y1: 20, x2: 11, y2: 31 },
+  { x1: 12, y1: 20, x2: 15, y2: 31 },
+  { x1: 4, y1: 16, x2: 7, y2: 19 },
+  // Left leg
+  { x1: 20, y1: 52, x2: 23, y2: 63 },
+  { x1: 16, y1: 52, x2: 19, y2: 63 },
+  { x1: 24, y1: 52, x2: 27, y2: 63 },
+  { x1: 28, y1: 52, x2: 31, y2: 63 },
+  { x1: 20, y1: 48, x2: 23, y2: 51 }
+];
+
+// src/lib/hairStyles.ts
+var HAIR_BASE = [
+  { x1: 8, y1: 0, x2: 15, y2: 7 },
+  { x1: 0, y1: 0, x2: 7, y2: 7 },
+  { x1: 16, y1: 0, x2: 23, y2: 7 },
+  { x1: 24, y1: 8, x2: 31, y2: 15 },
+  { x1: 0, y1: 8, x2: 7, y2: 11 },
+  { x1: 16, y1: 8, x2: 23, y2: 11 }
+];
+var HAIR_STYLES = {
+  "messy-fringe": {
+    name: "Messy Fringe",
+    vibe: "neutral",
+    rects: [
+      { x1: 8, y1: 8, x2: 15, y2: 9 },
+      { x1: 9, y1: 10, x2: 10, y2: 10 },
+      { x1: 13, y1: 10, x2: 14, y2: 10 },
+      { x1: 7, y1: 10, x2: 7, y2: 12 },
+      { x1: 16, y1: 10, x2: 16, y2: 12 }
+    ],
+    hatRects: [
+      { x1: 40, y1: 8, x2: 47, y2: 8 },
+      { x1: 41, y1: 9, x2: 42, y2: 9, shade: -10 },
+      { x1: 45, y1: 9, x2: 46, y2: 9 }
+    ]
+  },
+  undercut: {
+    name: "Undercut",
+    vibe: "masculine",
+    rects: [
+      { x1: 0, y1: 10, x2: 7, y2: 15, shade: -30 },
+      { x1: 16, y1: 10, x2: 23, y2: 15, shade: -30 },
+      { x1: 8, y1: 8, x2: 15, y2: 8 }
+    ]
+  },
+  "long-curly": {
+    name: "Long Curly",
+    vibe: "neutral",
+    rects: [
+      { x1: 24, y1: 8, x2: 31, y2: 15 },
+      { x1: 8, y1: 8, x2: 15, y2: 9 },
+      { x1: 8, y1: 10, x2: 8, y2: 12 },
+      { x1: 15, y1: 10, x2: 15, y2: 12 },
+      { x1: 20, y1: 16, x2: 21, y2: 19 },
+      { x1: 26, y1: 16, x2: 27, y2: 19 }
+    ],
+    hatRects: [
+      { x1: 40, y1: 8, x2: 47, y2: 9 },
+      { x1: 48, y1: 8, x2: 49, y2: 12 },
+      { x1: 38, y1: 8, x2: 39, y2: 12 },
+      { x1: 56, y1: 8, x2: 63, y2: 11 }
+    ]
+  },
+  "parted-curtains": {
+    name: "Parted Curtains",
+    vibe: "masculine",
+    rects: [
+      { x1: 8, y1: 8, x2: 9, y2: 10 },
+      { x1: 14, y1: 8, x2: 15, y2: 10 },
+      { x1: 10, y1: 8, x2: 13, y2: 8 },
+      { x1: 7, y1: 10, x2: 7, y2: 11 },
+      { x1: 16, y1: 10, x2: 16, y2: 11 }
+    ]
+  },
+  "short-spiky": {
+    name: "Short Spiky",
+    vibe: "masculine",
+    rects: [
+      { x1: 8, y1: 8, x2: 15, y2: 8 },
+      { x1: 9, y1: 9, x2: 9, y2: 9 },
+      { x1: 11, y1: 9, x2: 11, y2: 9 },
+      { x1: 13, y1: 9, x2: 13, y2: 9 },
+      { x1: 15, y1: 9, x2: 15, y2: 9 }
+    ]
+  },
+  ponytail: {
+    name: "Ponytail",
+    vibe: "feminine",
+    rects: [
+      { x1: 8, y1: 8, x2: 15, y2: 8 },
+      { x1: 24, y1: 8, x2: 31, y2: 15 },
+      { x1: 26, y1: 16, x2: 27, y2: 19, shade: 10 }
+    ],
+    hatRects: [
+      { x1: 56, y1: 8, x2: 61, y2: 12, shade: 6 }
+    ]
+  },
+  "twin-braids": {
+    name: "Twin Braids",
+    vibe: "feminine",
+    rects: [
+      { x1: 8, y1: 8, x2: 9, y2: 10 },
+      { x1: 14, y1: 8, x2: 15, y2: 10 },
+      { x1: 10, y1: 8, x2: 13, y2: 8 },
+      { x1: 7, y1: 10, x2: 7, y2: 15, shade: 5 },
+      { x1: 16, y1: 10, x2: 16, y2: 15, shade: -5 },
+      { x1: 20, y1: 16, x2: 20, y2: 19, shade: 5 },
+      { x1: 27, y1: 16, x2: 27, y2: 19, shade: -5 }
+    ],
+    hatRects: [
+      { x1: 48, y1: 10, x2: 48, y2: 15, shade: 5 },
+      { x1: 39, y1: 10, x2: 39, y2: 15, shade: -5 }
+    ]
+  },
+  "long-straight": {
+    name: "Long Straight",
+    vibe: "feminine",
+    rects: [
+      { x1: 24, y1: 8, x2: 31, y2: 15 },
+      { x1: 7, y1: 10, x2: 7, y2: 15 },
+      { x1: 16, y1: 10, x2: 16, y2: 15 },
+      { x1: 20, y1: 16, x2: 21, y2: 21 },
+      { x1: 26, y1: 16, x2: 27, y2: 21 }
+    ],
+    hatRects: [
+      { x1: 48, y1: 8, x2: 48, y2: 15 },
+      { x1: 39, y1: 8, x2: 39, y2: 15 },
+      { x1: 56, y1: 8, x2: 63, y2: 13, shade: -8 }
+    ]
+  },
+  bob: {
+    name: "Bob",
+    vibe: "neutral",
+    rects: [
+      { x1: 8, y1: 8, x2: 15, y2: 9 },
+      { x1: 0, y1: 10, x2: 7, y2: 13 },
+      { x1: 16, y1: 10, x2: 23, y2: 13 }
+    ],
+    hatRects: [
+      { x1: 48, y1: 8, x2: 55, y2: 11 },
+      { x1: 32, y1: 8, x2: 39, y2: 11 },
+      { x1: 40, y1: 8, x2: 47, y2: 8 }
+    ]
+  },
+  "buzz-cut": {
+    name: "Buzz Cut",
+    vibe: "masculine",
+    rects: [
+      { x1: 8, y1: 0, x2: 15, y2: 7, shade: -25 },
+      { x1: 0, y1: 0, x2: 7, y2: 7, shade: -25 },
+      { x1: 16, y1: 0, x2: 23, y2: 7, shade: -25 },
+      { x1: 24, y1: 8, x2: 31, y2: 15, shade: -25 },
+      { x1: 0, y1: 8, x2: 7, y2: 11, shade: -25 },
+      { x1: 16, y1: 8, x2: 23, y2: 11, shade: -25 },
+      { x1: 8, y1: 8, x2: 15, y2: 8, shade: -25 }
+    ]
+  },
+  "side-part": {
+    name: "Side Part",
+    vibe: "masculine",
+    rects: [
+      { x1: 8, y1: 8, x2: 15, y2: 8 },
+      { x1: 8, y1: 9, x2: 11, y2: 9 },
+      { x1: 12, y1: 9, x2: 12, y2: 9, shade: -15 }
+    ]
+  }
+};
+var HAIR_STYLE_KEYS = Object.keys(HAIR_STYLES);
+
+// src/lib/eyeStyles.ts
+var EYE_STYLES = {
+  "cool-highlight": {
+    name: "Cool Highlight",
+    vibe: "neutral",
+    draw: ({ setPixel, fillRect, eyeRgb, skinRgb }) => {
+      setPixel(9, 12, 255, 255, 255, 255);
+      setPixel(10, 12, 255, 255, 255, 255);
+      setPixel(13, 12, 255, 255, 255, 255);
+      setPixel(14, 12, 255, 255, 255, 255);
+      setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255);
+      setPixel(11, 13, clamp(eyeRgb.r - 20), clamp(eyeRgb.g - 20), clamp(eyeRgb.b - 20), 255);
+      setPixel(12, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255);
+      setPixel(12, 13, clamp(eyeRgb.r - 20), clamp(eyeRgb.g - 20), clamp(eyeRgb.b - 20), 255);
+      setPixel(10, 12, 255, 255, 255, 220);
+      setPixel(13, 12, 255, 255, 255, 220);
+      fillRect(9, 11, 14, 11, clamp(skinRgb.r - 35), clamp(skinRgb.g - 45), clamp(skinRgb.b - 45), 255, true);
+    }
+  },
+  "shadow-2x2": {
+    name: "Shadow 2x2",
+    vibe: "masculine",
+    draw: ({ setPixel, fillRect, eyeRgb }) => {
+      fillRect(10, 12, 11, 13, clamp(eyeRgb.r - 30), clamp(eyeRgb.g - 30), clamp(eyeRgb.b - 30), 255);
+      fillRect(13, 12, 14, 13, clamp(eyeRgb.r - 30), clamp(eyeRgb.g - 30), clamp(eyeRgb.b - 30), 255);
+      setPixel(9, 12, 255, 255, 255, 255);
+      setPixel(12, 12, 255, 255, 255, 255);
+    }
+  },
+  "anime-glowing": {
+    name: "Anime Glowing",
+    vibe: "feminine",
+    draw: ({ setPixel, fillRect, eyeRgb }) => {
+      const bright = applyHueShift(eyeRgb.r, eyeRgb.g, eyeRgb.b, 40, false);
+      fillRect(10, 12, 11, 12, bright.r, bright.g, bright.b, 255, false);
+      fillRect(13, 12, 14, 12, bright.r, bright.g, bright.b, 255, false);
+      setPixel(9, 12, 255, 255, 255, 255);
+      setPixel(12, 12, 255, 255, 255, 255);
+    }
+  },
+  "classic-simple": {
+    name: "Classic Simple",
+    vibe: "neutral",
+    draw: ({ setPixel, eyeRgb }) => {
+      setPixel(10, 12, 255, 255, 255, 255);
+      setPixel(11, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255);
+      setPixel(13, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255);
+      setPixel(14, 12, 255, 255, 255, 255);
+    }
+  },
+  "long-lashes": {
+    name: "Long Lashes",
+    vibe: "feminine",
+    draw: ({ setPixel, fillRect, eyeRgb, skinRgb }) => {
+      fillRect(9, 12, 10, 13, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
+      fillRect(13, 12, 14, 13, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
+      setPixel(9, 13, clamp(eyeRgb.r - 60), clamp(eyeRgb.g - 60), clamp(eyeRgb.b - 60), 255, false);
+      setPixel(14, 13, clamp(eyeRgb.r - 60), clamp(eyeRgb.g - 60), clamp(eyeRgb.b - 60), 255, false);
+      setPixel(9, 12, 255, 255, 255, 255, false);
+      setPixel(13, 12, 255, 255, 255, 255, false);
+      setPixel(9, 11, 20, 15, 15, 255, false);
+      setPixel(10, 11, 20, 15, 15, 255, false);
+      setPixel(13, 11, 20, 15, 15, 255, false);
+      setPixel(14, 11, 20, 15, 15, 255, false);
+      setPixel(8, 11, 20, 15, 15, 255, false);
+      setPixel(15, 11, 20, 15, 15, 255, false);
+      fillRect(9, 14, 14, 14, clamp(skinRgb.r - 15), clamp(skinRgb.g - 20), clamp(skinRgb.b - 20), 255, true);
+    }
+  },
+  "soft-round": {
+    name: "Soft Round",
+    vibe: "feminine",
+    draw: ({ setPixel, fillRect, eyeRgb, skinRgb }) => {
+      fillRect(10, 12, 11, 13, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
+      fillRect(13, 12, 14, 13, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
+      setPixel(10, 12, 255, 255, 255, 230, false);
+      setPixel(13, 12, 255, 255, 255, 230, false);
+      fillRect(9, 14, 14, 14, clamp(skinRgb.r - 15), clamp(skinRgb.g - 20), clamp(skinRgb.b - 20), 255, true);
+    }
+  },
+  "narrow-serious": {
+    name: "Narrow Serious",
+    vibe: "masculine",
+    draw: ({ setPixel, eyeRgb }) => {
+      setPixel(9, 12, clamp(eyeRgb.r - 10), clamp(eyeRgb.g - 10), clamp(eyeRgb.b - 10), 255, false);
+      setPixel(10, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
+      setPixel(13, 12, eyeRgb.r, eyeRgb.g, eyeRgb.b, 255, false);
+      setPixel(14, 12, clamp(eyeRgb.r - 10), clamp(eyeRgb.g - 10), clamp(eyeRgb.b - 10), 255, false);
+      setPixel(9, 11, 15, 12, 12, 255, false);
+      setPixel(10, 11, 15, 12, 12, 255, false);
+      setPixel(13, 11, 15, 12, 12, 255, false);
+      setPixel(14, 11, 15, 12, 12, 255, false);
+    }
+  }
+};
+var EYE_STYLE_KEYS = Object.keys(EYE_STYLES);
+
+// src/lib/skinEngine.ts
+function applyVolumeShader(x, y, r, g, b, bounds, isSkin = false, pattern = "none") {
+  return applyVolumeShaderV2(x, y, r, g, b, bounds, { isSkin, pattern });
+}
+function generateSkinArray(demographicKey, stencilKey, apparelColors, isAlex, accessories = [], traits, seed) {
+  const array = new Uint8Array(64 * 64 * 4);
+  const materialMap = new Uint8Array(64 * 64);
+  const demo = DEMOGRAPHICS[demographicKey] || DEMOGRAPHICS["East Asian"];
+  const skinRgb = hexToRgb(traits?.skinColor || demo.skinColor);
+  const hairRgb = hexToRgb(traits?.hairColor || demo.hairColor);
+  const eyeRgb = hexToRgb(traits?.eyeColor || demo.eyeColor);
+  const styleVibe = traits?.styleVibe || "neutral";
+  const vibeHairDefault = styleVibe === "feminine" ? "long-straight" : styleVibe === "masculine" ? "short-spiky" : "messy-fringe";
+  const vibeEyeDefault = styleVibe === "feminine" ? "long-lashes" : styleVibe === "masculine" ? "narrow-serious" : "cool-highlight";
+  const hairStyle = traits?.hairStyle || vibeHairDefault;
+  const eyeStyle = traits?.eyeStyle || vibeEyeDefault;
+  const detailTexture = traits?.detailTexture || "none";
+  const seedBase = `${stencilKey}|${hairStyle}|${apparelColors.primary}`;
+  const resolvedSeed = seed ?? Math.floor(hash2(seedBase.length, seedBase.charCodeAt(0) + seedBase.length, 7) * 65536);
+  const setPixel = (x, y, r, g, b, a = 255, bounds, isSkin = false, pattern = "none", applyShade = true, lightDir = "top", material = "none") => {
+    if (x < 0 || x >= 64 || y < 0 || y >= 64) return;
+    const idx = (y * 64 + x) * 4;
+    if (applyShade && a > 0) {
+      const shaded = applyVolumeShaderV2(x, y, r, g, b, bounds, { isSkin, pattern, seed: resolvedSeed, lightDir });
+      array[idx] = shaded.r;
+      array[idx + 1] = shaded.g;
+      array[idx + 2] = shaded.b;
+      array[idx + 3] = a;
+    } else {
+      array[idx] = r;
+      array[idx + 1] = g;
+      array[idx + 2] = b;
+      array[idx + 3] = a;
+    }
+    if (a > 0 && material !== "none") {
+      materialMap[y * 64 + x] = MATERIAL_INDEX[material];
+    }
+  };
+  const fillRect = (x1, y1, x2, y2, r, g, b, a = 255, isSkin = false, pattern = "none", lightDir = "top", material = "none") => {
+    for (let y = y1; y <= y2; y++) {
+      for (let x = x1; x <= x2; x++) {
+        setPixel(x, y, r, g, b, a, { x1, y1, x2, y2 }, isSkin, pattern, true, lightDir, material);
+      }
+    }
+  };
+  fillRect(0, 0, 31, 15, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top", "skin");
+  for (const rect of HAIR_BASE) {
+    fillRect(rect.x1, rect.y1, rect.x2, rect.y2, hairRgb.r, hairRgb.g, hairRgb.b, 255, false, "none", "top", "hair");
+  }
+  const resolvedHairStyle = HAIR_STYLES[hairStyle] || HAIR_STYLES["messy-fringe"];
+  for (const rect of resolvedHairStyle.rects) {
+    const c = rect.shade ? applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, rect.shade, false) : hairRgb;
+    fillRect(rect.x1, rect.y1, rect.x2, rect.y2, c.r, c.g, c.b, 255, false, "none", "top", "hair");
+  }
+  const stencilForHat = STENCILS[stencilKey] || STUDENT_HOODIE_STENCIL;
+  const stencilUsesHatLayer = stencilForHat.regions.some((r) => r.x1 >= 32 && r.y2 <= 15);
+  if (!stencilUsesHatLayer && resolvedHairStyle.hatRects) {
+    for (const rect of resolvedHairStyle.hatRects) {
+      const c = rect.shade ? applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, rect.shade, false) : hairRgb;
+      fillRect(rect.x1, rect.y1, rect.x2, rect.y2, c.r, c.g, c.b, 255, false, "none", "top", "hair");
+    }
+  }
+  const hairHighlight = applyHueShift(hairRgb.r, hairRgb.g, hairRgb.b, 18, false);
+  fillRect(9, 10, 14, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, "none", "top", "hair");
+  fillRect(1, 10, 6, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, "none", "top", "hair");
+  fillRect(17, 10, 22, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, "none", "top", "hair");
+  fillRect(25, 10, 30, 10, hairHighlight.r, hairHighlight.g, hairHighlight.b, 255, false, "none", "top", "hair");
+  const resolvedEyeStyle = EYE_STYLES[eyeStyle] || EYE_STYLES["cool-highlight"];
+  resolvedEyeStyle.draw({
+    setPixel: (x, y, r, g, b, a = 255, applyShade = true) => setPixel(x, y, r, g, b, a, void 0, false, "none", applyShade, "top", "eye"),
+    // Eyes are tiny (2-3px) stylized shapes, not lit surfaces: routing them
+    // through the engine's fillRect would apply the cloth dither/volume
+    // shader (isSkin=false) and speckle the iris with noise. Only actual
+    // skin fills (under-eye shadow) get the clean skin shading ramp.
+    fillRect: (x1, y1, x2, y2, r, g, b, a = 255, isSkin = false) => {
+      for (let yy = y1; yy <= y2; yy++) {
+        for (let xx = x1; xx <= x2; xx++) {
+          setPixel(xx, yy, r, g, b, a, void 0, isSkin, "none", isSkin, "top", isSkin ? "skin" : "eye");
+        }
+      }
+    },
+    eyeRgb,
+    skinRgb
+  });
+  setPixel(11, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, void 0, false, "none", true, "top", "skin");
+  setPixel(12, 13, clamp(skinRgb.r - 10), clamp(skinRgb.g - 15), clamp(skinRgb.b - 15), 255, void 0, false, "none", true, "top", "skin");
+  if (accessories && Array.isArray(accessories)) {
+    const darkColor = { r: 35, g: 30, b: 30 };
+    if (accessories.includes("glasses")) {
+      setPixel(12, 12, darkColor.r, darkColor.g, darkColor.b, 255, void 0, false, "none", true, "top", "accessory");
+      fillRect(9, 11, 12, 11, darkColor.r, darkColor.g, darkColor.b, 255, false, "none", "top", "accessory");
+      fillRect(9, 13, 12, 13, darkColor.r, darkColor.g, darkColor.b, 255, false, "none", "top", "accessory");
+      setPixel(9, 12, darkColor.r, darkColor.g, darkColor.b, 255, void 0, false, "none", true, "top", "accessory");
+      setPixel(12, 12, darkColor.r, darkColor.g, darkColor.b, 255, void 0, false, "none", true, "top", "accessory");
+      fillRect(13, 11, 16, 11, darkColor.r, darkColor.g, darkColor.b, 255, false, "none", "top", "accessory");
+      fillRect(13, 13, 16, 13, darkColor.r, darkColor.g, darkColor.b, 255, false, "none", "top", "accessory");
+      setPixel(13, 12, darkColor.r, darkColor.g, darkColor.b, 255, void 0, false, "none", true, "top", "accessory");
+      setPixel(16, 12, darkColor.r, darkColor.g, darkColor.b, 255, void 0, false, "none", true, "top", "accessory");
+      fillRect(3, 12, 7, 12, darkColor.r, darkColor.g, darkColor.b, 255, false, "none", "top", "accessory");
+      fillRect(16, 12, 20, 12, darkColor.r, darkColor.g, darkColor.b, 255, false, "none", "top", "accessory");
+    }
+    if (accessories.includes("headphones")) {
+      const hpColor = hexToRgb(apparelColors.secondary || "#ff0000");
+      fillRect(8, 0, 15, 0, hpColor.r, hpColor.g, hpColor.b, 255, false, "none", "top", "accessory");
+      fillRect(4, 9, 4, 11, hpColor.r, hpColor.g, hpColor.b, 255, false, "none", "top", "accessory");
+      fillRect(19, 9, 19, 11, hpColor.r, hpColor.g, hpColor.b, 255, false, "none", "top", "accessory");
+      fillRect(3, 10, 5, 12, hpColor.r, hpColor.g, hpColor.b, 255, false, "none", "top", "accessory");
+      fillRect(18, 10, 20, 12, hpColor.r, hpColor.g, hpColor.b, 255, false, "none", "top", "accessory");
+    }
+    if (accessories.includes("mask")) {
+      const maskColor = hexToRgb(apparelColors.shirt || "#ffffff");
+      fillRect(10, 13, 13, 14, maskColor.r, maskColor.g, maskColor.b, 255, false, "none", "top", "accessory");
+      setPixel(9, 13, maskColor.r, maskColor.g, maskColor.b, 255, void 0, false, "none", true, "top", "accessory");
+      setPixel(14, 13, maskColor.r, maskColor.g, maskColor.b, 255, void 0, false, "none", true, "top", "accessory");
+    }
+    if (accessories.includes("beard")) {
+      fillRect(9, 15, 14, 15, darkColor.r, darkColor.g, darkColor.b, 255, false, "none", "top", "accessory");
+      fillRect(8, 13, 8, 14, darkColor.r, darkColor.g, darkColor.b, 255, false, "none", "top", "accessory");
+      fillRect(15, 13, 15, 14, darkColor.r, darkColor.g, darkColor.b, 255, false, "none", "top", "accessory");
+    }
+    if (accessories.includes("eyebrows")) {
+      fillRect(9, 11, 11, 11, darkColor.r, darkColor.g, darkColor.b, 255, false, "none", "top", "accessory");
+      fillRect(12, 11, 14, 11, darkColor.r, darkColor.g, darkColor.b, 255, false, "none", "top", "accessory");
+    }
+    if (accessories.includes("freckles")) {
+      const freckleRgb = { r: clamp(skinRgb.r - 45), g: clamp(skinRgb.g - 45), b: clamp(skinRgb.b - 55) };
+      const spots = [[9, 13], [10, 14], [13, 14], [14, 13], [9, 14], [14, 14]];
+      for (const [x, y] of spots) {
+        if (hash2(x, y, resolvedSeed) > 0.4) {
+          setPixel(x, y, freckleRgb.r, freckleRgb.g, freckleRgb.b, 255, void 0, false, "none", true, "top", "accessory");
+        }
+      }
+    }
+    if (accessories.includes("blush")) {
+      const blushRgb = applyHueShift(skinRgb.r, skinRgb.g, skinRgb.b, 22, true);
+      setPixel(8, 13, blushRgb.r, blushRgb.g, blushRgb.b, 200, void 0, false, "none", true, "top", "accessory");
+      setPixel(15, 13, blushRgb.r, blushRgb.g, blushRgb.b, 200, void 0, false, "none", true, "top", "accessory");
+    }
+    if (accessories.includes("lipstick")) {
+      const lipRgb = hexToRgb("#b03a4a");
+      setPixel(11, 14, lipRgb.r, lipRgb.g, lipRgb.b, 255, void 0, false, "none", true, "top", "accessory");
+      setPixel(12, 14, lipRgb.r, lipRgb.g, lipRgb.b, 255, void 0, false, "none", true, "top", "accessory");
+    }
+    if (accessories.includes("earrings")) {
+      const earringRgb = hexToRgb(apparelColors.trim || "#d4af37");
+      setPixel(7, 13, earringRgb.r, earringRgb.g, earringRgb.b, 255, void 0, false, "none", true, "top", "accessory");
+      setPixel(16, 13, earringRgb.r, earringRgb.g, earringRgb.b, 255, void 0, false, "none", true, "top", "accessory");
+    }
+  }
+  const stencil = STENCILS[stencilKey] || STUDENT_HOODIE_STENCIL;
+  const layerColor = (source) => {
+    if (source === "skin") return skinRgb;
+    if (source === "primary") return hexToRgb(apparelColors.primary);
+    if (source === "secondary") return hexToRgb(apparelColors.secondary);
+    return hexToRgb(apparelColors.shirt);
+  };
+  const layerMaterial = (source) => source === "skin" ? "skin" : `garment-${source}`;
+  const resolvedPattern = (fallback) => PATTERN_KEYS.includes(detailTexture) && detailTexture !== "none" ? detailTexture : fallback;
+  const torsoRgb = layerColor(stencil.baseTorso);
+  const isTorsoSkin = stencil.baseTorso === "skin";
+  const torsoMaterial = layerMaterial(stencil.baseTorso);
+  const torsoPattern = resolvedPattern(stencil.defaultPattern);
+  fillRect(16, 16, 39, 31, torsoRgb.r, torsoRgb.g, torsoRgb.b, 255, isTorsoSkin, torsoPattern, "top", torsoMaterial);
+  if (!isTorsoSkin) {
+    fillRect(22, 20, 25, 21, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top", "skin");
+    setPixel(22, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, void 0, false, "none", true, "top", "skin");
+    setPixel(23, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, void 0, false, "none", true, "top", "skin");
+    setPixel(24, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, void 0, false, "none", true, "top", "skin");
+    setPixel(25, 20, clamp(skinRgb.r - 20), clamp(skinRgb.g - 25), clamp(skinRgb.b - 25), 255, void 0, false, "none", true, "top", "skin");
+    if (stencil.baseTie) {
+      const tieColor = hexToRgb(apparelColors.tie);
+      fillRect(23, 21, 24, 27, tieColor.r, tieColor.g, tieColor.b, 255, false, "none", "top", "garment-tie");
+    }
+  }
+  const pantsColor = hexToRgb(apparelColors.pants);
+  const legHem = stencil.legStyle === "shorts" ? 4 : stencil.legStyle === "skirt" ? 3 : stencil.legStyle === "bare" ? -1 : 16;
+  if (legHem >= 0) {
+    fillRect(0, 16, 15, 16 + legHem - 1, pantsColor.r, pantsColor.g, pantsColor.b, 255, false, "none", "top-right", "pants");
+    fillRect(16, 48, 31, 48 + legHem - 1, pantsColor.r, pantsColor.g, pantsColor.b, 255, false, "none", "top-left", "pants");
+  }
+  const sleeveRgb = layerColor(stencil.baseSleeve);
+  const isArmSkin = stencil.baseSleeve === "skin";
+  const armMaterial = layerMaterial(stencil.baseSleeve);
+  const armPattern = resolvedPattern(stencil.defaultPattern);
+  const shortSleeveRows = 6;
+  if (isAlex) {
+    if (stencil.sleeveLength === "short") {
+      fillRect(40, 16, 54, 16 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, "top-right", armMaterial);
+      fillRect(40, 16 + shortSleeveRows, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top-right", "skin");
+    } else if (stencil.sleeveLength === "none") {
+      fillRect(40, 16, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top-right", "skin");
+    } else {
+      fillRect(40, 16, 54, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, "top-right", armMaterial);
+      fillRect(40, 28, 54, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top-right", "skin");
+    }
+  } else {
+    if (stencil.sleeveLength === "short") {
+      fillRect(40, 16, 55, 16 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, "top-right", armMaterial);
+      fillRect(40, 16 + shortSleeveRows, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top-right", "skin");
+    } else if (stencil.sleeveLength === "none") {
+      fillRect(40, 16, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top-right", "skin");
+    } else {
+      fillRect(40, 16, 55, 27, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, "top-right", armMaterial);
+      fillRect(40, 28, 55, 31, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top-right", "skin");
+    }
+  }
+  if (isAlex) {
+    if (stencil.sleeveLength === "short") {
+      fillRect(32, 46, 46, 46 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, "top-left", armMaterial);
+      fillRect(32, 46 + shortSleeveRows, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top-left", "skin");
+    } else if (stencil.sleeveLength === "none") {
+      fillRect(32, 46, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top-left", "skin");
+    } else {
+      fillRect(32, 46, 46, 57, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, "top-left", armMaterial);
+      fillRect(32, 58, 46, 61, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top-left", "skin");
+    }
+  } else {
+    if (stencil.sleeveLength === "short") {
+      fillRect(32, 48, 47, 48 + shortSleeveRows - 1, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, "top-left", armMaterial);
+      fillRect(32, 48 + shortSleeveRows, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top-left", "skin");
+    } else if (stencil.sleeveLength === "none") {
+      fillRect(32, 48, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top-left", "skin");
+    } else {
+      fillRect(32, 48, 47, 59, sleeveRgb.r, sleeveRgb.g, sleeveRgb.b, 255, isArmSkin, armPattern, "top-left", armMaterial);
+      fillRect(32, 60, 47, 63, skinRgb.r, skinRgb.g, skinRgb.b, 255, true, "none", "top-left", "skin");
+    }
+  }
+  for (const region of stencil.regions) {
+    let hex = "#ffffff";
+    if (region.colorType === "primary") hex = apparelColors.primary;
+    else if (region.colorType === "secondary") hex = apparelColors.secondary;
+    else if (region.colorType === "trim") hex = apparelColors.trim;
+    else if (region.colorType === "shirt") hex = apparelColors.shirt;
+    else if (region.colorType === "tie") hex = apparelColors.tie;
+    else if (region.colorType === "pants") hex = apparelColors.pants;
+    else if (region.colorType === "skin") hex = demo.skinColor;
+    else if (region.colorType === "hair") hex = demo.hairColor;
+    else if (region.colorType === "eyes") hex = demo.eyeColor;
+    const rgb = hexToRgb(hex);
+    let pattern = "none";
+    if (PATTERN_KEYS.includes(detailTexture) && detailTexture !== "none") {
+      pattern = detailTexture;
+    } else {
+      if (stencilKey === "hoodie" && (region.name.includes("Hoodie") || region.name.includes("Sleeve") || region.name.includes("Hood"))) {
+        pattern = "knit";
+      } else if (stencilKey === "blazer" && (region.name.includes("Blazer") || region.name.includes("Sleeve"))) {
+        pattern = "tweed";
+      }
+    }
+    const regionLightDir = region.name.includes("Right") ? "top-right" : region.name.includes("Left") ? "top-left" : "top";
+    const regionMaterial = region.colorType === "pants" ? "pants" : region.colorType === "skin" ? "skin" : region.colorType === "hair" ? "hair" : region.colorType === "eyes" ? "eye" : `garment-${region.colorType === "accent" ? "secondary" : region.colorType}`;
+    if (isAlex && region.name.includes("Sleeve")) {
+      if (region.name.includes("Right Sleeve")) {
+        const adjustedX2 = Math.min(region.x2, 54);
+        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern, regionLightDir, regionMaterial);
+      } else if (region.name.includes("Left Sleeve")) {
+        const adjustedX2 = Math.min(region.x2, 62);
+        fillRect(region.x1, region.y1, adjustedX2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern, regionLightDir, regionMaterial);
+      } else {
+        fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b, 255, false, pattern, regionLightDir, regionMaterial);
+      }
+    } else {
+      fillRect(region.x1, region.y1, region.x2, region.y2, rgb.r, rgb.g, rgb.b, 255, region.colorType === "skin", pattern, regionLightDir, regionMaterial);
+    }
+  }
+  const shoeStyle = stencil.shoeStyle || "boots";
+  const shoeRgb = hexToRgb(apparelColors.shoes || "#302015");
+  if (shoeStyle === "boots") {
+    fillRect(0, 29, 15, 31, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, "none", "top", "shoes");
+    fillRect(16, 61, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, "none", "top", "shoes");
+  } else if (shoeStyle === "sneakers") {
+    fillRect(0, 30, 15, 30, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, "none", "top", "shoes");
+    fillRect(0, 31, 15, 31, 235, 235, 235, 255, false, "none", "top", "shoes");
+    fillRect(16, 62, 31, 62, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, "none", "top", "shoes");
+    fillRect(16, 63, 31, 63, 235, 235, 235, 255, false, "none", "top", "shoes");
+  } else if (shoeStyle === "flats") {
+    fillRect(0, 31, 15, 31, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, "none", "top", "shoes");
+    fillRect(16, 63, 31, 63, shoeRgb.r, shoeRgb.g, shoeRgb.b, 255, false, "none", "top", "shoes");
+  }
+  applyContourPass(array, materialMap, BASE_FACE_RECTS);
+  return array;
+}
+function skinToBase64(array) {
+  const binary = Array.from(array).map((b) => String.fromCharCode(b)).join("");
+  return btoa(binary);
+}
+function base64ToSkin(base64) {
+  const binary = atob(base64);
+  const array = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    array[i] = binary.charCodeAt(i);
+  }
+  return array;
+}
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  applyHueShift,
+  applyVolumeShader,
+  base64ToSkin,
+  clamp,
+  generateSkinArray,
+  hexToRgb,
+  skinToBase64
+});

@@ -17,6 +17,24 @@ const ReactSkinview3d = dynamic(
   { ssr: false, loading: () => <div className="text-grid-tag text-[#555558]">Loading mesh...</div> }
 );
 
+/**
+ * Converts a flat RGBA Uint8Array into an off-screen 64×64 HTMLCanvasElement.
+ * Centralises the repeated temp-canvas boilerplate used across this page.
+ */
+function skinArrayToCanvas(arr: Uint8Array): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    const imgData = ctx.createImageData(64, 64);
+    imgData.data.set(arr);
+    ctx.putImageData(imgData, 0, 0);
+  }
+  return canvas;
+}
+
+
 export default function DashboardPage() {
   const { isSignedIn, user } = useUser();
   const {
@@ -62,16 +80,7 @@ export default function DashboardPage() {
   // Synchronize model type (Steve vs Alex)
   useEffect(() => {
     if (viewer && skinArray) {
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = 64;
-      tempCanvas.height = 64;
-      const ctx = tempCanvas.getContext("2d");
-      if (ctx) {
-        const imgData = ctx.createImageData(64, 64);
-        imgData.data.set(skinArray);
-        ctx.putImageData(imgData, 0, 0);
-        viewer.loadSkin(tempCanvas.toDataURL(), modelType === "alex" ? "slim" : "classic");
-      }
+      viewer.loadSkin(skinArrayToCanvas(skinArray).toDataURL(), modelType === "alex" ? "slim" : "classic");
     }
   }, [viewer, modelType, skinArray]);
 
@@ -90,20 +99,11 @@ export default function DashboardPage() {
   };
 
   const downloadSkin = () => {
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = 64;
-    tempCanvas.height = 64;
-    const ctx = tempCanvas.getContext("2d");
-    if (ctx) {
-      const imgData = ctx.createImageData(64, 64);
-      imgData.data.set(skinArray);
-      ctx.putImageData(imgData, 0, 0);
-      
-      const link = document.createElement("a");
-      link.download = `skin_${modelType}_${role}.png`;
-      link.href = tempCanvas.toDataURL("image/png");
-      link.click();
-    }
+    const canvas = skinArrayToCanvas(skinArray);
+    const link = document.createElement("a");
+    link.download = `skin_${modelType}_${role}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
   };
 
   if (isSignedIn === undefined) {

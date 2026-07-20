@@ -1,6 +1,14 @@
-import { createClient, type Client } from "@libsql/client";
+import { createClient, type Client, type InStatement, type ResultSet } from "@libsql/client";
 
 let _db: Client | null = null;
+
+/** Subset of the libSQL Client interface used throughout this application. */
+export interface DbClient {
+  execute(opts: InStatement): Promise<ResultSet>;
+  batch(stmts: InStatement[]): Promise<ResultSet[]>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  transaction(fn: (tx: any) => Promise<void>): Promise<unknown>;
+}
 
 export function getDb(): Client {
   if (!_db) {
@@ -16,11 +24,11 @@ export function getDb(): Client {
   return _db;
 }
 
-export const db = {
-  execute: (opts: { sql: string; args?: unknown[] }) => getDb().execute(opts),
-  batch: (stmts: { sql: string; args?: unknown[] }[]) => getDb().batch(stmts),
-  transaction: (fn: (tx: any) => Promise<void>) => getDb().transaction(fn),
-} as unknown as Client;
+export const db: DbClient = {
+  execute: (opts) => getDb().execute(opts),
+  batch: (stmts) => getDb().batch(stmts),
+  transaction: (fn) => getDb().transaction(fn as any),
+};
 
 export async function initializeDatabase() {
   try {

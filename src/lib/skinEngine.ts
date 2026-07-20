@@ -37,7 +37,22 @@ export function applyVolumeShader(
 }
 
 /**
- * Procedurally generates a 64x64 Minecraft skin as a flat 1D RGBA array (16,384 elements).
+ * Creates a blank 64×64 Minecraft skin as a flat 1D RGBA Uint8Array (16,384 elements).
+ * Every pixel is opaque white — suitable as a default mannequin base.
+ */
+export function createBlankSkinArray(): Uint8Array {
+  const arr = new Uint8Array(64 * 64 * 4);
+  for (let i = 0; i < arr.length; i += 4) {
+    arr[i]     = 255; // R
+    arr[i + 1] = 255; // G
+    arr[i + 2] = 255; // B
+    arr[i + 3] = 255; // A
+  }
+  return arr;
+}
+
+/**
+ * Procedurally generates a 64×64 Minecraft skin as a flat 1D RGBA array (16,384 elements).
  */
 export function generateSkinArray(
   demographicKey: string,
@@ -492,7 +507,11 @@ export function generateSkinArray(
 }
 
 /**
- * Helper to convert Uint8Array back and forth to standard Base64 representation.
+ * Encodes a raw RGBA Uint8Array (16,384 bytes for a 64×64 skin) into a
+ * Base64 string suitable for JSON transport or `<img src>` data URLs.
+ *
+ * @param array - The flat RGBA skin array produced by `generateSkinArray`.
+ * @returns Standard Base64-encoded string of the raw bytes.
  */
 export function skinToBase64(array: Uint8Array): string {
   const binary = Array.from(array)
@@ -501,6 +520,13 @@ export function skinToBase64(array: Uint8Array): string {
   return btoa(binary);
 }
 
+/**
+ * Decodes a Base64 string (as produced by `skinToBase64`) back into a raw
+ * RGBA Uint8Array for use with Canvas APIs or the skin engine.
+ *
+ * @param base64 - A Base64 string representing a 64×64 Minecraft skin.
+ * @returns Flat RGBA Uint8Array with 16,384 elements.
+ */
 export function base64ToSkin(base64: string): Uint8Array {
   const binary = atob(base64);
   const array = new Uint8Array(binary.length);

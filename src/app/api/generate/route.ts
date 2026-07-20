@@ -49,7 +49,6 @@ const SHADING_MODE_KEYS = ["soft", "graphic"];
 const PALETTE_MODE_KEYS = ["full", "monochrome", "complementary", "analogous", "split-complementary", "triadic"];
 
 const PRICING: Record<string, { inRate: number; outRate: number }> = {
-  "gemini-3.5-flash": { inRate: 1.50 / 1000000, outRate: 9.00 / 1000000 },
   "gemini-1.5-flash": { inRate: 0.075 / 1000000, outRate: 0.30 / 1000000 },
   "gemini-1.5-pro": { inRate: 1.25 / 1000000, outRate: 5.00 / 1000000 },
   "gemini-2.0-flash": { inRate: 0.075 / 1000000, outRate: 0.30 / 1000000 },
