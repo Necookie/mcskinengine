@@ -41,8 +41,12 @@ export async function initializeDatabase() {
     
     try {
       await db.execute("ALTER TABLE user_settings ADD COLUMN openai_key TEXT;");
-    } catch {
-      // Column already exists
+    } catch (err: unknown) {
+      // Ignore "duplicate column" errors — the column already exists from a prior migration.
+      const msg = err instanceof Error ? err.message : String(err);
+      if (!msg.includes("duplicate column") && !msg.includes("already exists")) {
+        console.error("[db] ALTER TABLE user_settings failed unexpectedly:", msg);
+      }
     }
     
     await db.execute(`
