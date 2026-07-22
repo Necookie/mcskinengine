@@ -58,11 +58,14 @@ export default function DashboardPage() {
   const [viewer, setViewer] = useState<any>(null);
 
   // Initialize data on sign-in
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isSignedIn) {
       fetchSkin();
       fetchSettings();
     }
+  // Intentionally run once on sign-in status change; fetchSkin/fetchSettings are stable store refs
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn]);
 
   // Sync texture changes to the 3D viewer
@@ -99,6 +102,7 @@ export default function DashboardPage() {
   };
 
   const downloadSkin = () => {
+    if (!skinArray || skinArray.length === 0) return;
     const canvas = skinArrayToCanvas(skinArray);
     const link = document.createElement("a");
     link.download = `skin_${modelType}_${role}.png`;
