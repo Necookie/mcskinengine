@@ -28,6 +28,17 @@ const ReactSkinview3d = dynamic(
   { ssr: false, loading: () => <div className="text-grid-tag text-[#555558]">Loading Voxel Mesh...</div> }
 );
 
+/** Minimal interface of the skinview3d viewer instance used in this component. */
+interface SkinViewer3DInstance {
+  skinCanvas: HTMLCanvasElement;
+  skinTexture: { minFilter: number; magFilter: number; needsUpdate: boolean };
+  background: null | string;
+  autoRotate: boolean;
+  autoRotateSpeed: number;
+  animations: { add: (cls: unknown) => void; handles: Array<{ resetAndRemove: () => void }> };
+  loadSkin: (url: string, model: "slim" | "classic") => void;
+}
+
 export default function ModelPreview3D() {
   const skinArray = useSkinStore((s) => s.skinArray);
   const modelType = useSkinStore((s) => s.modelType);
@@ -37,7 +48,7 @@ export default function ModelPreview3D() {
   const pushUndo = useSkinStore((s) => s.pushUndo);
   const [autoRotate, setAutoRotate] = useState(true);
   const [animationName, setAnimationName] = useState<"walk" | "run" | "idle" | "static">("walk");
-  const [viewer, setViewer] = useState<any>(null);
+  const [viewer, setViewer] = useState<SkinViewer3DInstance | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Synchronize skinArray changes (Undo/Redo/Drawing strokes) to the 3D viewer texture live
