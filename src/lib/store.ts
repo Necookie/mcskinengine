@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import { base64ToSkin, skinToBase64, createBlankSkinArray } from "./skinEngine";
 
+/**
+ * Bump this version whenever the skin save format changes in a breaking way.
+ * The fetch handler can use this to detect and migrate legacy stored skins.
+ */
+export const SKIN_SCHEMA_VERSION = 1;
+
 interface LogEntry {
   id: number;
   timestamp: string;
