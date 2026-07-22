@@ -5,6 +5,23 @@ import { useSkinStore } from "@/lib/store";
 import dynamic from "next/dynamic";
 import { Play, Pause, Download, Upload } from "lucide-react";
 
+/**
+ * Converts a flat RGBA Uint8Array into an off-screen 64×64 HTMLCanvasElement.
+ * Centralises the repeated temp-canvas boilerplate used across this component.
+ */
+function skinArrayToCanvas(arr: Uint8Array): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    const imgData = ctx.createImageData(64, 64);
+    imgData.data.set(arr);
+    ctx.putImageData(imgData, 0, 0);
+  }
+  return canvas;
+}
+
 // Dynamically import SkinViewer since it depends on browser canvas APIs (WebGL, ThreeJS)
 const ReactSkinview3d = dynamic(
   () => import("react-skinview3d"),
@@ -57,16 +74,7 @@ export default function ModelPreview3D() {
   // Synchronize model type (Steve vs Alex) dynamically on the viewer instance
   useEffect(() => {
     if (viewer && skinArray) {
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = 64;
-      tempCanvas.height = 64;
-      const ctx = tempCanvas.getContext("2d");
-      if (ctx) {
-        const imgData = ctx.createImageData(64, 64);
-        imgData.data.set(skinArray);
-        ctx.putImageData(imgData, 0, 0);
-        viewer.loadSkin(tempCanvas.toDataURL(), modelType === "alex" ? "slim" : "classic");
-      }
+      viewer.loadSkin(skinArrayToCanvas(skinArray).toDataURL(), modelType === "alex" ? "slim" : "classic");
     }
   }, [viewer, modelType]);
 
@@ -79,20 +87,10 @@ export default function ModelPreview3D() {
   }, [viewer, autoRotate]);
 
   const downloadSkin = () => {
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = 64;
-    tempCanvas.height = 64;
-    const ctx = tempCanvas.getContext("2d");
-    if (ctx) {
-      const imgData = ctx.createImageData(64, 64);
-      imgData.data.set(skinArray);
-      ctx.putImageData(imgData, 0, 0);
-      
-      const link = document.createElement("a");
-      link.download = `skin_${modelType}_${role}.png`;
-      link.href = tempCanvas.toDataURL("image/png");
-      link.click();
-    }
+    const link = document.createElement("a");
+    link.download = `skin_${modelType}_${role}.png`;
+    link.href = skinArrayToCanvas(skinArray).toDataURL("image/png");
+    link.click();
   };
 
   const handleUploadClick = () => {
