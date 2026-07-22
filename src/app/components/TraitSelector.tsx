@@ -28,22 +28,22 @@ export default function TraitSelector() {
   const saveSkin = useSkinStore((s) => s.saveSkin);
   const pushUndo = useSkinStore((s) => s.pushUndo);
 
-  const handleRoleChange = (newRole: string) => {
+  const handleRoleChange = async (newRole: string) => {
     pushUndo(skinArray);
     setRole(newRole);
-    setTimeout(() => saveSkin(), 500);
+    await saveSkin();
   };
 
-  const handleEthnicityChange = (newEth: string) => {
+  const handleEthnicityChange = async (newEth: string) => {
     pushUndo(skinArray);
     setEthnicity(newEth);
-    setTimeout(() => saveSkin(), 500);
+    await saveSkin();
   };
 
-  const handleModelTypeChange = (type: "steve" | "alex") => {
+  const handleModelTypeChange = async (type: "steve" | "alex") => {
     pushUndo(skinArray);
     setModelType(type);
-    setTimeout(() => saveSkin(), 500);
+    await saveSkin();
   };
 
   return (
