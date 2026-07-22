@@ -186,6 +186,8 @@ export function LandingPage() {
 
           <SignInButton mode="modal">
             <button
+              type="button"
+              aria-label="Sign in to launch your Minecraft skin workspace"
               style={launchBtnStyle}
               onMouseEnter={e => {
                 (e.target as HTMLButtonElement).style.filter = "brightness(0.85)";
