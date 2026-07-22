@@ -1,10 +1,28 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#1c1c1d",
+};
+
 export const metadata: Metadata = {
-  title: "MCSkinEngine.dev - Minecraft Skin Workspace",
-  description: "A premium retro-voxel Minecraft skin editor powered by Gemini AI and Turso database.",
+  title: "MCSkinEngine — Minecraft Skin Workspace",
+  description: "Design, paint, and AI-generate Minecraft skins with a retro-voxel 3D editor. Powered by Gemini AI and real-time Turso sync.",
+  keywords: ["Minecraft skin editor", "Minecraft skin generator", "AI skin", "Gemini AI", "voxel editor", "3D skin preview"],
+  robots: { index: true, follow: true },
+  openGraph: {
+    title: "MCSkinEngine — Minecraft Skin Workspace",
+    description: "Design, paint, and AI-generate Minecraft skins with a retro-voxel 3D editor.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "MCSkinEngine — Minecraft Skin Workspace",
+    description: "Design, paint, and AI-generate Minecraft skins with a retro-voxel 3D editor.",
+  },
 };
 
 export default function RootLayout({
