@@ -35,6 +35,16 @@ function skinArrayToCanvas(arr: Uint8Array): HTMLCanvasElement {
 }
 
 
+interface SkinViewerInstance {
+  skinCanvas: HTMLCanvasElement;
+  skinTexture: { minFilter: number; magFilter: number; needsUpdate: boolean };
+  background: null | string | number;
+  autoRotate: boolean;
+  autoRotateSpeed: number;
+  animations: { add: (cls: unknown) => void };
+  loadSkin: (url: string, model: "slim" | "classic") => void;
+}
+
 export default function DashboardPage() {
   const { isSignedIn, user } = useUser();
   const {
@@ -55,7 +65,7 @@ export default function DashboardPage() {
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  const [viewer, setViewer] = useState<any>(null);
+  const [viewer, setViewer] = useState<SkinViewerInstance | null>(null);
 
   // Initialize data on sign-in
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -292,7 +302,7 @@ export default function DashboardPage() {
                         skinUrl=""
                         height={150}
                         width={110}
-                        onReady={(viewerInstance: any) => {
+                        onReady={(viewerInstance: SkinViewerInstance) => {
                           if (viewerInstance.skinTexture) {
                             viewerInstance.skinTexture.minFilter = 1003;
                             viewerInstance.skinTexture.magFilter = 1003;
