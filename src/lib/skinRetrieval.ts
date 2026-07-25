@@ -611,7 +611,7 @@ export function extractPromptAttributes(prompt: string): PromptAttributes {
   // Translate color-name buckets into the clothing_hue_category values
   // actually stored in the DB (black/white/gray have no hue, so they map
   // to "neutral" instead of being dropped from matching entirely).
-  const hueBuckets = [...new Set(colors.map((c) => COLOR_TO_HUE_BUCKET[c]).filter((v): v is string => !!v))];
+  const hueBuckets = Array.from(new Set(colors.map((c) => COLOR_TO_HUE_BUCKET[c]).filter((v): v is string => !!v)));
 
   // Extract gender
   let gender: string | null = null;
@@ -726,10 +726,10 @@ export function extractPromptAttributes(prompt: string): PromptAttributes {
   
   // Add style preferences
   if (matchedHairStyles.length > 0) {
-    explicitParams.preferredHairStyles = [...new Set(matchedHairStyles)];
+    explicitParams.preferredHairStyles = Array.from(new Set(matchedHairStyles));
   }
   if (matchedEyeStyles.length > 0) {
-    explicitParams.preferredEyeStyles = [...new Set(matchedEyeStyles)];
+    explicitParams.preferredEyeStyles = Array.from(new Set(matchedEyeStyles));
   }
   if (matchedVibe) {
     explicitParams.styleVibe = matchedVibe;
@@ -833,7 +833,7 @@ async function fetchCandidatePool(attributes: PromptAttributes): Promise<SkinRef
     for (const row of fallback.rows as unknown as SkinReference[]) rowsById.set(row.id, row);
   }
 
-  return [...rowsById.values()];
+  return Array.from(rowsById.values());
 }
 
 /** Higher is a better match for the extracted prompt attributes. */
