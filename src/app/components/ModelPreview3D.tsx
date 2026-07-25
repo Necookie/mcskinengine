@@ -87,7 +87,7 @@ export default function ModelPreview3D() {
     if (viewer && skinArray) {
       viewer.loadSkin(skinArrayToCanvas(skinArray).toDataURL(), modelType === "alex" ? "slim" : "classic");
     }
-  }, [viewer, modelType]);
+  }, [viewer, modelType, skinArray]);
 
   // Synchronize autoRotate dynamically on the viewer instance
   useEffect(() => {
