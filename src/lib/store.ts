@@ -157,7 +157,7 @@ export const useSkinStore = create<SkinState>((set, get) => ({
       }
     }
 
-    set({ skinArray: newArray });
+    set({ skinArray: newArray, skinBase64: skinToBase64(newArray) });
   },
 
   setRole: (role) => set({ role }),
