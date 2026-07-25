@@ -190,18 +190,18 @@ export function LandingPage() {
               aria-label="Sign in to launch your Minecraft skin workspace"
               style={launchBtnStyle}
               onMouseEnter={e => {
-                (e.target as HTMLButtonElement).style.filter = "brightness(0.85)";
+                (e.currentTarget as HTMLButtonElement).style.filter = "brightness(0.85)";
               }}
               onMouseLeave={e => {
-                (e.target as HTMLButtonElement).style.filter = "brightness(1)";
+                (e.currentTarget as HTMLButtonElement).style.filter = "brightness(1)";
               }}
               onMouseDown={e => {
-                (e.target as HTMLButtonElement).style.transform = "translateY(0)";
-                (e.target as HTMLButtonElement).style.boxShadow = "0 0 0 0 #000000";
+                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 0 0 #000000";
               }}
               onMouseUp={e => {
-                (e.target as HTMLButtonElement).style.transform = "translateY(-4px)";
-                (e.target as HTMLButtonElement).style.boxShadow = "0 4px 0 0 #000000";
+                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-4px)";
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 0 0 #000000";
               }}
             >
               Launch Workspace
