@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
       });
     } else {
       const setClauses: string[] = [];
-      const args: unknown[] = [];
+      const args: string[] = [];
       for (const [col, val] of Object.entries(updates)) {
         setClauses.push(`${col} = ?`);
         args.push(val);
