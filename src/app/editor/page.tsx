@@ -199,8 +199,8 @@ export default function WorkspacePage() {
       const usageStr = data.usage ? `${data.usage.promptTokenCount} in, ${data.usage.candidatesTokenCount} out` : "unknown";
       setSuccessMsg(`Skin generated! Cost: ${costStr} (${usageStr} tokens)`);
       fetchLogs();
-    } catch (err: any) {
-      setErrorMsg(err.message || "An error occurred during generation");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "An error occurred during generation");
     } finally {
       setIsGenerating(false);
     }

@@ -133,8 +133,8 @@ export default function AiStudioPage() {
       }
 
       setSuccessMsg(`Skin generated successfully!`);
-    } catch (err: any) {
-      setErrorMsg(err.message || "An error occurred during generation");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "An error occurred during generation");
     } finally {
       setIsGenerating(false);
     }
