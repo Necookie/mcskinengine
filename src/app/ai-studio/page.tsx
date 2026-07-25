@@ -60,6 +60,9 @@ export default function AiStudioPage() {
       fetchSkin();
       fetchSettings();
     }
+  // Intentionally run once on sign-in status change;
+  // fetchSkin/fetchSettings are stable Zustand store refs that never change identity.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn]);
 
   // Initialize Setup Guide state depending on keys

@@ -142,6 +142,9 @@ export default function WorkspacePage() {
       }, 5000);
       return () => clearInterval(interval);
     }
+  // Intentionally run once on sign-in status change;
+  // fetchSkin/fetchSettings/fetchLogs are stable Zustand store refs that never change identity.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn]);
 
   const handleGenerateSkin = async () => {
