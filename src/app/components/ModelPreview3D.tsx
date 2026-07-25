@@ -49,6 +49,7 @@ export default function ModelPreview3D() {
   const [autoRotate, setAutoRotate] = useState(true);
   const [animationName, setAnimationName] = useState<"walk" | "run" | "idle" | "static">("walk");
   const [viewer, setViewer] = useState<SkinViewer3DInstance | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Synchronize skinArray changes (Undo/Redo/Drawing strokes) to the 3D viewer texture live
@@ -116,7 +117,9 @@ export default function ModelPreview3D() {
       const img = new Image();
       img.onload = () => {
         if (img.width !== 64 || img.height !== 64) {
-          alert("Error: Minecraft skins must be exactly 64x64 pixels.");
+          setUploadError("Skin must be exactly 64×64 pixels.");
+          setTimeout(() => setUploadError(null), 3000);
+          console.error("[Upload] Invalid skin dimensions: must be 64x64 pixels.");
           return;
         }
         const tempCanvas = document.createElement("canvas");
@@ -220,6 +223,13 @@ export default function ModelPreview3D() {
           style={{ display: "none" }}
         />
       </div>
+
+      {/* Upload error feedback */}
+      {uploadError && (
+        <div style={{ marginTop: "6px", fontSize: "10px", color: "#c53030", fontFamily: "var(--font-mono)", textAlign: "center", padding: "4px 8px", border: "1px solid #fca5a5", backgroundColor: "#fce8e6" }}>
+          {uploadError}
+        </div>
+      )}
     </div>
   );
 }
