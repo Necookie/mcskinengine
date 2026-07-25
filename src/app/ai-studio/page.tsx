@@ -3,13 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { useUser, SignOutButton } from "@clerk/nextjs";
 import { useSkinStore } from "@/lib/store";
-import { motion } from "framer-motion";
 import { LandingPage, LoadingScreen } from "../components/LandingPage";
 import ImageDropzone from "../components/ImageDropzone";
 import dynamic from "next/dynamic";
 import { 
-  Sparkles, Settings, LogOut, Maximize, User, Key, Cpu,
-  Paintbrush, Download, AlertTriangle, CheckCircle, ArrowRight, Home
+  Sparkles, LogOut, Maximize,
+  Paintbrush, Download, AlertTriangle, CheckCircle, Home
 } from "lucide-react";
 
 // Dynamically import SkinViewer since it depends on browser canvas APIs (WebGL, ThreeJS)
@@ -21,7 +20,6 @@ const ReactSkinview3d = dynamic(
 export default function AiStudioPage() {
   const { isSignedIn, user } = useUser();
   const {
-    skinBase64,
     geminiPrompt,
     hasGeminiKey,
     hasOpenaiKey,
