@@ -274,6 +274,11 @@ User description: ${prompt}`;
     }
     if (apparel.shoes && !HEX_COLOR_RE.test(apparel.shoes)) apparel.shoes = undefined;
 
+    // Validate and sanitize skin/hair/eye colors with safe fallbacks
+    if (!HEX_COLOR_RE.test(apparel.skinColor)) apparel.skinColor = "#f3d0bc";
+    if (!HEX_COLOR_RE.test(apparel.hairColor)) apparel.hairColor = "#1c1c1d";
+    if (!HEX_COLOR_RE.test(apparel.eyeColor)) apparel.eyeColor = "#1c1c1d";
+
     // OpenAI has no schema enforcement, so fall back to safe defaults for any invalid enum value.
     if (!HAIR_STYLE_KEYS.includes(apparel.hairStyle)) apparel.hairStyle = "messy-fringe";
     if (!EYE_STYLE_KEYS.includes(apparel.eyeStyle)) apparel.eyeStyle = "cool-highlight";
