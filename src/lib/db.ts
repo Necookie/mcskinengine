@@ -104,7 +104,5 @@ export async function initializeDatabase() {
   }
 }
 
-// Automatically trigger database initialization on module import to ensure tables are always created
-initializeDatabase().catch((err) => {
-  console.error("Auto DB initialization failed:", err);
-});
+// initializeDatabase() is exported for explicit invocation during migrations or server startup.
+// Do NOT call it here at module level — this file is imported on every edge request.
