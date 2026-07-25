@@ -55,7 +55,7 @@ export default function WorkspacePage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [geminiKeyInput, setGeminiKeyInput] = useState("");
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
-  const [selectedModel, setSelectedModel] = useState("gemini-3.5-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
   const [enhancedPrompt, setEnhancedPrompt] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");

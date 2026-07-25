@@ -44,7 +44,7 @@ export default function AiStudioPage() {
   } = useSkinStore();
 
   const [refImage, setRefImage] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState("gemini-3.5-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
   const [enhancedPrompt, setEnhancedPrompt] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
