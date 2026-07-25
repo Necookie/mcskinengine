@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     }
 
     const selectedProvider = provider || "gemini";
-    const selectedModel = model || "gemini-1.5-flash";
+    const selectedModel = model || "gemini-2.5-flash";
 
     const settingsResult = await db.execute({
       sql: "SELECT gemini_key, openai_key FROM user_settings WHERE user_id = ? LIMIT 1",
