@@ -65,7 +65,7 @@ export default function DashboardPage() {
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  const [viewer, setViewer] = useState<SkinViewerInstance | null>(null);
+  const [viewer, setViewer] = useState<any>(null);
 
   // Initialize data on sign-in
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -302,7 +302,7 @@ export default function DashboardPage() {
                         skinUrl=""
                         height={150}
                         width={110}
-                        onReady={(viewerInstance: SkinViewerInstance) => {
+                        onReady={(viewerInstance: any) => {
                           if (viewerInstance.skinTexture) {
                             viewerInstance.skinTexture.minFilter = 1003;
                             viewerInstance.skinTexture.magFilter = 1003;
