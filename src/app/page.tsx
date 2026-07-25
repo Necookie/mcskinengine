@@ -7,8 +7,8 @@ import { motion } from "framer-motion";
 import { LandingPage, LoadingScreen } from "./components/LandingPage";
 import dynamic from "next/dynamic";
 import { 
-  Sparkles, Settings, LogOut, Maximize, User, Key, Cpu,
-  Paintbrush, Download, ShieldCheck, Database, AlertTriangle, CheckCircle, ArrowRight, Home
+  Sparkles, Settings, LogOut, Maximize, Key,
+  Paintbrush, Download, AlertTriangle, CheckCircle, ArrowRight, Home
 } from "lucide-react";
 
 // Dynamically import SkinViewer since it depends on browser canvas APIs (WebGL, ThreeJS)
