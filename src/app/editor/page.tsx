@@ -17,7 +17,6 @@ import {
 export default function WorkspacePage() {
   const { isSignedIn, user } = useUser();
   const {
-    skinBase64,
     geminiPrompt,
     hasGeminiKey,
     hasOpenaiKey,
@@ -30,7 +29,6 @@ export default function WorkspacePage() {
     setIsGenerating,
     setSkinArray,
     setRole,
-    setEthnicity,
     setModelType,
     fetchSkin,
     fetchLogs,
