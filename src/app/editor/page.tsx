@@ -286,19 +286,17 @@ export default function WorkspacePage() {
           <div className="header-divider" />
 
           {/* User Display & Logout */}
-          <div className="header-actions">
-            <span className="header-badge-user">
-              User: {user?.username || user?.firstName || "Steve"}
-            </span>
-            <SignOutButton>
-              <button
-                className="voxel-btn"
-                style={{ padding: "6px 10px", backgroundColor: "#f4f4f5", color: "#555558", borderRadius: "6px", borderWidth: "1px" }}
-              >
-                <LogOut size={12} strokeWidth={2} />
-              </button>
-            </SignOutButton>
-          </div>
+          <span className="header-badge-user">
+            User: {user?.username || user?.firstName || "Steve"}
+          </span>
+          <SignOutButton>
+            <button
+              className="voxel-btn"
+              style={{ padding: "6px 10px", backgroundColor: "#f4f4f5", color: "#555558", borderRadius: "6px", borderWidth: "1px" }}
+            >
+              <LogOut size={12} strokeWidth={2} />
+            </button>
+          </SignOutButton>
         </div>
       </header>
 
