@@ -21,6 +21,17 @@ interface GeminiContent {
   parts: GeminiPart[];
 }
 
+interface OpenAIMessageContent {
+  type: "text" | "image_url";
+  text?: string;
+  image_url?: { url: string };
+}
+
+interface OpenAIMessage {
+  role: "user" | "assistant" | "system";
+  content: OpenAIMessageContent[];
+}
+
 interface ApparelResult {
   stencilKey: string;
   primary: string;
@@ -140,7 +151,7 @@ User description: ${prompt}`;
     let outputTokens = 0;
 
     if (selectedProvider === "openai") {
-      const messages: any[] = [
+      const messages: OpenAIMessage[] = [
         {
           role: "user",
           content: [
