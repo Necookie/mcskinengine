@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useSkinStore } from "@/lib/store";
 import { PALETTE_PRESETS } from "@/lib/palettePresets";
+import { Paintbrush, Eraser, Pipette } from "lucide-react";
 
 export default function PixelEditor2D() {
   const {
@@ -181,6 +182,49 @@ export default function PixelEditor2D() {
 
   return (
     <div className="canvas-workspace-wrapper">
+      {/* 2D EDITOR TOOLBAR */}
+      <div className="canvas-header-toolbar">
+        <div className="tool-selector-group" role="radiogroup" aria-label="Editor tool">
+          <button
+            onClick={() => setActiveTool("brush")}
+            className={`voxel-tool-btn ${activeTool === "brush" ? "active" : ""}`}
+            role="radio"
+            aria-checked={activeTool === "brush"}
+            title="Brush Tool (B)"
+          >
+            <Paintbrush size={13} />
+            <span>Brush (B)</span>
+          </button>
+          <button
+            onClick={() => setActiveTool("eraser")}
+            className={`voxel-tool-btn ${activeTool === "eraser" ? "active" : ""}`}
+            role="radio"
+            aria-checked={activeTool === "eraser"}
+            title="Eraser Tool (E)"
+          >
+            <Eraser size={13} />
+            <span>Eraser (E)</span>
+          </button>
+          <button
+            onClick={() => setActiveTool("eyedropper")}
+            className={`voxel-tool-btn ${activeTool === "eyedropper" ? "active" : ""}`}
+            role="radio"
+            aria-checked={activeTool === "eyedropper"}
+            title="Color Dropper (I)"
+          >
+            <Pipette size={13} />
+            <span>Dropper (I)</span>
+          </button>
+        </div>
+
+        <div className="active-tool-badge">
+          <span className="text-grid-tag" style={{ color: "#555558" }}>MODE:</span>
+          <span className="text-grid-tag" style={{ color: "var(--color-primary)", fontWeight: 700 }}>
+            {activeTool.toUpperCase()}
+          </span>
+        </div>
+      </div>
+
       {/* 2D CANVAS CONTAINER */}
       <div className="canvas-board-outer">
         {/* Canvas Wrap for zoom scaling */}
