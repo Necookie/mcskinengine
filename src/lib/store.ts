@@ -34,7 +34,7 @@ interface SkinState {
   undoStack: Uint8Array[];
   redoStack: Uint8Array[];
 
-  activeTool: "brush" | "eraser";
+  activeTool: "brush" | "eraser" | "eyedropper";
   showGuides: boolean;
   zoom2D: number;
   activePalettePreset: string;
@@ -57,7 +57,7 @@ interface SkinState {
   undo: () => void;
   redo: () => void;
 
-  setActiveTool: (tool: "brush" | "eraser") => void;
+  setActiveTool: (tool: "brush" | "eraser" | "eyedropper") => void;
   setShowGuides: (val: boolean) => void;
   setZoom2D: (val: number) => void;
 
