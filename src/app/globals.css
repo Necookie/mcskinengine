@@ -874,6 +874,43 @@ textarea {
   color: var(--color-canvas);
 }
 
+.palette-preset-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.palette-preset-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  background-color: var(--color-canvas);
+  color: #555558;
+  border: 1px solid rgba(24, 24, 27, 0.15);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: transform 0.08s ease, background-color 0.12s ease;
+}
+
+.palette-preset-pill:hover {
+  background-color: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+
+.palette-preset-pill:active {
+  transform: translateY(2px);
+}
+
+.palette-preset-pill.active {
+  background-color: var(--color-primary);
+  color: var(--color-canvas);
+  border-color: var(--color-primary);
+}
+
 .color-presets-grid {
   display: flex;
   flex-wrap: wrap;
@@ -885,14 +922,25 @@ textarea {
 .color-preset-swatch {
   width: 24px;
   height: 24px;
-  border: 1px solid rgba(24, 24, 27, 0.15);
+  border: 1px solid rgba(24, 24, 27, 0.2);
   cursor: pointer;
   position: relative;
-  border-radius: 4px;
+  border-radius: 0px;
+  transition: transform 0.08s ease, box-shadow 0.1s ease;
+}
+
+.color-preset-swatch:hover {
+  outline: 1px solid var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.color-preset-swatch:active {
+  transform: translateY(2px);
 }
 
 .color-preset-swatch.active {
-  transform: scale(1.1);
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
   box-shadow: 0 0 0 2px var(--color-accent-ai);
   z-index: 10;
 }
@@ -901,13 +949,18 @@ textarea {
   position: relative;
   width: 24px;
   height: 24px;
-  border: 1px solid rgba(24, 24, 27, 0.15);
+  border: 1px solid rgba(24, 24, 27, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: var(--color-surface-soft);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 0px;
+  transition: transform 0.08s ease;
+}
+
+.custom-color-picker-wrap:active {
+  transform: translateY(2px);
 }
 
 .custom-color-picker-input {
