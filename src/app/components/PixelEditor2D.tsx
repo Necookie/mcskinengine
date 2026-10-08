@@ -181,6 +181,15 @@ export default function PixelEditor2D() {
     return "BLANK TEXTURE FIELD";
   }, [modelType]);
 
+  const getHoveredPixelHex = useCallback(() => {
+    if (!hoverCoords) return null;
+    const idx = (hoverCoords.y * 64 + hoverCoords.x) * 4;
+    const a = skinArray[idx + 3];
+    if (a === 0) return "TRANSPARENT";
+    const toHex = (n: number) => n.toString(16).padStart(2, "0").toUpperCase();
+    return `#${toHex(skinArray[idx])}${toHex(skinArray[idx + 1])}${toHex(skinArray[idx + 2])}`;
+  }, [hoverCoords, skinArray]);
+
   return (
     <div className="canvas-workspace-wrapper">
       {/* 2D EDITOR TOOLBAR */}
@@ -293,11 +302,29 @@ export default function PixelEditor2D() {
         {/* Brush Size Selector & Coordinates */}
         <div className="controls-row-top">
           {/* Coordinates overlay */}
+          {/* Coordinates & Pixel Inspector overlay */}
           <div className="controls-coords">
             {hoverCoords ? (
-              <span>X:{hoverCoords.x.toString().padStart(2, "0")} Y:{hoverCoords.y.toString().padStart(2, "0")} | {getRegionLabel(hoverCoords.x, hoverCoords.y).split(" (")[0]}</span>
+              <div className="hud-coord-indicator">
+                <span className="hud-coord-item">
+                  X:<strong>{hoverCoords.x.toString().padStart(2, "0")}</strong> Y:<strong>{hoverCoords.y.toString().padStart(2, "0")}</strong>
+                </span>
+                <span className="hud-divider">|</span>
+                <span className="hud-region">{getRegionLabel(hoverCoords.x, hoverCoords.y).split(" (")[0]}</span>
+                <span className="hud-divider">|</span>
+                <span className="hud-hex-preview">
+                  {getHoveredPixelHex() === "TRANSPARENT" ? (
+                    <span className="hud-transparent-tag">EMPTY</span>
+                  ) : (
+                    <span className="hud-color-chip">
+                      <span className="hud-color-dot" style={{ backgroundColor: getHoveredPixelHex() || "transparent" }} />
+                      <span>{getHoveredPixelHex()}</span>
+                    </span>
+                  )}
+                </span>
+              </div>
             ) : (
-              <span>GRID: 64x64</span>
+              <span>GRID: 64×64 VOXEL UV</span>
             )}
           </div>
 
