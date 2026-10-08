@@ -303,18 +303,36 @@ export default function PixelEditor2D() {
           <div className="brush-size-selector" role="radiogroup" aria-label="Brush size">
             <span className="brush-size-label">Size:</span>
             <div className="brush-size-btn-group">
-              {[1, 2, 3].map((size) => (
+              <button
+                type="button"
+                onClick={() => setBrushSize(Math.max(1, brushSize - 1))}
+                className="brush-size-btn"
+                title="Decrease brush size"
+                aria-label="Decrease brush size"
+              >
+                -
+              </button>
+              {[1, 2, 3, 4].map((size) => (
                 <button
                   key={size}
                   onClick={() => setBrushSize(size)}
                   className={`brush-size-btn ${brushSize === size ? "active" : ""}`}
                   role="radio"
                   aria-checked={brushSize === size}
-                  aria-label={`Brush size ${size}x`}
+                  aria-label={`Brush size ${size}px`}
                 >
-                  {size}x
+                  {size}p
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={() => setBrushSize(Math.min(4, brushSize + 1))}
+                className="brush-size-btn"
+                title="Increase brush size"
+                aria-label="Increase brush size"
+              >
+                +
+              </button>
             </div>
           </div>
         </div>
