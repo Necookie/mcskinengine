@@ -2,12 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useSkinStore } from "@/lib/store";
-
-const PALETTE = [
-  "#1c1c1d", "#ffffff", "#ff2a85", "#b3d7df", "#ebd3be",
-  "#f1e4d3", "#d2ebd9", "#704732", "#f3d0bc", "#e02424",
-  "#eab308", "#22c55e", "#3b82f6", "#a855f7"
-] as const;
+import { PALETTE_PRESETS } from "@/lib/palettePresets";
 
 export default function PixelEditor2D() {
   const {
@@ -23,7 +18,10 @@ export default function PixelEditor2D() {
     setActiveTool,
     showGuides,
     zoom2D,
-    pushUndo
+    pushUndo,
+    activePalettePreset,
+    setActivePalettePreset,
+    addColorHistory
   } = useSkinStore();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -258,21 +256,37 @@ export default function PixelEditor2D() {
           </div>
         </div>
 
-        {/* Color Palette Presets */}
+        {/* Color Palette Presets Selection Tabs */}
+        <div className="palette-preset-selector" role="tablist" aria-label="Palette presets">
+          {PALETTE_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              onClick={() => setActivePalettePreset(preset.id)}
+              className={`palette-preset-pill ${activePalettePreset === preset.id ? "active" : ""}`}
+              role="tab"
+              aria-selected={activePalettePreset === preset.id}
+            >
+              {preset.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Color Palette Presets Grid */}
         <div className="color-presets-grid" role="listbox" aria-label="Color palette">
-          {PALETTE.map((color) => (
+          {(PALETTE_PRESETS.find((p) => p.id === activePalettePreset)?.colors || PALETTE_PRESETS[0].colors).map((color) => (
             <button
               key={color}
               onClick={() => {
                 setSelectedColor(color);
+                addColorHistory(color);
                 setActiveTool("brush");
               }}
               className={`color-preset-swatch ${
-                selectedColor === color && activeTool === "brush" ? "active" : ""
+                selectedColor.toLowerCase() === color.toLowerCase() && activeTool === "brush" ? "active" : ""
               }`}
               style={{ backgroundColor: color }}
               role="option"
-              aria-selected={selectedColor === color && activeTool === "brush"}
+              aria-selected={selectedColor.toLowerCase() === color.toLowerCase() && activeTool === "brush"}
               aria-label={`Color ${color}`}
             />
           ))}
@@ -282,6 +296,7 @@ export default function PixelEditor2D() {
               value={selectedColor}
               onChange={(e) => {
                 setSelectedColor(e.target.value);
+                addColorHistory(e.target.value);
                 setActiveTool("brush");
               }}
               className="custom-color-picker-input"
