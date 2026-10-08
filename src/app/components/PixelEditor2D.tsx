@@ -72,8 +72,10 @@ export default function PixelEditor2D() {
     setIsDrawing(true);
     const coords = getCanvasCoords(e.clientX, e.clientY);
     if (coords) {
-      pushUndo(skinArray);
-      lastUndoPos.current = coords;
+      if (activeTool !== "eyedropper") {
+        pushUndo(skinArray);
+        lastUndoPos.current = coords;
+      }
       applyPaint(coords.x, coords.y);
     }
   };
@@ -86,7 +88,7 @@ export default function PixelEditor2D() {
         lastHoverCoords.current = coords;
         setHoverCoords(coords);
       }
-      if (isDrawing) {
+      if (isDrawing && activeTool !== "eyedropper") {
         applyPaint(coords.x, coords.y);
       }
     } else {
@@ -109,8 +111,10 @@ export default function PixelEditor2D() {
     setIsDrawing(true);
     const coords = getCanvasCoords(touch.clientX, touch.clientY);
     if (coords) {
-      pushUndo(skinArray);
-      lastUndoPos.current = coords;
+      if (activeTool !== "eyedropper") {
+        pushUndo(skinArray);
+        lastUndoPos.current = coords;
+      }
       applyPaint(coords.x, coords.y);
     }
   };
@@ -120,7 +124,7 @@ export default function PixelEditor2D() {
     const touch = e.touches[0];
     if (!touch) return;
     const coords = getCanvasCoords(touch.clientX, touch.clientY);
-    if (coords && isDrawing) {
+    if (coords && isDrawing && activeTool !== "eyedropper") {
       applyPaint(coords.x, coords.y);
     }
   };
@@ -131,12 +135,27 @@ export default function PixelEditor2D() {
   };
 
   const applyPaint = useCallback((x: number, y: number) => {
+    if (activeTool === "eyedropper") {
+      const idx = (y * 64 + x) * 4;
+      const r = skinArray[idx];
+      const g = skinArray[idx + 1];
+      const b = skinArray[idx + 2];
+      const a = skinArray[idx + 3];
+      if (a > 0) {
+        const toHex = (n: number) => n.toString(16).padStart(2, "0");
+        const hex = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        setSelectedColor(hex);
+        addColorHistory(hex);
+        setActiveTool("brush");
+      }
+      return;
+    }
     if (activeTool === "brush") {
       setPixel(x, y, selectedColor, 255);
     } else {
       setPixel(x, y, "#000000", 0);
     }
-  }, [activeTool, selectedColor, setPixel]);
+  }, [activeTool, selectedColor, skinArray, setPixel, setSelectedColor, addColorHistory, setActiveTool]);
 
   const getRegionLabel = useCallback((x: number, y: number) => {
     const isAlex = modelType === "alex";
