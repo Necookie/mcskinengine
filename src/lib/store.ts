@@ -37,6 +37,8 @@ interface SkinState {
   activeTool: "brush" | "eraser";
   showGuides: boolean;
   zoom2D: number;
+  activePalettePreset: string;
+  colorHistory: string[];
 
   setSkinArray: (arr: Uint8Array) => void;
   setPixel: (x: number, y: number, colorHex: string, alpha: number) => void;
@@ -48,6 +50,8 @@ interface SkinState {
   setGeminiPrompt: (prompt: string) => void;
   setIsGenerating: (val: boolean) => void;
   setMcpLogs: (logs: LogEntry[]) => void;
+  setActivePalettePreset: (presetId: string) => void;
+  addColorHistory: (color: string) => void;
 
   pushUndo: (arr: Uint8Array) => void;
   undo: () => void;
@@ -85,10 +89,18 @@ export const useSkinStore = create<SkinState>((set, get) => ({
   activeTool: "brush",
   showGuides: true,
   zoom2D: 1,
+  activePalettePreset: "voxel",
+  colorHistory: ["#1c1c1d", "#ffffff", "#ff2a85", "#b3d7df", "#ebd3be"],
 
   setActiveTool: (activeTool) => set({ activeTool }),
   setShowGuides: (showGuides) => set({ showGuides }),
   setZoom2D: (zoom2D) => set({ zoom2D }),
+  setActivePalettePreset: (activePalettePreset) => set({ activePalettePreset }),
+  addColorHistory: (color) => {
+    const { colorHistory } = get();
+    const filtered = colorHistory.filter((c) => c.toLowerCase() !== color.toLowerCase());
+    set({ colorHistory: [color, ...filtered].slice(0, 8) });
+  },
 
   pushUndo: (arr) => {
     const { undoStack } = get();
