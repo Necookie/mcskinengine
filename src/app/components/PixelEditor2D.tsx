@@ -19,6 +19,7 @@ export default function PixelEditor2D() {
     setActiveTool,
     showGuides,
     zoom2D,
+    setZoom2D,
     pushUndo,
     activePalettePreset,
     setActivePalettePreset,
@@ -333,6 +334,25 @@ export default function PixelEditor2D() {
               >
                 +
               </button>
+            </div>
+          </div>
+
+          <div className="brush-size-selector" role="radiogroup" aria-label="Canvas zoom">
+            <span className="brush-size-label">Zoom:</span>
+            <div className="brush-size-btn-group">
+              {[1, 1.5, 2].map((z) => (
+                <button
+                  key={z}
+                  type="button"
+                  onClick={() => setZoom2D(z)}
+                  className={`brush-size-btn ${zoom2D === z ? "active" : ""}`}
+                  role="radio"
+                  aria-checked={zoom2D === z}
+                  aria-label={`Zoom ${Math.round(z * 100)}%`}
+                >
+                  {Math.round(z * 100)}%
+                </button>
+              ))}
             </div>
           </div>
         </div>
