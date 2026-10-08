@@ -823,6 +823,59 @@ textarea {
   color: #555558;
   text-transform: uppercase;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+.hud-coord-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-coord-item strong {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.hud-divider {
+  color: rgba(24, 24, 27, 0.2);
+}
+
+.hud-region {
+  color: var(--color-primary);
+  letter-spacing: 0.2px;
+}
+
+.hud-hex-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hud-color-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--color-surface-soft);
+  padding: 1px 4px;
+  border-radius: 2px;
+  border: 1px solid rgba(24, 24, 27, 0.12);
+}
+
+.hud-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 0px;
+  border: 1px solid rgba(24, 24, 27, 0.3);
+  display: inline-block;
+}
+
+.hud-transparent-tag {
+  color: #8a8a93;
+  font-size: 9px;
+  padding: 1px 3px;
+  border: 1px dashed rgba(24, 24, 27, 0.2);
 }
 
 .brush-size-selector {
