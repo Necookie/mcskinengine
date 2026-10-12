@@ -1245,7 +1245,44 @@ textarea {
   background-color: var(--color-canvas);
   color: var(--color-primary);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 2px;
+  transition: transform 0.08s ease;
+}
+
+.preview-3d-rotate-btn:active {
+  transform: translateY(2px);
+}
+
+.preview-3d-camera-snaps {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  gap: 3px;
+  z-index: 10;
+}
+
+.preview-camera-snap-btn {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 5px;
+  border: 1px solid rgba(24, 24, 27, 0.15);
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  color: var(--color-primary);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: transform 0.08s ease, background-color 0.12s ease;
+}
+
+.preview-camera-snap-btn:hover {
+  background-color: var(--color-surface-soft);
+}
+
+.preview-camera-snap-btn:active {
+  transform: translateY(2px);
 }
 
 .pose-selector-section {

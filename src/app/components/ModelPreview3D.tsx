@@ -211,6 +211,42 @@ export default function ModelPreview3D() {
           <div className="text-grid-tag" style={{ color: "var(--color-primary)" }}>Init 3D Scene...</div>
         )}
 
+        {/* Camera Snap Buttons Overlay */}
+        <div className="preview-3d-camera-snaps">
+          <button
+            type="button"
+            onClick={() => setCameraAngle("front")}
+            className="preview-camera-snap-btn"
+            title="Front View"
+          >
+            FRONT
+          </button>
+          <button
+            type="button"
+            onClick={() => setCameraAngle("back")}
+            className="preview-camera-snap-btn"
+            title="Back View"
+          >
+            BACK
+          </button>
+          <button
+            type="button"
+            onClick={() => setCameraAngle("iso")}
+            className="preview-camera-snap-btn"
+            title="Isometric View"
+          >
+            ISO
+          </button>
+          <button
+            type="button"
+            onClick={() => setCameraAngle("top")}
+            className="preview-camera-snap-btn"
+            title="Top View"
+          >
+            TOP
+          </button>
+        </div>
+
         {/* Overlay controls on top of 3D preview */}
         <button
           onClick={() => setAutoRotate(!autoRotate)}
