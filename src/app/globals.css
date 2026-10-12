@@ -1255,36 +1255,53 @@ textarea {
   width: 100%;
 }
 
+.pose-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
 .pose-selector-label {
   font-family: var(--font-mono);
   font-size: 9px;
   color: #555558;
   text-transform: uppercase;
-  padding: 0 2px;
+}
+
+.pose-active-indicator {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.5px;
 }
 
 .pose-buttons-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
 }
 
 .pose-btn {
-  padding: 6px 0;
+  padding: 5px 0;
   font-family: var(--font-mono);
   font-size: 9px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   border: 1px solid rgba(24, 24, 27, 0.15);
   background-color: var(--color-canvas);
   color: var(--color-primary);
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.1s ease;
+  border-radius: 2px;
+  transition: transform 0.08s ease, background-color 0.12s ease;
 }
 .pose-btn:hover {
   background-color: var(--color-surface-soft);
   border-color: var(--color-primary);
+}
+.pose-btn:active {
+  transform: translateY(2px);
 }
 .pose-btn.active {
   background-color: var(--color-primary);

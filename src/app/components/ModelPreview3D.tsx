@@ -206,9 +206,12 @@ export default function ModelPreview3D() {
 
       {/* Animation Selector */}
       <div className="pose-selector-section">
-        <span className="pose-selector-label">Preview Pose</span>
+        <div className="pose-selector-header">
+          <span className="pose-selector-label">Model Pose</span>
+          <span className="pose-active-indicator">{animationName.toUpperCase()}</span>
+        </div>
         <div className="pose-buttons-grid">
-          {(["walk", "run", "idle", "static"] as const).map((anim) => (
+          {(["walk", "run", "idle", "wave", "crouch", "static"] as const).map((anim) => (
             <button
               key={anim}
               onClick={() => setAnimationName(anim)}
