@@ -128,6 +128,23 @@ export default function ModelPreview3D() {
     link.click();
   };
 
+  const setCameraAngle = (angle: "front" | "back" | "iso" | "top") => {
+    if (!viewer) return;
+    const v = viewer as any;
+    if (v.camera) {
+      if (angle === "front") {
+        v.camera.position.set(0, 0, 60);
+      } else if (angle === "back") {
+        v.camera.position.set(0, 0, -60);
+      } else if (angle === "iso") {
+        v.camera.position.set(35, 20, 50);
+      } else if (angle === "top") {
+        v.camera.position.set(0, 65, 0.01);
+      }
+      v.camera.lookAt(0, 0, 0);
+    }
+  };
+
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
