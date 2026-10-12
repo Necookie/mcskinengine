@@ -49,6 +49,7 @@ export default function ModelPreview3D() {
   const [autoRotate, setAutoRotate] = useState(true);
   const [animationName, setAnimationName] = useState<"walk" | "run" | "idle" | "wave" | "crouch" | "static">("walk");
   const [lightingMode, setLightingMode] = useState<"studio" | "flat">("studio");
+  const [showOuterLayers, setShowOuterLayers] = useState(true);
   const [viewer, setViewer] = useState<SkinViewer3DInstance | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -136,6 +137,20 @@ export default function ModelPreview3D() {
       }
     }
   }, [viewer, lightingMode]);
+
+  // Synchronize outer overlay layers (Minecraft 1.8 2nd skin layer)
+  useEffect(() => {
+    if (!viewer) return;
+    const player = (viewer as any).playerObject?.skin;
+    if (player) {
+      const parts = [player.head, player.torso, player.rightArm, player.leftArm, player.rightLeg, player.leftLeg];
+      parts.forEach((p) => {
+        if (p && p.outerLayer) {
+          p.outerLayer.visible = showOuterLayers;
+        }
+      });
+    }
+  }, [viewer, showOuterLayers]);
 
   const downloadSkin = () => {
     const link = document.createElement("a");
