@@ -1305,6 +1305,45 @@ textarea {
   transform: translateY(2px);
 }
 
+.preview-3d-layer-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+.preview-layer-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border: 1px solid rgba(24, 24, 27, 0.15);
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  color: var(--color-primary);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: transform 0.08s ease, background-color 0.12s ease;
+}
+
+.preview-layer-toggle-btn:hover {
+  background-color: var(--color-surface-soft);
+}
+
+.preview-layer-toggle-btn:active {
+  transform: translateY(2px);
+}
+
+.preview-layer-toggle-btn.active {
+  background-color: var(--color-primary);
+  color: var(--color-canvas);
+  border-color: var(--color-primary);
+}
+
 .pose-selector-section {
   display: flex;
   flex-direction: column;

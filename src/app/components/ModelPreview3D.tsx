@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSkinStore } from "@/lib/store";
 import dynamic from "next/dynamic";
-import { Play, Pause, Download, Upload, Sun, Lightbulb } from "lucide-react";
+import { Play, Pause, Download, Upload, Sun, Lightbulb, Layers } from "lucide-react";
 
 /**
  * Converts a flat RGBA Uint8Array into an off-screen 64×64 HTMLCanvasElement.
@@ -275,6 +275,19 @@ export default function ModelPreview3D() {
             title="Top View"
           >
             TOP
+          </button>
+        </div>
+
+        {/* Outer Layer Visibility Toggle */}
+        <div className="preview-3d-layer-toggle">
+          <button
+            type="button"
+            onClick={() => setShowOuterLayers(!showOuterLayers)}
+            className={`preview-layer-toggle-btn ${showOuterLayers ? "active" : ""}`}
+            title={`Toggle Minecraft Outer Layer: ${showOuterLayers ? "Showing" : "Hidden"}`}
+          >
+            <Layers size={10} />
+            <span>{showOuterLayers ? "2ND LAYER ON" : "BASE LAYER"}</span>
           </button>
         </div>
 
