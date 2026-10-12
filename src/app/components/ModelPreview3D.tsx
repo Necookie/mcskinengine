@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSkinStore } from "@/lib/store";
 import dynamic from "next/dynamic";
-import { Play, Pause, Download, Upload, Sun, Lightbulb, Layers, Camera } from "lucide-react";
+import { Play, Pause, Download, Upload, Sun, Lightbulb, Layers, Camera, Grid } from "lucide-react";
 
 /**
  * Converts a flat RGBA Uint8Array into an off-screen 64×64 HTMLCanvasElement.
@@ -341,6 +341,14 @@ export default function ModelPreview3D() {
             title="Toggle Auto Rotation"
           >
             {autoRotate ? <Pause size={12} /> : <Play size={12} />}
+          </button>
+          <button
+            type="button"
+            onClick={() => setWireframeMode(!wireframeMode)}
+            className={`preview-3d-action-btn ${wireframeMode ? "active" : ""}`}
+            title={`Wireframe Mode: ${wireframeMode ? "ON" : "OFF"}`}
+          >
+            <Grid size={12} />
           </button>
           <button
             type="button"
