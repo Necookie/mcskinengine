@@ -349,14 +349,25 @@ export default function ModelPreview3D() {
           onClick={downloadSkin}
           className="voxel-btn"
           style={{ padding: "6px 0", fontSize: "10px", justifyContent: "center", width: "100%" }}
+          title="Download 64×64 skin PNG file"
         >
           <Download size={13} />
-          <span>Download</span>
+          <span>Skin PNG</span>
+        </button>
+        <button
+          onClick={export3DSnapshot}
+          className="voxel-btn"
+          style={{ padding: "6px 0", fontSize: "10px", justifyContent: "center", width: "100%" }}
+          title="Export high-resolution 3D pose render"
+        >
+          <Camera size={13} />
+          <span>3D Render</span>
         </button>
         <button
           onClick={handleUploadClick}
           className="voxel-btn"
-          style={{ padding: "6px 0", fontSize: "10px", justifyContent: "center", width: "100%" }}
+          style={{ padding: "6px 0", fontSize: "10px", justifyContent: "center", width: "100%", gridColumn: "span 2" }}
+          title="Upload existing skin file"
         >
           <Upload size={13} />
           <span>Upload Skin</span>
