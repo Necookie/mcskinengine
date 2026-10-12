@@ -48,6 +48,7 @@ export default function ModelPreview3D() {
   const pushUndo = useSkinStore((s) => s.pushUndo);
   const [autoRotate, setAutoRotate] = useState(true);
   const [animationName, setAnimationName] = useState<"walk" | "run" | "idle" | "wave" | "crouch" | "static">("walk");
+  const [lightingMode, setLightingMode] = useState<"studio" | "flat">("studio");
   const [viewer, setViewer] = useState<SkinViewer3DInstance | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -120,6 +121,21 @@ export default function ModelPreview3D() {
       viewer.autoRotateSpeed = 0.8;
     }
   }, [viewer, autoRotate]);
+
+  // Synchronize lighting mode (studio vs flat pixel light)
+  useEffect(() => {
+    if (!viewer) return;
+    const v = viewer as any;
+    if (v.globalLight && v.cameraLight) {
+      if (lightingMode === "flat") {
+        v.globalLight.intensity = 3.2;
+        v.cameraLight.intensity = 0.0;
+      } else {
+        v.globalLight.intensity = 1.8;
+        v.cameraLight.intensity = 1.2;
+      }
+    }
+  }, [viewer, lightingMode]);
 
   const downloadSkin = () => {
     const link = document.createElement("a");
