@@ -51,6 +51,7 @@ export default function ModelPreview3D() {
   const [animationName, setAnimationName] = useState<"walk" | "run" | "idle" | "wave" | "crouch" | "static">("walk");
   const [lightingMode, setLightingMode] = useState<"studio" | "flat">("studio");
   const [showOuterLayers, setShowOuterLayers] = useState(true);
+  const [wireframeMode, setWireframeMode] = useState(false);
   const [viewer, setViewer] = useState<SkinViewer3DInstance | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -152,6 +153,25 @@ export default function ModelPreview3D() {
       });
     }
   }, [viewer, showOuterLayers]);
+
+  // Synchronize wireframe debug view
+  useEffect(() => {
+    if (!viewer) return;
+    const player = (viewer as any).playerObject?.skin;
+    if (player) {
+      const parts = [player.head, player.torso, player.rightArm, player.leftArm, player.rightLeg, player.leftLeg];
+      parts.forEach((p) => {
+        if (p) {
+          if (p.innerLayer?.material) {
+            p.innerLayer.material.wireframe = wireframeMode;
+          }
+          if (p.outerLayer?.material) {
+            p.outerLayer.material.wireframe = wireframeMode;
+          }
+        }
+      });
+    }
+  }, [viewer, wireframeMode]);
 
   const downloadSkin = () => {
     const link = document.createElement("a");
