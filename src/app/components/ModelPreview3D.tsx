@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSkinStore } from "@/lib/store";
 import dynamic from "next/dynamic";
-import { Play, Pause, Download, Upload, Sun, Lightbulb, Layers } from "lucide-react";
+import { Play, Pause, Download, Upload, Sun, Lightbulb, Layers, Camera } from "lucide-react";
 
 /**
  * Converts a flat RGBA Uint8Array into an off-screen 64×64 HTMLCanvasElement.
@@ -157,6 +157,19 @@ export default function ModelPreview3D() {
     link.download = `skin_${modelType}_${role}.png`;
     link.href = skinArrayToCanvas(skinArray).toDataURL("image/png");
     link.click();
+  };
+
+  const export3DSnapshot = () => {
+    if (!viewer) return;
+    const v = viewer as any;
+    if (v.renderer?.domElement) {
+      if (v.render) v.render();
+      const url = v.renderer.domElement.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.download = `render_${modelType}_${role}_${animationName}.png`;
+      link.href = url;
+      link.click();
+    }
   };
 
   const setCameraAngle = (angle: "front" | "back" | "iso" | "top") => {
