@@ -322,6 +322,20 @@ export default function ModelPreview3D() {
           >
             {autoRotate ? <Pause size={12} /> : <Play size={12} />}
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (rotateSpeed === 0.4) setRotateSpeed(0.8);
+              else if (rotateSpeed === 0.8) setRotateSpeed(1.6);
+              else setRotateSpeed(0.4);
+            }}
+            className="preview-3d-action-btn"
+            title={`Rotation Speed: ${rotateSpeed === 0.4 ? "0.5x" : rotateSpeed === 0.8 ? "1.0x" : "2.0x"}`}
+          >
+            <span style={{ fontSize: "8px", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+              {rotateSpeed === 0.4 ? "0.5×" : rotateSpeed === 0.8 ? "1.0×" : "2.0×"}
+            </span>
+          </button>
         </div>
       </div>
 
