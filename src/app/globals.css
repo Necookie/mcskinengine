@@ -1236,21 +1236,41 @@ textarea {
   overflow: hidden;
 }
 
-.preview-3d-rotate-btn {
+.preview-3d-actions-bottom {
   position: absolute;
   bottom: 8px;
   right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 10;
+}
+
+.preview-3d-action-btn {
   padding: 4px;
   border: 1px solid rgba(24, 24, 27, 0.15);
-  background-color: var(--color-canvas);
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
   color: var(--color-primary);
   cursor: pointer;
   border-radius: 2px;
-  transition: transform 0.08s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.08s ease, background-color 0.12s ease;
 }
 
-.preview-3d-rotate-btn:active {
+.preview-3d-action-btn:hover {
+  background-color: var(--color-surface-soft);
+}
+
+.preview-3d-action-btn:active {
   transform: translateY(2px);
+}
+
+.preview-3d-action-btn.active {
+  background-color: var(--color-primary);
+  color: var(--color-canvas);
 }
 
 .preview-3d-camera-snaps {

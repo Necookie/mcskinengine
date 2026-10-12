@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSkinStore } from "@/lib/store";
 import dynamic from "next/dynamic";
-import { Play, Pause, Download, Upload } from "lucide-react";
+import { Play, Pause, Download, Upload, Sun, Lightbulb } from "lucide-react";
 
 /**
  * Converts a flat RGBA Uint8Array into an off-screen 64×64 HTMLCanvasElement.
@@ -264,13 +264,23 @@ export default function ModelPreview3D() {
         </div>
 
         {/* Overlay controls on top of 3D preview */}
-        <button
-          onClick={() => setAutoRotate(!autoRotate)}
-          className="preview-3d-rotate-btn"
-          title="Toggle Auto Rotation"
-        >
-          {autoRotate ? <Pause size={12} /> : <Play size={12} />}
-        </button>
+        <div className="preview-3d-actions-bottom">
+          <button
+            type="button"
+            onClick={() => setLightingMode(lightingMode === "studio" ? "flat" : "studio")}
+            className={`preview-3d-action-btn ${lightingMode === "flat" ? "active" : ""}`}
+            title={`Lighting: ${lightingMode === "studio" ? "Studio Shading" : "Flat Pixel"}`}
+          >
+            {lightingMode === "studio" ? <Lightbulb size={12} /> : <Sun size={12} />}
+          </button>
+          <button
+            onClick={() => setAutoRotate(!autoRotate)}
+            className="preview-3d-action-btn"
+            title="Toggle Auto Rotation"
+          >
+            {autoRotate ? <Pause size={12} /> : <Play size={12} />}
+          </button>
+        </div>
       </div>
 
       {/* Animation Selector */}
