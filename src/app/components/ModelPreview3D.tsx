@@ -47,7 +47,7 @@ export default function ModelPreview3D() {
   const saveSkin = useSkinStore((s) => s.saveSkin);
   const pushUndo = useSkinStore((s) => s.pushUndo);
   const [autoRotate, setAutoRotate] = useState(true);
-  const [animationName, setAnimationName] = useState<"walk" | "run" | "idle" | "static">("walk");
+  const [animationName, setAnimationName] = useState<"walk" | "run" | "idle" | "wave" | "crouch" | "static">("walk");
   const [viewer, setViewer] = useState<SkinViewer3DInstance | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -73,12 +73,35 @@ export default function ModelPreview3D() {
       // Clean up previous animations by resetting limbs to default state and removing them
       viewer.animations.handles.forEach((handle: any) => handle.resetAndRemove());
 
+      const player = (viewer as any).playerObject?.skin;
+      if (player) {
+        // Reset limb rotations to default
+        player.rightArm.rotation.set(0, 0, 0);
+        player.leftArm.rotation.set(0, 0, 0);
+        player.rightLeg.rotation.set(0, 0, 0);
+        player.leftLeg.rotation.set(0, 0, 0);
+        player.head.rotation.set(0, 0, 0);
+      }
+
       if (animationName === "walk") {
         viewer.animations.add(sv.WalkingAnimation);
       } else if (animationName === "run") {
         viewer.animations.add(sv.RunningAnimation);
       } else if (animationName === "idle") {
         viewer.animations.add(sv.IdleAnimation);
+      } else if (animationName === "wave") {
+        if (player) {
+          player.rightArm.rotation.x = -2.6;
+          player.rightArm.rotation.z = 0.4;
+          player.head.rotation.y = -0.2;
+        }
+      } else if (animationName === "crouch") {
+        if (player) {
+          player.rightLeg.rotation.x = -0.4;
+          player.leftLeg.rotation.x = -0.4;
+          player.torso.rotation.x = 0.3;
+          player.head.rotation.x = -0.2;
+        }
       }
     });
   }, [viewer, animationName]);
