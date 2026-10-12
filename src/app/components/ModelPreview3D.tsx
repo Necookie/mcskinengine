@@ -47,6 +47,7 @@ export default function ModelPreview3D() {
   const saveSkin = useSkinStore((s) => s.saveSkin);
   const pushUndo = useSkinStore((s) => s.pushUndo);
   const [autoRotate, setAutoRotate] = useState(true);
+  const [rotateSpeed, setRotateSpeed] = useState<number>(0.8);
   const [animationName, setAnimationName] = useState<"walk" | "run" | "idle" | "wave" | "crouch" | "static">("walk");
   const [lightingMode, setLightingMode] = useState<"studio" | "flat">("studio");
   const [showOuterLayers, setShowOuterLayers] = useState(true);
@@ -119,9 +120,9 @@ export default function ModelPreview3D() {
   useEffect(() => {
     if (viewer) {
       viewer.autoRotate = autoRotate;
-      viewer.autoRotateSpeed = 0.8;
+      viewer.autoRotateSpeed = rotateSpeed;
     }
-  }, [viewer, autoRotate]);
+  }, [viewer, autoRotate, rotateSpeed]);
 
   // Synchronize lighting mode (studio vs flat pixel light)
   useEffect(() => {
