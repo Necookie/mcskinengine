@@ -8,10 +8,11 @@ import PixelEditor3D from "../components/PixelEditor3D";
 import ModelPreview3D from "../components/ModelPreview3D";
 import ImageDropzone from "../components/ImageDropzone";
 import { LandingPage, LoadingScreen } from "../components/LandingPage";
+import KeyboardShortcutsModal from "../components/KeyboardShortcutsModal";
 import { 
   Sparkles, Terminal, Settings, LogOut, CheckCircle, AlertTriangle,
   Paintbrush, Eraser, Undo, Redo, RotateCcw, Grid3X3, ZoomIn, ZoomOut, Maximize,
-  ChevronUp, ChevronDown, Key
+  ChevronUp, ChevronDown, Key, HelpCircle
 } from "lucide-react";
 
 export default function WorkspacePage() {
@@ -61,6 +62,7 @@ export default function WorkspacePage() {
   const [consoleExpanded, setConsoleExpanded] = useState(false);
   const [showAiSetup, setShowAiSetup] = useState(true);
   const [hideSidebars, setHideSidebars] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   // Initialize Setup Guide state depending on keys
   useEffect(() => {
@@ -271,6 +273,15 @@ export default function WorkspacePage() {
           <div className="header-badge-zoom">
             <span>ZOOM: {Math.round(zoom2D * 100)}%</span>
           </div>
+
+          <button
+            onClick={() => setShortcutsOpen(true)}
+            className="voxel-btn"
+            title="Keyboard Shortcuts (?)"
+          >
+            <HelpCircle size={12} strokeWidth={2} />
+            <span>Shortcuts</span>
+          </button>
 
           <button
             onClick={() => setSettingsOpen(!settingsOpen)}
@@ -565,6 +576,12 @@ export default function WorkspacePage() {
           </div>
         </aside>
       </div>
+
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal
+        isOpen={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+      />
     </div>
   );
 }
