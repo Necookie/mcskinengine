@@ -12,7 +12,7 @@ import KeyboardShortcutsModal from "../components/KeyboardShortcutsModal";
 import { 
   Sparkles, Terminal, Settings, LogOut, CheckCircle, AlertTriangle,
   Paintbrush, Eraser, Undo, Redo, RotateCcw, Grid3X3, ZoomIn, ZoomOut, Maximize,
-  ChevronUp, ChevronDown, Key, HelpCircle
+  ChevronUp, ChevronDown, Key, HelpCircle, Pipette
 } from "lucide-react";
 
 export default function WorkspacePage() {
@@ -333,16 +333,23 @@ export default function WorkspacePage() {
             <button
               onClick={() => setActiveTool("brush")}
               className={`tool-btn ${activeTool === "brush" ? "active" : ""}`}
-              title="Paint Brush"
+              title="Paint Brush (B)"
             >
               <Paintbrush size={15} strokeWidth={2} />
             </button>
             <button
               onClick={() => setActiveTool("eraser")}
               className={`tool-btn ${activeTool === "eraser" ? "active" : ""}`}
-              title="Eraser"
+              title="Eraser (E)"
             >
               <Eraser size={15} strokeWidth={2} />
+            </button>
+            <button
+              onClick={() => setActiveTool("eyedropper")}
+              className={`tool-btn ${activeTool === "eyedropper" ? "active" : ""}`}
+              title="Eyedropper / Color Dropper (I)"
+            >
+              <Pipette size={15} strokeWidth={2} />
             </button>
           </div>
 
@@ -354,25 +361,33 @@ export default function WorkspacePage() {
             <button
               onClick={undo}
               disabled={undoStack.length === 0}
-              className="tool-btn"
-              title="Undo Last Action"
+              className={`tool-btn ${undoStack.length === 0 ? "disabled" : ""}`}
+              title={undoStack.length > 0 ? `Undo (${undoStack.length}) [Ctrl+Z]` : "Undo [Ctrl+Z]"}
+              aria-label={`Undo last change (${undoStack.length} remaining)`}
             >
-              <Undo size={15} strokeWidth={2} />
+              <Undo size={14} strokeWidth={2} />
+              {undoStack.length > 0 && (
+                <span className="tool-btn-badge">{undoStack.length}</span>
+              )}
             </button>
             <button
               onClick={redo}
               disabled={redoStack.length === 0}
-              className="tool-btn"
-              title="Redo Next Action"
+              className={`tool-btn ${redoStack.length === 0 ? "disabled" : ""}`}
+              title={redoStack.length > 0 ? `Redo (${redoStack.length}) [Ctrl+Y]` : "Redo [Ctrl+Y]"}
+              aria-label={`Redo change (${redoStack.length} available)`}
             >
-              <Redo size={15} strokeWidth={2} />
+              <Redo size={14} strokeWidth={2} />
+              {redoStack.length > 0 && (
+                <span className="tool-btn-badge">{redoStack.length}</span>
+              )}
             </button>
             <button
               onClick={handleClearCanvas}
               className="tool-btn hover:text-red-600 hover:border-red-500"
               title="Reset/Clear Canvas"
             >
-              <RotateCcw size={15} strokeWidth={2} />
+              <RotateCcw size={14} strokeWidth={2} />
             </button>
           </div>
 
