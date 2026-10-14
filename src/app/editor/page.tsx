@@ -63,6 +63,7 @@ export default function WorkspacePage() {
   const [showAiSetup, setShowAiSetup] = useState(true);
   const [hideSidebars, setHideSidebars] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Initialize Setup Guide state depending on keys
   useEffect(() => {
@@ -236,19 +237,18 @@ export default function WorkspacePage() {
     setTimeout(() => setSuccessMsg(""), 3000);
   };
 
-  const handleClearCanvas = () => {
-    if (confirm("Are you sure you want to clear the canvas? This will reset all pixels.")) {
-      pushUndo(skinArray);
-      const blank = new Uint8Array(64 * 64 * 4);
-      for (let i = 0; i < blank.length; i += 4) {
-        blank[i] = 255;
-        blank[i + 1] = 255;
-        blank[i + 2] = 255;
-        blank[i + 3] = 255;
-      }
-      setSkinArray(blank);
-      setTimeout(() => saveSkin(), 100);
+  const executeClearCanvas = () => {
+    pushUndo(skinArray);
+    const blank = new Uint8Array(64 * 64 * 4);
+    for (let i = 0; i < blank.length; i += 4) {
+      blank[i] = 255;
+      blank[i + 1] = 255;
+      blank[i + 2] = 255;
+      blank[i + 3] = 255;
     }
+    setSkinArray(blank);
+    setShowClearConfirm(false);
+    setTimeout(() => saveSkin(), 100);
   };
 
   if (isSignedIn === undefined) {
@@ -382,13 +382,36 @@ export default function WorkspacePage() {
                 <span className="tool-btn-badge">{redoStack.length}</span>
               )}
             </button>
-            <button
-              onClick={handleClearCanvas}
-              className="tool-btn hover:text-red-600 hover:border-red-500"
-              title="Reset/Clear Canvas"
-            >
-              <RotateCcw size={14} strokeWidth={2} />
-            </button>
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setShowClearConfirm(!showClearConfirm)}
+                className={`tool-btn ${showClearConfirm ? "active text-red-600" : "hover:text-red-600"}`}
+                title="Reset / Clear Canvas"
+              >
+                <RotateCcw size={14} strokeWidth={2} />
+              </button>
+
+              {showClearConfirm && (
+                <div className="clear-confirm-popover">
+                  <div className="clear-confirm-title">Clear Canvas?</div>
+                  <p className="clear-confirm-desc">Reset all pixels to blank. Undo is available.</p>
+                  <div className="clear-confirm-actions">
+                    <button
+                      onClick={executeClearCanvas}
+                      className="clear-confirm-btn-danger"
+                    >
+                      Clear
+                    </button>
+                    <button
+                      onClick={() => setShowClearConfirm(false)}
+                      className="clear-confirm-btn-cancel"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="tool-dock-divider" />
