@@ -300,17 +300,18 @@ body {
 }
 
 .tool-btn {
+  position: relative;
   width: 36px;
   height: 36px;
-  border: 1px solid rgba(24, 24, 27, 0.12);
+  border: 1px solid rgba(24, 24, 27, 0.15);
   background-color: var(--color-canvas);
   color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.1s ease;
+  border-radius: 2px;
+  transition: transform 0.08s ease, background-color 0.12s ease;
 }
 
 .tool-btn:hover {
@@ -318,8 +319,8 @@ body {
   border-color: var(--color-primary);
 }
 
-.tool-btn:active, .tool-btn.active {
-  transform: scale(0.95);
+.tool-btn:active {
+  transform: translateY(2px);
 }
 
 .tool-btn.active {
@@ -332,9 +333,24 @@ body {
   background-color: #2e2e30;
 }
 
-.tool-btn:disabled {
-  opacity: 0.3;
+.tool-btn:disabled, .tool-btn.disabled {
+  opacity: 0.35;
   cursor: not-allowed;
+  pointer-events: none;
+}
+
+.tool-btn-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background-color: var(--color-primary);
+  color: var(--color-canvas);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 3px;
+  border-radius: 2px;
+  line-height: 1;
 }
 
 .canvas-column {
