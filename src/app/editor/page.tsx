@@ -123,6 +123,20 @@ export default function WorkspacePage() {
         setShowGuides(!showGuides);
         return;
       }
+
+      // ?: Toggle shortcuts modal
+      if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+        e.preventDefault();
+        setShortcutsOpen((prev) => !prev);
+        return;
+      }
+
+      // Escape: Close dialogs
+      if (e.key === "Escape") {
+        setShortcutsOpen(false);
+        setSettingsOpen(false);
+        return;
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
