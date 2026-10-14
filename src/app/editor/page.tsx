@@ -422,28 +422,32 @@ export default function WorkspacePage() {
             <button
               onClick={() => setShowGuides(!showGuides)}
               className={`tool-btn ${showGuides ? "active" : ""}`}
-              title="Toggle Symmetry/Grid Guides"
+              title="Toggle Grid Guides (G)"
+              aria-label="Toggle grid guides"
             >
               <Grid3X3 size={15} strokeWidth={2} />
             </button>
             <button
               onClick={() => setZoom2D(Math.min(3, zoom2D + 0.25))}
               className="tool-btn"
-              title="Zoom In"
+              title="Zoom In (+)"
+              aria-label="Zoom in"
             >
               <ZoomIn size={15} strokeWidth={2} />
             </button>
             <button
               onClick={() => setZoom2D(Math.max(0.5, zoom2D - 0.25))}
               className="tool-btn"
-              title="Zoom Out"
+              title="Zoom Out (-)"
+              aria-label="Zoom out"
             >
               <ZoomOut size={15} strokeWidth={2} />
             </button>
             <button
               onClick={() => setZoom2D(1)}
               className="tool-btn"
-              title="Zoom Reset (Fit)"
+              title="Reset Zoom to 100% (Fit)"
+              aria-label="Reset zoom"
             >
               <Maximize size={15} strokeWidth={2} />
             </button>
