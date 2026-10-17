@@ -336,7 +336,17 @@ export default function AiStudioPage() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-group-label">AI Model</label>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2px" }}>
+                      <label className="form-group-label" style={{ margin: 0 }}>AI Engine Model</label>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <span className={`provider-status-badge ${hasGeminiKey ? "connected" : "missing"}`}>
+                          Gemini {hasGeminiKey ? "✓" : "!"}
+                        </span>
+                        <span className={`provider-status-badge ${hasOpenaiKey ? "connected" : "missing"}`}>
+                          OpenAI {hasOpenaiKey ? "✓" : "!"}
+                        </span>
+                      </div>
+                    </div>
                     <select
                       value={selectedModel}
                       onChange={(e) => setSelectedModel(e.target.value)}
