@@ -25,6 +25,13 @@ const PROMPT_TEMPLATES = [
   { label: "Ranger", prompt: "Weathered brown leather duster coat, emerald wool vest, brass compass pouch, sturdy trail boots" }
 ] as const;
 
+interface GenerationHistoryItem {
+  id: string;
+  prompt: string;
+  model: string;
+  timestamp: string;
+}
+
 export default function AiStudioPage() {
   const { isSignedIn, user } = useUser();
   const {
@@ -59,6 +66,17 @@ export default function AiStudioPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [geminiKeyInput, setGeminiKeyInput] = useState("");
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
+  const [promptHistory, setPromptHistory] = useState<GenerationHistoryItem[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("mcskinengine_prompt_history");
+        return saved ? JSON.parse(saved) : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
 
   // Initialize data on sign-in
   useEffect(() => {
@@ -141,6 +159,21 @@ export default function AiStudioPage() {
       }
 
       setSuccessMsg(`Skin generated successfully!`);
+      const newHistoryItem: GenerationHistoryItem = {
+        id: Date.now().toString(),
+        prompt: geminiPrompt,
+        model: selectedModel,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      setPromptHistory((prev) => {
+        const updated = [newHistoryItem, ...prev.filter((p) => p.prompt !== geminiPrompt)].slice(0, 5);
+        try {
+          localStorage.setItem("mcskinengine_prompt_history", JSON.stringify(updated));
+        } catch {
+          // ignore localStorage write errors
+        }
+        return updated;
+      });
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : "An error occurred during generation");
     } finally {
