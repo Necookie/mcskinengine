@@ -2399,3 +2399,16 @@ textarea {
   margin-left: 8px;
   flex-shrink: 0;
 }
+
+/* Loading button spinner animation */
+.voxel-btn-loading {
+  opacity: 0.85;
+  cursor: wait !important;
+  pointer-events: none;
+}
+
+.spin-icon {
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+

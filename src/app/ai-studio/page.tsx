@@ -9,7 +9,7 @@ import ImageDropzone from "../components/ImageDropzone";
 import dynamic from "next/dynamic";
 import { 
   Sparkles, LogOut, Maximize,
-  Paintbrush, Download, AlertTriangle, CheckCircle, Home, X
+  Paintbrush, Download, AlertTriangle, CheckCircle, Home, X, Loader2
 } from "lucide-react";
 
 // Dynamically import SkinViewer since it depends on browser canvas APIs (WebGL, ThreeJS)
@@ -534,12 +534,23 @@ export default function AiStudioPage() {
                   </div>
 
                   <button
+                    type="button"
                     onClick={handleGenerateSkin}
-                    disabled={isGenerating || !geminiPrompt}
-                    className="voxel-btn btn-accent"
+                    disabled={isGenerating || !geminiPrompt.trim()}
+                    className={`voxel-btn btn-accent ${isGenerating ? "voxel-btn-loading" : ""}`}
                     style={{ width: "100%", justifyContent: "center" }}
                   >
-                    {isGenerating ? "Generating..." : "Generate Skin"}
+                    {isGenerating ? (
+                      <>
+                        <Loader2 size={13} className="spin-icon" />
+                        <span>Synthesizing Skin Texture...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={13} />
+                        <span>Generate Skin</span>
+                      </>
+                    )}
                   </button>
 
                   {enhancedPrompt && (
