@@ -8,7 +8,7 @@ import ImageDropzone from "../components/ImageDropzone";
 import dynamic from "next/dynamic";
 import { 
   Sparkles, LogOut, Maximize,
-  Paintbrush, Download, AlertTriangle, CheckCircle, Home
+  Paintbrush, Download, AlertTriangle, CheckCircle, Home, X
 } from "lucide-react";
 
 // Dynamically import SkinViewer since it depends on browser canvas APIs (WebGL, ThreeJS)
@@ -382,7 +382,30 @@ export default function AiStudioPage() {
 
                   <div className="form-group">
                     <label className="form-group-label">Reference Image (Optional)</label>
-                    <ImageDropzone onImageLoaded={(base64) => setRefImage(base64)} />
+                    {refImage ? (
+                      <div className="reference-image-preview-card">
+                        <img
+                          src={refImage}
+                          alt="Reference preview"
+                          className="reference-image-thumb"
+                        />
+                        <div className="reference-image-info">
+                          <span className="reference-image-status">Image Attached</span>
+                          <span className="reference-image-hint">Visual guide for generation</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setRefImage(null)}
+                          className="voxel-tool-btn"
+                          title="Remove reference image"
+                        >
+                          <X size={12} />
+                          <span>Remove</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <ImageDropzone onImageLoaded={(base64) => setRefImage(base64)} />
+                    )}
                   </div>
 
                   <button
