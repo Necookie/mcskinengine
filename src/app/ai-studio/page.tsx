@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useUser, SignOutButton } from "@clerk/nextjs";
 import { useSkinStore } from "@/lib/store";
 import { LandingPage, LoadingScreen } from "../components/LandingPage";
@@ -33,6 +34,7 @@ interface GenerationHistoryItem {
 }
 
 export default function AiStudioPage() {
+  const router = useRouter();
   const { isSignedIn, user } = useUser();
   const {
     geminiPrompt,
@@ -194,6 +196,13 @@ export default function AiStudioPage() {
     setSettingsOpen(false);
     setShowAiSetup(false);
     setTimeout(() => setSuccessMsg(""), 3000);
+  };
+
+  const handleOpenInEditor = async () => {
+    if (skinArray) {
+      await saveSkin(skinArray);
+    }
+    router.push("/editor");
   };
 
   const downloadSkin = () => {
@@ -585,14 +594,15 @@ export default function AiStudioPage() {
                     <span>Download PNG</span>
                   </button>
 
-                  <a
-                    href="/editor"
+                  <button
+                    type="button"
+                    onClick={handleOpenInEditor}
                     className="voxel-btn btn-accent"
-                    style={{ width: "100%", justifyContent: "center", fontSize: "10px", textDecoration: "none" }}
+                    style={{ width: "100%", justifyContent: "center", fontSize: "10px" }}
                   >
-                    <Maximize size={12} strokeWidth={2} />
-                    <span>Open in Editor</span>
-                  </a>
+                    <Paintbrush size={12} strokeWidth={2} />
+                    <span>Open in 3D Editor</span>
+                  </button>
                 </div>
               </div>
             </div>
