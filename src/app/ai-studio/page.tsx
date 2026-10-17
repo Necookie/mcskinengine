@@ -276,7 +276,7 @@ export default function AiStudioPage() {
             <SignOutButton>
               <button
                 className="voxel-btn"
-                style={{ width: "100%", padding: "8px 0", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: "9999px" }}
+                style={{ width: "100%", padding: "8px 0", backgroundColor: "#fce8e6", color: "#c53030", borderRadius: "2px" }}
               >
                 <LogOut size={12} strokeWidth={2} />
                 <span>Log Out</span>
@@ -316,7 +316,7 @@ export default function AiStudioPage() {
             <div className="dashboard-action-card" style={{ flexGrow: 1, backgroundColor: "#ffffff" }}>
               {showAiSetup ? (
                 /* Setup Guide Onboarding */
-                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div className="ai-setup-guide">
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--color-accent-ai)" }}>
                     <Sparkles size={14} strokeWidth={2} />
                     <span className="font-mono text-xs font-bold uppercase tracking-wider">AI Setup Guide</span>

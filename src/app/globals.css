@@ -2474,4 +2474,16 @@ textarea {
   word-break: break-word;
 }
 
+/* AI Setup Guide Card */
+.ai-setup-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: var(--color-surface-soft);
+  border: 1px dashed rgba(24, 24, 27, 0.2);
+  padding: 16px;
+  border-radius: 2px;
+}
+
+
 
