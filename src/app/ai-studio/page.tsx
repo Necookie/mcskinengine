@@ -591,8 +591,18 @@ export default function AiStudioPage() {
 
             {/* Column 2: 3D Preview Panel Bento Card */}
             <div className="dashboard-preview-panel">
-              <div className="dashboard-preview-header">
+              <div className="dashboard-preview-header" style={{ justifyContent: "space-between" }}>
                 <span className="font-bold">Active Avatar</span>
+                <button
+                  type="button"
+                  onClick={downloadSkin}
+                  className="voxel-tool-btn"
+                  title="Quick export skin PNG"
+                  style={{ height: "24px", padding: "0 6px", fontSize: "10px" }}
+                >
+                  <Download size={11} strokeWidth={2} />
+                  <span>Export</span>
+                </button>
               </div>
               <div className="dashboard-preview-body">
                 <div className="dashboard-avatar-preview-box">
