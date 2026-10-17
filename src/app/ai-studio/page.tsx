@@ -460,6 +460,40 @@ export default function AiStudioPage() {
                       rows={3}
                       className="voxel-textarea"
                     />
+
+                    {promptHistory.length > 0 && (
+                      <div className="prompt-history-tray">
+                        <div className="prompt-history-header">
+                          <span className="prompt-history-label">Recent History</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPromptHistory([]);
+                              try {
+                                localStorage.removeItem("mcskinengine_prompt_history");
+                              } catch {}
+                            }}
+                            className="prompt-history-clear-btn"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                        <div className="prompt-history-list">
+                          {promptHistory.map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => setGeminiPrompt(item.prompt)}
+                              className="prompt-history-item"
+                              title={`Restore prompt: ${item.prompt}`}
+                            >
+                              <span className="prompt-history-text">{item.prompt}</span>
+                              <span className="prompt-history-time">{item.timestamp}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="form-group">
