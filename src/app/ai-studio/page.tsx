@@ -9,7 +9,7 @@ import ImageDropzone from "../components/ImageDropzone";
 import dynamic from "next/dynamic";
 import { 
   Sparkles, LogOut, Maximize,
-  Paintbrush, Download, AlertTriangle, CheckCircle, Home, X, Loader2
+  Paintbrush, Download, AlertTriangle, CheckCircle, Home, X, Loader2, Copy, Check
 } from "lucide-react";
 
 // Dynamically import SkinViewer since it depends on browser canvas APIs (WebGL, ThreeJS)
@@ -68,6 +68,7 @@ export default function AiStudioPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [geminiKeyInput, setGeminiKeyInput] = useState("");
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [promptHistory, setPromptHistory] = useState<GenerationHistoryItem[]>(() => {
     if (typeof window !== "undefined") {
       try {
@@ -203,6 +204,17 @@ export default function AiStudioPage() {
       await saveSkin(skinArray);
     }
     router.push("/editor");
+  };
+
+  const handleCopyEnhancedPrompt = async () => {
+    if (!enhancedPrompt) return;
+    try {
+      await navigator.clipboard.writeText(enhancedPrompt);
+      setCopiedPrompt(true);
+      setTimeout(() => setCopiedPrompt(false), 2000);
+    } catch {
+      // fallback
+    }
   };
 
   const downloadSkin = () => {
@@ -554,9 +566,23 @@ export default function AiStudioPage() {
                   </button>
 
                   {enhancedPrompt && (
-                    <div style={{ marginTop: "12px", padding: "8px", border: "1px dashed var(--color-accent-ai)", backgroundColor: "#fff9fb", borderRadius: "8px" }}>
-                      <div className="font-mono text-[9px] font-bold text-[#ff2a85] uppercase tracking-wider mb-1">AI Prompt</div>
-                      <p className="text-[10px] italic leading-relaxed text-[#555558] font-sans">{enhancedPrompt}</p>
+                    <div className="enhanced-prompt-card">
+                      <div className="enhanced-prompt-header">
+                        <div className="enhanced-prompt-badge">
+                          <Sparkles size={10} />
+                          <span>Enhanced Stencil Prompt</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCopyEnhancedPrompt}
+                          className="enhanced-prompt-copy-btn"
+                          title="Copy enhanced prompt"
+                        >
+                          {copiedPrompt ? <Check size={10} /> : <Copy size={10} />}
+                          <span>{copiedPrompt ? "Copied" : "Copy"}</span>
+                        </button>
+                      </div>
+                      <p className="enhanced-prompt-text">{enhancedPrompt}</p>
                     </div>
                   )}
                 </>
