@@ -352,6 +352,45 @@ export default function AiStudioPage() {
                     </select>
                   </div>
 
+                  {/* Demographic & Model Archetype Grid */}
+                  <div className="archetype-selector-row">
+                    <div className="archetype-group">
+                      <label className="form-group-label">Mesh Silhouette</label>
+                      <div className="archetype-pills">
+                        <button
+                          type="button"
+                          onClick={() => setModelType("steve")}
+                          className={`archetype-pill ${modelType === "steve" ? "active" : ""}`}
+                        >
+                          Steve (4px)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setModelType("alex")}
+                          className={`archetype-pill ${modelType === "alex" ? "active" : ""}`}
+                        >
+                          Alex (3px)
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="archetype-group">
+                      <label className="form-group-label">Demographic Base</label>
+                      <div className="archetype-pills">
+                        {(["East Asian", "South Asian", "Caucasian", "Black"] as const).map((eth) => (
+                          <button
+                            key={eth}
+                            type="button"
+                            onClick={() => setEthnicity(eth)}
+                            className={`archetype-pill ${ethnicity === eth ? "active" : ""}`}
+                          >
+                            {eth}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="form-group">
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                       <label className="form-group-label" style={{ margin: 0 }}>Prompt Description</label>
