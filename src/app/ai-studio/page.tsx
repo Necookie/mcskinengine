@@ -17,6 +17,14 @@ const ReactSkinview3d = dynamic(
   { ssr: false, loading: () => <div className="text-grid-tag text-[#555558]">Loading mesh...</div> }
 );
 
+const PROMPT_TEMPLATES = [
+  { label: "Cyberpunk", prompt: "Neon accented cyber jacket with glowing cyan circuit patterns, dark cargo pants, high-top combat sneakers" },
+  { label: "Paladin", prompt: "Gilded steel plate armor, deep royal navy cape with gold embroidery, chainmail underlay" },
+  { label: "Astronaut", prompt: "Pressurized white astronaut suit with mission patch badge, copper reflective visor, survival utility belt" },
+  { label: "Streetwear", prompt: "Oversized pastel pink hoodie with aesthetic barcode graphic, distressed denim jeans, skate shoes" },
+  { label: "Ranger", prompt: "Weathered brown leather duster coat, emerald wool vest, brass compass pouch, sturdy trail boots" }
+] as const;
+
 export default function AiStudioPage() {
   const { isSignedIn, user } = useUser();
   const {
@@ -345,7 +353,24 @@ export default function AiStudioPage() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-group-label">Prompt</label>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                      <label className="form-group-label" style={{ margin: 0 }}>Prompt Description</label>
+                      <span className="text-grid-tag" style={{ color: "#8a8a93", fontSize: "9px" }}>Quick Presets</span>
+                    </div>
+
+                    <div className="prompt-template-pills">
+                      {PROMPT_TEMPLATES.map((tmpl) => (
+                        <button
+                          key={tmpl.label}
+                          type="button"
+                          onClick={() => setGeminiPrompt(tmpl.prompt)}
+                          className={`prompt-template-pill ${geminiPrompt === tmpl.prompt ? "active" : ""}`}
+                        >
+                          {tmpl.label}
+                        </button>
+                      ))}
+                    </div>
+
                     <textarea
                       value={geminiPrompt}
                       onChange={(e) => setGeminiPrompt(e.target.value)}
