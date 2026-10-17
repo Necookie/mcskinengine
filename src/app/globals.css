@@ -2292,3 +2292,29 @@ textarea {
   overflow: hidden;
   position: relative;
 }
+
+/* AI Studio provider status badges */
+.provider-status-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(24, 24, 27, 0.12);
+  line-height: 1.2;
+}
+
+.provider-status-badge.connected {
+  background-color: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.provider-status-badge.missing {
+  background-color: #fffbeb;
+  color: #b45309;
+  border-color: #fde68a;
+}
