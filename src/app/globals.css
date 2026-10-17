@@ -1670,7 +1670,7 @@ textarea {
 
 /* Image Dropzone styles */
 .voxel-dropzone {
-  border: 1px dashed rgba(24, 24, 27, 0.2);
+  border: 1px dashed rgba(24, 24, 27, 0.25);
   padding: 12px;
   display: flex;
   flex-direction: column;
@@ -1680,17 +1680,58 @@ textarea {
   cursor: pointer;
   background-color: var(--color-surface-soft);
   color: #555558;
-  min-height: 90px;
-  border-radius: 8px;
+  min-height: 80px;
+  border-radius: 2px;
   user-select: none;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
 }
 .voxel-dropzone:hover {
-  background-color: var(--color-surface-soft);
-  border-color: rgba(24, 24, 27, 0.2);
+  background-color: #ffffff;
+  border-color: var(--color-primary);
 }
 .voxel-dropzone-active {
+  background-color: #ffffff;
+  border-color: var(--color-accent-ai);
+}
+
+.reference-image-preview-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
   background-color: var(--color-surface-soft);
-  border-color: rgba(24, 24, 27, 0.2);
+  border: 1px solid rgba(24, 24, 27, 0.15);
+  border-radius: 2px;
+}
+
+.reference-image-thumb {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border: 1px solid rgba(24, 24, 27, 0.2);
+  border-radius: 2px;
+  image-rendering: pixelated;
+  background-color: #ffffff;
+}
+
+.reference-image-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.reference-image-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.reference-image-hint {
+  font-size: 10px;
+  color: #555558;
 }
 
 .dropzone-preview-wrap {
