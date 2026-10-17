@@ -1631,6 +1631,43 @@ textarea {
   text-transform: uppercase;
 }
 
+.prompt-template-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.prompt-template-pill {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  background-color: var(--color-surface-soft);
+  color: #555558;
+  border: 1px solid rgba(24, 24, 27, 0.12);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: transform 0.08s ease, background-color 0.12s ease;
+}
+
+.prompt-template-pill:hover {
+  background-color: #ffffff;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.prompt-template-pill:active {
+  transform: translateY(2px);
+}
+
+.prompt-template-pill.active {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
 /* Image Dropzone styles */
 .voxel-dropzone {
   border: 1px dashed rgba(24, 24, 27, 0.2);
