@@ -2893,6 +2893,25 @@ textarea {
   transform: translateY(2px) !important;
 }
 
+/* Accessibility Focus-Visible Rings */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 1px !important;
+}
+
+.tool-btn:focus-visible,
+.voxel-btn:focus-visible,
+.preview-camera-snap-btn:focus-visible,
+.starter-template-chip:focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 2px !important;
+}
+
+
 
 
 
