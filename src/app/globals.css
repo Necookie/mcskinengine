@@ -2573,6 +2573,49 @@ textarea {
   line-height: 1;
 }
 
+/* Creator Stats Ribbon */
+.creator-stats-ribbon {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 10px;
+  background-color: var(--color-surface-soft);
+  border: 1px solid rgba(24, 24, 27, 0.12);
+  border-radius: 2px;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.creator-stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+}
+
+.creator-stat-pill-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #8a8a93;
+}
+
+.creator-stat-pill-val {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.creator-stat-divider {
+  width: 1px;
+  height: 14px;
+  background-color: rgba(24, 24, 27, 0.12);
+}
+
+
 
 
 
