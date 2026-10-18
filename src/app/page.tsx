@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useUser, SignOutButton } from "@clerk/nextjs";
-import { useSkinStore } from "@/lib/store";
+import { useSkinStore, STARTER_TEMPLATES } from "@/lib/store";
 import { motion } from "framer-motion";
 import { LandingPage, LoadingScreen } from "./components/LandingPage";
 import dynamic from "next/dynamic";
@@ -54,6 +54,8 @@ export default function DashboardPage() {
     role,
     ethnicity,
     modelType,
+    activeStarterTemplate,
+    setActiveStarterTemplate,
     fetchSkin,
     fetchSettings,
     saveSettings,
@@ -325,6 +327,31 @@ export default function DashboardPage() {
                   ) : (
                     <div className="text-grid-tag text-center">Loading 3D mesh...</div>
                   )}
+
+                  {/* Starter Archetypes Selector */}
+                  <div className="starter-templates-section">
+                    <div className="starter-templates-header">
+                      <span className="starter-templates-title">Archetype Presets</span>
+                      <span className="starter-templates-hint">Quick Load</span>
+                    </div>
+                    <div className="starter-templates-list">
+                      {STARTER_TEMPLATES.map((tmpl) => (
+                        <button
+                          key={tmpl.id}
+                          type="button"
+                          onClick={() => setActiveStarterTemplate(tmpl.id)}
+                          className={`starter-template-chip ${activeStarterTemplate === tmpl.id ? "active" : ""}`}
+                          title={tmpl.description}
+                        >
+                          <span
+                            className="starter-template-dot"
+                            style={{ backgroundColor: tmpl.primaryColor }}
+                          />
+                          <span className="starter-template-name">{tmpl.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
                     <button
