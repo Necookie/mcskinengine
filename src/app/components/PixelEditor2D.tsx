@@ -458,6 +458,29 @@ export default function PixelEditor2D() {
             <span className="custom-color-picker-plus" aria-hidden="true">+</span>
           </div>
         </div>
+
+        {/* Color History Recent Swatches */}
+        {colorHistory.length > 0 && (
+          <div className="color-history-row" role="group" aria-label="Recent colors">
+            <span className="color-history-label">Recent:</span>
+            <div className="color-history-swatches">
+              {colorHistory.map((c, i) => (
+                <button
+                  key={`${c}-${i}`}
+                  type="button"
+                  onClick={() => {
+                    setSelectedColor(c);
+                    setActiveTool("brush");
+                  }}
+                  className={`color-history-swatch ${selectedColor.toLowerCase() === c.toLowerCase() && activeTool === "brush" ? "active" : ""}`}
+                  style={{ backgroundColor: c }}
+                  title={`Use recent color ${c}`}
+                  aria-label={`Recent color ${c}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
