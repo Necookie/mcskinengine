@@ -395,12 +395,13 @@ export default function DashboardPage() {
 
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
                     <button
+                      type="button"
                       onClick={downloadSkin}
                       className="voxel-btn"
-                      style={{ width: "100%", padding: "10px 0", justifyContent: "center", fontSize: "10px", backgroundColor: "#fff", color: "#1c1c1d", borderRadius: "2px" }}
+                      style={{ width: "100%", padding: "8px 0", justifyContent: "center", fontSize: "10px", backgroundColor: "#ffffff", color: "#1c1c1d", borderRadius: "2px" }}
                     >
-                      <Download size={13} strokeWidth={2} />
-                      <span>Download PNG</span>
+                      <Download size={12} strokeWidth={2} />
+                      <span>Export Texture (.PNG)</span>
                     </button>
 
                     <a
