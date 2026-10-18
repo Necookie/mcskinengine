@@ -2875,5 +2875,24 @@ textarea {
   padding: 0;
 }
 
+/* Turntable 360 Spin button */
+.preview-spin-btn {
+  background-color: var(--color-surface-soft) !important;
+  color: var(--color-primary) !important;
+  border-color: rgba(24, 24, 27, 0.25) !important;
+  font-weight: 700;
+}
+
+.preview-spin-btn:hover {
+  background-color: var(--color-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--color-primary) !important;
+}
+
+.preview-spin-btn:active {
+  transform: translateY(2px) !important;
+}
+
+
 
 
