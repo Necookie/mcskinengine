@@ -2772,3 +2772,16 @@ textarea {
   color: var(--color-primary);
   background-color: var(--color-surface-soft);
 }
+
+/* Symmetry Mode active glow badge */
+.tool-btn-badge-glow {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 5px;
+  height: 5px;
+  background-color: var(--color-accent-ai);
+  border-radius: 1px;
+  box-shadow: 0 0 6px var(--color-accent-ai);
+}
+
