@@ -2243,7 +2243,8 @@ textarea {
   flex-direction: column;
   background-color: #f8f8f9;
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .dashboard-preview-header {
