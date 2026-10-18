@@ -189,6 +189,29 @@ export default function DashboardPage() {
                 <span className="text-grid-tag" style={{ color: "#555558", textTransform: "none" }}>Mesh: {modelType === "steve" ? "Steve (4px)" : "Alex (3px)"}</span>
                 <span className="text-grid-tag" style={{ color: "#555558", textTransform: "none" }}>Active Base: {role}</span>
               </div>
+
+              {/* Creator Stats Ribbon */}
+              <div className="creator-stats-ribbon">
+                <div className="creator-stat-pill">
+                  <span className="creator-stat-pill-label">Dimensions</span>
+                  <span className="creator-stat-pill-val">64 × 64 px</span>
+                </div>
+                <div className="creator-stat-divider" />
+                <div className="creator-stat-pill">
+                  <span className="creator-stat-pill-label">Total Voxels</span>
+                  <span className="creator-stat-pill-val">4,096 px</span>
+                </div>
+                <div className="creator-stat-divider" />
+                <div className="creator-stat-pill">
+                  <span className="creator-stat-pill-label">UV Format</span>
+                  <span className="creator-stat-pill-val">Dual 1.8+</span>
+                </div>
+                <div className="creator-stat-divider" />
+                <div className="creator-stat-pill">
+                  <span className="creator-stat-pill-label">Arm Mesh</span>
+                  <span className="creator-stat-pill-val">{modelType === "steve" ? "4px Classic" : "3px Slim"}</span>
+                </div>
+              </div>
             </div>
 
             {/* Action Grid */}
