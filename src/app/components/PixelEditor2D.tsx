@@ -23,7 +23,8 @@ export default function PixelEditor2D() {
     pushUndo,
     activePalettePreset,
     setActivePalettePreset,
-    addColorHistory
+    addColorHistory,
+    symmetryMode
   } = useSkinStore();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -152,12 +153,36 @@ export default function PixelEditor2D() {
       }
       return;
     }
-    if (activeTool === "brush") {
-      setPixel(x, y, selectedColor, 255);
-    } else {
-      setPixel(x, y, "#000000", 0);
+    const paintPixel = (px: number, py: number) => {
+      if (activeTool === "brush") {
+        setPixel(px, py, selectedColor, 255);
+      } else {
+        setPixel(px, py, "#000000", 0);
+      }
+    };
+
+    paintPixel(x, y);
+
+    if (symmetryMode && activeTool !== "eyedropper") {
+      let symX: number | null = null;
+      if (x >= 8 && x < 16 && y >= 8 && y < 16) {
+        symX = 8 + (15 - x);
+      } else if (x >= 40 && x < 48 && y >= 8 && y < 16) {
+        symX = 40 + (47 - x);
+      } else if (x >= 20 && x < 28 && y >= 20 && y < 32) {
+        symX = 20 + (27 - x);
+      } else if (x >= 32 && x < 40 && y >= 20 && y < 32) {
+        symX = 32 + (39 - x);
+      } else {
+        const blockX = Math.floor(x / 8) * 8;
+        symX = blockX + (7 - (x % 8));
+      }
+
+      if (symX !== null && symX !== x && symX >= 0 && symX < 64) {
+        paintPixel(symX, y);
+      }
     }
-  }, [activeTool, selectedColor, skinArray, setPixel, setSelectedColor, addColorHistory, setActiveTool]);
+  }, [activeTool, selectedColor, skinArray, symmetryMode, setPixel, setSelectedColor, addColorHistory, setActiveTool]);
 
   const getRegionLabel = useCallback((x: number, y: number) => {
     const isAlex = modelType === "alex";
