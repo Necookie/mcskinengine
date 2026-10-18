@@ -406,11 +406,11 @@ export default function DashboardPage() {
 
                     <a
                       href="/editor"
-                      className="voxel-btn btn-accent"
-                      style={{ width: "100%", padding: "10px 0", justifyContent: "center", fontSize: "10px", textDecoration: "none", borderRadius: "2px" }}
+                      className="voxel-btn btn-primary"
+                      style={{ width: "100%", padding: "9px 0", justifyContent: "center", fontSize: "11px", textDecoration: "none", borderRadius: "2px" }}
                     >
-                      <Maximize size={12} strokeWidth={2} />
-                      <span>Open in Editor</span>
+                      <Paintbrush size={13} strokeWidth={2} />
+                      <span>Open in 3D Editor</span>
                     </a>
                   </div>
                 </div>
