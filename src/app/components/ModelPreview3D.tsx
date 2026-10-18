@@ -210,6 +210,22 @@ export default function ModelPreview3D() {
     }
   };
 
+  const handleSpin360 = () => {
+    if (!viewer) return;
+    const v = viewer as any;
+    if (v.autoRotate !== undefined) {
+      const origSpeed = v.autoRotateSpeed;
+      v.autoRotate = true;
+      v.autoRotateSpeed = 6.0;
+      setTimeout(() => {
+        v.autoRotateSpeed = origSpeed;
+        if (!autoRotate) {
+          v.autoRotate = false;
+        }
+      }, 1200);
+    }
+  };
+
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
@@ -309,6 +325,14 @@ export default function ModelPreview3D() {
             title="Top View"
           >
             TOP
+          </button>
+          <button
+            type="button"
+            onClick={handleSpin360}
+            className="preview-camera-snap-btn preview-spin-btn"
+            title="Perform quick 360° turntable spin"
+          >
+            SPIN 360°
           </button>
         </div>
 
