@@ -54,6 +54,7 @@ export default function DashboardPage() {
     role,
     ethnicity,
     modelType,
+    setModelType,
     activeStarterTemplate,
     setActiveStarterTemplate,
     fetchSkin,
@@ -315,10 +316,26 @@ export default function DashboardPage() {
 
               {/* Column 2: 3D Preview Panel */}
               <div className="dashboard-preview-panel">
-                <div className="dashboard-preview-header">
+                <div className="dashboard-preview-header" style={{ justifyContent: "space-between" }}>
                   <span className="text-grid-tag" style={{ color: "var(--color-primary)", fontWeight: 700 }}>
                     Active Mannequin
                   </span>
+                  <div className="mesh-toggle-group">
+                    <button
+                      type="button"
+                      onClick={() => setModelType("steve")}
+                      className={`mesh-toggle-btn ${modelType === "steve" ? "active" : ""}`}
+                    >
+                      Steve 4px
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setModelType("alex")}
+                      className={`mesh-toggle-btn ${modelType === "alex" ? "active" : ""}`}
+                    >
+                      Alex 3px
+                    </button>
+                  </div>
                 </div>
                 <div className="dashboard-preview-body">
                   {skinArray ? (
