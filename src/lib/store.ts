@@ -7,6 +7,58 @@ import { base64ToSkin, skinToBase64, createBlankSkinArray } from "./skinEngine";
  */
 export const SKIN_SCHEMA_VERSION = 1;
 
+export interface StarterTemplate {
+  id: string;
+  name: string;
+  model: "steve" | "alex";
+  role: string;
+  description: string;
+  primaryColor: string;
+}
+
+export const STARTER_TEMPLATES: StarterTemplate[] = [
+  {
+    id: "steve-classic",
+    name: "Classic Steve",
+    model: "steve",
+    role: "steve",
+    description: "Iconic teal shirt with blue jeans and classic 4px arms",
+    primaryColor: "#00a8a8",
+  },
+  {
+    id: "alex-classic",
+    name: "Classic Alex",
+    model: "alex",
+    role: "alex",
+    description: "Traditional green tunic with brown trousers and slim 3px arms",
+    primaryColor: "#5b8c32",
+  },
+  {
+    id: "netherite-knight",
+    name: "Nether Knight",
+    model: "steve",
+    role: "knight",
+    description: "Deep obsidian slate plate armor with gilded gold inlay",
+    primaryColor: "#312e38",
+  },
+  {
+    id: "cyber-runner",
+    name: "Cyber Runner",
+    model: "alex",
+    role: "hoodie",
+    description: "High-contrast neon cyan and magenta urban streetwear",
+    primaryColor: "#ff2a85",
+  },
+  {
+    id: "woodland-ranger",
+    name: "Woodland Ranger",
+    model: "steve",
+    role: "suit",
+    description: "Forest camouflage emerald wool with leather utility belts",
+    primaryColor: "#2d6a4f",
+  },
+];
+
 interface LogEntry {
   id: number;
   timestamp: string;
@@ -24,6 +76,7 @@ interface SkinState {
   modelType: "steve" | "alex";
   selectedColor: string;
   brushSize: number;
+  activeStarterTemplate: string;
   
   geminiPrompt: string;
   hasGeminiKey: boolean;
@@ -52,6 +105,7 @@ interface SkinState {
   setMcpLogs: (logs: LogEntry[]) => void;
   setActivePalettePreset: (presetId: string) => void;
   addColorHistory: (color: string) => void;
+  setActiveStarterTemplate: (templateId: string) => void;
 
   pushUndo: (arr: Uint8Array) => void;
   undo: () => void;
@@ -91,11 +145,24 @@ export const useSkinStore = create<SkinState>((set, get) => ({
   zoom2D: 1,
   activePalettePreset: "voxel",
   colorHistory: ["#1c1c1d", "#ffffff", "#ff2a85", "#b3d7df", "#ebd3be"],
+  activeStarterTemplate: "steve-classic",
 
   setActiveTool: (activeTool) => set({ activeTool }),
   setShowGuides: (showGuides) => set({ showGuides }),
   setZoom2D: (zoom2D) => set({ zoom2D }),
   setActivePalettePreset: (activePalettePreset) => set({ activePalettePreset }),
+  setActiveStarterTemplate: (activeStarterTemplate) => {
+    const template = STARTER_TEMPLATES.find((t) => t.id === activeStarterTemplate);
+    if (template) {
+      set({
+        activeStarterTemplate,
+        modelType: template.model,
+        role: template.role,
+      });
+    } else {
+      set({ activeStarterTemplate });
+    }
+  },
   addColorHistory: (color) => {
     const { colorHistory } = get();
     const filtered = colorHistory.filter((c) => c.toLowerCase() !== color.toLowerCase());
