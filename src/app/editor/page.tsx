@@ -9,6 +9,7 @@ import ModelPreview3D from "../components/ModelPreview3D";
 import ImageDropzone from "../components/ImageDropzone";
 import { LandingPage, LoadingScreen } from "../components/LandingPage";
 import KeyboardShortcutsModal from "../components/KeyboardShortcutsModal";
+import { useToast } from "../components/ToastProvider";
 import { 
   Sparkles, Terminal, Settings, LogOut, CheckCircle, AlertTriangle,
   Paintbrush, Eraser, Undo, Redo, RotateCcw, Grid3X3, ZoomIn, ZoomOut, Maximize,
@@ -64,6 +65,7 @@ export default function WorkspacePage() {
   const [hideSidebars, setHideSidebars] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const toast = useToast();
 
   // Initialize Setup Guide state depending on keys
   useEffect(() => {
@@ -249,6 +251,19 @@ export default function WorkspacePage() {
     setSkinArray(blank);
     setShowClearConfirm(false);
     setTimeout(() => saveSkin(), 100);
+    toast.info("Canvas reset to blank");
+  };
+
+  const handleUndo = () => {
+    if (undoStack.length === 0) return;
+    undo();
+    toast.info("Reverted previous change");
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    redo();
+    toast.info("Restored change");
   };
 
   if (isSignedIn === undefined) {
@@ -359,7 +374,7 @@ export default function WorkspacePage() {
           <div className="tool-dock-section">
             <span className="tool-dock-label">Edit</span>
             <button
-              onClick={undo}
+              onClick={handleUndo}
               disabled={undoStack.length === 0}
               className={`tool-btn ${undoStack.length === 0 ? "disabled" : ""}`}
               title={undoStack.length > 0 ? `Undo (${undoStack.length}) [Ctrl+Z]` : "Undo [Ctrl+Z]"}
@@ -371,7 +386,7 @@ export default function WorkspacePage() {
               )}
             </button>
             <button
-              onClick={redo}
+              onClick={handleRedo}
               disabled={redoStack.length === 0}
               className={`tool-btn ${redoStack.length === 0 ? "disabled" : ""}`}
               title={redoStack.length > 0 ? `Redo (${redoStack.length}) [Ctrl+Y]` : "Redo [Ctrl+Y]"}
