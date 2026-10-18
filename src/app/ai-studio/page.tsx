@@ -405,7 +405,7 @@ export default function AiStudioPage() {
                       value={selectedModel}
                       onChange={(e) => setSelectedModel(e.target.value)}
                       className="voxel-input font-mono text-[10px]"
-                      style={{ padding: "6px", width: "100%", textTransform: "none", borderRadius: "8px" }}
+                      style={{ padding: "6px", width: "100%", textTransform: "none", borderRadius: "2px" }}
                     >
                       <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
                       <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
@@ -659,7 +659,7 @@ export default function AiStudioPage() {
 
       {/* API settings popup status alerts */}
       {(errorMsg || successMsg) && (
-        <div className={`alert-overlay ${errorMsg ? "alert-overlay-error" : "alert-overlay-success"}`} style={{ borderRadius: "8px" }}>
+        <div className={`alert-overlay ${errorMsg ? "alert-overlay-error" : "alert-overlay-success"}`} style={{ borderRadius: "2px" }}>
           {errorMsg ? <AlertTriangle size={13} strokeWidth={2} /> : <CheckCircle size={13} strokeWidth={2} />}
           <span style={{ flexGrow: 1 }}>{errorMsg || successMsg}</span>
           <button 
