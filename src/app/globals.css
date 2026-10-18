@@ -2615,6 +2615,46 @@ textarea {
   background-color: rgba(24, 24, 27, 0.12);
 }
 
+/* Dashboard Mesh Toggle Segmented Control */
+.mesh-toggle-group {
+  display: inline-flex;
+  background-color: var(--color-surface-soft);
+  border: 1px solid rgba(24, 24, 27, 0.12);
+  border-radius: 2px;
+  padding: 1px;
+  gap: 1px;
+}
+
+.mesh-toggle-btn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: none;
+  background: transparent;
+  color: #555558;
+  cursor: pointer;
+  border-radius: 1px;
+  line-height: 1;
+  user-select: none;
+  transition: transform 0.05s ease;
+}
+
+.mesh-toggle-btn:hover {
+  color: var(--color-primary);
+}
+
+.mesh-toggle-btn:active {
+  transform: translateY(1px);
+}
+
+.mesh-toggle-btn.active {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+
 
 
 
