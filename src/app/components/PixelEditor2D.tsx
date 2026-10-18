@@ -30,8 +30,25 @@ export default function PixelEditor2D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hoverCoords, setHoverCoords] = useState<{ x: number; y: number } | null>(null);
+  const [hexInput, setHexInput] = useState(selectedColor.toUpperCase());
   const lastUndoPos = useRef<{ x: number; y: number } | null>(null);
   const lastHoverCoords = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    setHexInput(selectedColor.toUpperCase());
+  }, [selectedColor]);
+
+  const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.trim();
+    if (val && !val.startsWith("#")) val = `#${val}`;
+    setHexInput(val.toUpperCase());
+
+    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+      setSelectedColor(val.toLowerCase());
+      addColorHistory(val.toLowerCase());
+      setActiveTool("brush");
+    }
+  };
 
   // Draw skin array to canvas
   useEffect(() => {
@@ -456,6 +473,19 @@ export default function PixelEditor2D() {
               aria-label="Custom color picker"
             />
             <span className="custom-color-picker-plus" aria-hidden="true">+</span>
+          </div>
+
+          <div className="hex-input-group">
+            <span className="hex-input-prefix">#</span>
+            <input
+              type="text"
+              value={hexInput.replace("#", "")}
+              onChange={(e) => handleHexChange(e)}
+              maxLength={6}
+              placeholder="1C1C1D"
+              className="hex-input-field"
+              aria-label="Hex color code"
+            />
           </div>
         </div>
 
