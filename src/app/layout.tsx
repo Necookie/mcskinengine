@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ToastProvider } from "./components/ToastProvider";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -64,7 +65,9 @@ export default function RootLayout({
           <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;540;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
         </head>
         <body>
-          {children}
+          <ToastProvider>
+            {children}
+          </ToastProvider>
         </body>
       </html>
     </ClerkProvider>
