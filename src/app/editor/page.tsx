@@ -13,7 +13,7 @@ import { useToast } from "../components/ToastProvider";
 import { 
   Sparkles, Terminal, Settings, LogOut, CheckCircle, AlertTriangle,
   Paintbrush, Eraser, Undo, Redo, RotateCcw, Grid3X3, ZoomIn, ZoomOut, Maximize,
-  ChevronUp, ChevronDown, Key, HelpCircle, Pipette
+  ChevronUp, ChevronDown, Key, HelpCircle, Pipette, FlipHorizontal
 } from "lucide-react";
 
 export default function WorkspacePage() {
@@ -44,6 +44,8 @@ export default function WorkspacePage() {
     setActiveTool,
     showGuides,
     setShowGuides,
+    symmetryMode,
+    setSymmetryMode,
     zoom2D,
     setZoom2D,
     pushUndo,
@@ -124,6 +126,14 @@ export default function WorkspacePage() {
       if (key === "g") {
         e.preventDefault();
         setShowGuides(!showGuides);
+        return;
+      }
+
+      // S: Toggle symmetry mode
+      if (key === "s" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        setSymmetryMode(!symmetryMode);
+        toast.info(!symmetryMode ? "Symmetry mode enabled" : "Symmetry mode disabled");
         return;
       }
 
@@ -365,6 +375,18 @@ export default function WorkspacePage() {
               title="Eyedropper / Color Dropper (I)"
             >
               <Pipette size={15} strokeWidth={2} />
+            </button>
+            <button
+              onClick={() => {
+                setSymmetryMode(!symmetryMode);
+                toast.info(!symmetryMode ? "Symmetry mode enabled" : "Symmetry mode disabled");
+              }}
+              className={`tool-btn ${symmetryMode ? "active" : ""}`}
+              title={`Horizontal Symmetry Mode [S] (${symmetryMode ? "ON" : "OFF"})`}
+              aria-label="Toggle horizontal symmetry"
+            >
+              <FlipHorizontal size={15} strokeWidth={2} />
+              {symmetryMode && <span className="tool-btn-badge-glow" />}
             </button>
           </div>
 

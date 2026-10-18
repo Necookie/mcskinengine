@@ -89,6 +89,7 @@ interface SkinState {
 
   activeTool: "brush" | "eraser" | "eyedropper";
   showGuides: boolean;
+  symmetryMode: boolean;
   zoom2D: number;
   activePalettePreset: string;
   colorHistory: string[];
@@ -113,6 +114,7 @@ interface SkinState {
 
   setActiveTool: (tool: "brush" | "eraser" | "eyedropper") => void;
   setShowGuides: (val: boolean) => void;
+  setSymmetryMode: (val: boolean) => void;
   setZoom2D: (val: number) => void;
 
   fetchSkin: () => Promise<void>;
@@ -142,6 +144,7 @@ export const useSkinStore = create<SkinState>((set, get) => ({
 
   activeTool: "brush",
   showGuides: true,
+  symmetryMode: false,
   zoom2D: 1,
   activePalettePreset: "voxel",
   colorHistory: ["#1c1c1d", "#ffffff", "#ff2a85", "#b3d7df", "#ebd3be"],
@@ -149,6 +152,7 @@ export const useSkinStore = create<SkinState>((set, get) => ({
 
   setActiveTool: (activeTool) => set({ activeTool }),
   setShowGuides: (showGuides) => set({ showGuides }),
+  setSymmetryMode: (symmetryMode) => set({ symmetryMode }),
   setZoom2D: (zoom2D) => set({ zoom2D }),
   setActivePalettePreset: (activePalettePreset) => set({ activePalettePreset }),
   setActiveStarterTemplate: (activeStarterTemplate) => {
