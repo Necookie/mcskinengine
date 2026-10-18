@@ -2678,9 +2678,97 @@ textarea {
   }
 }
 
+/* Voxel Toast System */
+.voxel-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+  pointer-events: none;
+}
 
+.voxel-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: var(--color-canvas);
+  border: 1px solid rgba(24, 24, 27, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 2px;
+  min-width: 200px;
+  max-width: 380px;
+  animation: voxelToastSlideIn 0.18s cubic-bezier(0, 0, 0.2, 1);
+}
 
+@keyframes voxelToastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
+.voxel-toast-success {
+  border-left: 3px solid #10b981;
+}
 
+.voxel-toast-error {
+  border-left: 3px solid #ef4444;
+}
 
+.voxel-toast-info {
+  border-left: 3px solid var(--color-primary);
+}
 
+.voxel-toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.voxel-toast-success .voxel-toast-icon {
+  color: #10b981;
+}
+
+.voxel-toast-error .voxel-toast-icon {
+  color: #ef4444;
+}
+
+.voxel-toast-info .voxel-toast-icon {
+  color: var(--color-primary);
+}
+
+.voxel-toast-message {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-primary);
+  flex: 1;
+  line-height: 1.3;
+}
+
+.voxel-toast-close {
+  background: transparent;
+  border: none;
+  padding: 2px;
+  color: #8a8a93;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+}
+
+.voxel-toast-close:hover {
+  color: var(--color-primary);
+  background-color: var(--color-surface-soft);
+}
