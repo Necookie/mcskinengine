@@ -2837,4 +2837,43 @@ textarea {
   outline: 1px solid #ffffff;
 }
 
+/* Hex code input group */
+.hex-input-group {
+  display: inline-flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid rgba(24, 24, 27, 0.2);
+  border-radius: 2px;
+  height: 24px;
+  padding: 0 4px;
+  gap: 2px;
+}
+
+.hex-input-group:focus-within {
+  border-color: var(--color-primary);
+}
+
+.hex-input-prefix {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: #8a8a93;
+  user-select: none;
+}
+
+.hex-input-field {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-primary);
+  border: none;
+  background: transparent;
+  width: 54px;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0;
+}
+
+
 
