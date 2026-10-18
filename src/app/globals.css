@@ -2785,3 +2785,56 @@ textarea {
   box-shadow: 0 0 6px var(--color-accent-ai);
 }
 
+/* Color History Swatches */
+.color-history-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  background-color: var(--color-surface-soft);
+  border: 1px solid rgba(24, 24, 27, 0.08);
+  border-radius: 2px;
+  width: 100%;
+}
+
+.color-history-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #8a8a93;
+  letter-spacing: 0.5px;
+}
+
+.color-history-swatches {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.color-history-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 1px;
+  border: 1px solid rgba(24, 24, 27, 0.2);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.05s ease, border-color 0.1s ease;
+}
+
+.color-history-swatch:hover {
+  border-color: var(--color-primary);
+  transform: scale(1.1);
+}
+
+.color-history-swatch:active {
+  transform: translateY(1px);
+}
+
+.color-history-swatch.active {
+  border: 2px solid var(--color-primary);
+  outline: 1px solid #ffffff;
+}
+
+
