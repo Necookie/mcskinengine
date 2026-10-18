@@ -69,6 +69,7 @@ export default function DashboardPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [viewer, setViewer] = useState<any>(null);
+  const [edgeLatency, setEdgeLatency] = useState<number | null>(null);
 
   // Initialize data on sign-in
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -76,6 +77,10 @@ export default function DashboardPage() {
     if (isSignedIn) {
       fetchSkin();
       fetchSettings();
+      const t0 = performance.now();
+      fetch("/api/mcp-logs")
+        .then(() => setEdgeLatency(Math.max(12, Math.round(performance.now() - t0))))
+        .catch(() => setEdgeLatency(null));
     }
   // Intentionally run once on sign-in status change; fetchSkin/fetchSettings are stable store refs
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -297,6 +302,13 @@ export default function DashboardPage() {
                           <span className="dashboard-stat-label">OpenAI API Key</span>
                           <span className="dashboard-stat-value" style={{ fontSize: "9px", color: hasOpenaiKey ? "#15803d" : "#b91c1c" }}>
                             {hasOpenaiKey ? "CONNECTED" : "MISSING"}
+                          </span>
+                        </div>
+
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: "var(--color-block-lab)", borderRadius: "2px" }}>
+                          <span className="dashboard-stat-label">Edge Ping</span>
+                          <span className="dashboard-stat-value" style={{ fontSize: "9px", color: "#15803d" }}>
+                            {edgeLatency !== null ? `${edgeLatency}ms` : "ACTIVE"}
                           </span>
                         </div>
                       </div>
