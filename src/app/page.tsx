@@ -306,6 +306,7 @@ export default function DashboardPage() {
                         </div>
 
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", border: "2px solid var(--color-primary)", padding: "4px 8px", backgroundColor: "var(--color-block-lab)", borderRadius: "2px" }}>
+                          <span className="edge-beacon-dot" />
                           <span className="dashboard-stat-label">Edge Ping</span>
                           <span className="dashboard-stat-value" style={{ fontSize: "9px", color: "#15803d" }}>
                             {edgeLatency !== null ? `${edgeLatency}ms` : "ACTIVE"}
